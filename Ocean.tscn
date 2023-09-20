@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://c0sr6ry54lpov"]
+[gd_scene load_steps=11 format=3 uid="uid://c0sr6ry54lpov"]
 
 [ext_resource type="Shader" path="res://Ocean.gdshader" id="1_swcej"]
 
@@ -44,7 +44,7 @@ shader_parameter/color_deep = Color(0.0196078, 0.2, 0.266667, 1)
 shader_parameter/color_shallow = Color(0.0862745, 0.454902, 0.588235, 1)
 shader_parameter/beers_law = 2.0
 shader_parameter/depth_offset = -0.75
-shader_parameter/edge_scale = 0.1
+shader_parameter/edge_scale = 0.4
 shader_parameter/near = 1.0
 shader_parameter/far = 100.0
 shader_parameter/edge_color = Color(0.811765, 0.980392, 0.984314, 1)
@@ -58,6 +58,13 @@ subdivide_width = 200
 subdivide_depth = 200
 orientation = 1
 
+[sub_resource type="CylinderMesh" id="CylinderMesh_jcr67"]
+top_radius = 0.1
+
 [node name="Water" type="MeshInstance3D"]
 cast_shadow = 0
 mesh = SubResource("QuadMesh_060gm")
+
+[node name="TestMesh" type="MeshInstance3D" parent="."]
+visible = false
+mesh = SubResource("CylinderMesh_jcr67")
