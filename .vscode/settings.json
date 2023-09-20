@@ -1,0 +1,12 @@
+{
+    "godot_tools.editor_path": "/drives/media/Development/Godot Examples/first_script/project.godot",
+    "files.autoSave": "afterDelay",
+    "files.autoSaveDelay": 1000,
+    "editor.formatOnSave": true,
+    "[csharp]": {
+        "editor.defaultFormatter": "ms-dotnettools.csharp"
+    },
+    "omnisharp.enableMsBuildLoadProjectsOnDemand": true,
+    "omnisharp.enableEditorConfigSupport": true,
+    "editor.acceptSuggestionOnCommitCharacter": false,
+}

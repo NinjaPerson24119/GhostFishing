@@ -1,0 +1,53 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "🕹 Debug Game",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT4}",
+        "args": [],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false,
+      },
+      {
+        "name": "🎭 Debug Current Scene",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT4}",
+        "args": [
+          "${fileDirname}/${fileBasenameNoExtension}.tscn"
+        ],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false,
+      },
+      {
+        "name": "🧪 Debug Tests",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT4}",
+        "args": [
+          "--run-tests",
+          "--quit-on-finish"
+        ],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false,
+      },
+      {
+        "name": "🔬 Debug Current Test",
+        "type": "coreclr",
+        "request": "launch",
+        "preLaunchTask": "build",
+        "program": "${env:GODOT4}",
+        "args": [
+          "--run-tests=${fileBasenameNoExtension}",
+          "--quit-on-finish"
+        ],
+        "cwd": "${workspaceFolder}",
+        "stopAtEntry": false
+      },
+    ]
+  }
