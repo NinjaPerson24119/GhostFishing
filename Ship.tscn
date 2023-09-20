@@ -1,0 +1,17 @@
+[gd_scene load_steps=3 format=3 uid="uid://dpabijl3uxatr"]
+
+[ext_resource type="PackedScene" uid="uid://5itrr7mkcc4i" path="res://assets/pirate-ship/meshFixed.blend" id="1_b8gxp"]
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_bqa0m"]
+
+[node name="Ship" type="Node3D"]
+
+[node name="Pivot" type="Node3D" parent="."]
+
+[node name="RigidBody3D" type="RigidBody3D" parent="Pivot"]
+
+[node name="meshFixed" parent="Pivot/RigidBody3D" instance=ExtResource("1_b8gxp")]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pivot/RigidBody3D"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.387008, 0)
+shape = SubResource("ConvexPolygonShape3D_bqa0m")
