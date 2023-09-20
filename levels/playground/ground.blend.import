@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://bvdld8xmllgmd"
-path="res://.godot/imported/mesh.blend-dd7230d8a962e412a15a47b479c20774.scn"
+uid="uid://cuwd36j8kfuje"
+path="res://.godot/imported/ground.blend-4bf50a2a00b5d37734d7a0c692bb4fee.scn"
 
 [deps]
 
-source_file="res://assets/pirate-ship/mesh.blend"
-dest_files=["res://.godot/imported/mesh.blend-dd7230d8a962e412a15a47b479c20774.scn"]
+source_file="res://levels/playground/ground.blend"
+dest_files=["res://.godot/imported/ground.blend-4bf50a2a00b5d37734d7a0c692bb4fee.scn"]
 
 [params]
 
@@ -31,8 +31,8 @@ import_script/path=""
 _subresources={}
 gltf/embedded_image_handling=1
 blender/nodes/visible=0
-blender/nodes/punctual_lights=true
-blender/nodes/cameras=true
+blender/nodes/punctual_lights=false
+blender/nodes/cameras=false
 blender/nodes/custom_properties=true
 blender/nodes/modifiers=1
 blender/meshes/colors=false

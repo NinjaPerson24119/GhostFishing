@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://blghdiccbs2tp"
-path="res://.godot/imported/meshWithScene.blend-d874040c6bde664dba7b5d5bc5fbae20.scn"
+uid="uid://5itrr7mkcc4i"
+path="res://.godot/imported/meshFixed.blend-f9b00638bbe7e57c309b390cc8fc95f9.scn"
 
 [deps]
 
-source_file="res://assets/pirate-ship/meshWithScene.blend"
-dest_files=["res://.godot/imported/meshWithScene.blend-d874040c6bde664dba7b5d5bc5fbae20.scn"]
+source_file="res://common/pirate-ship/meshFixed.blend"
+dest_files=["res://.godot/imported/meshFixed.blend-f9b00638bbe7e57c309b390cc8fc95f9.scn"]
 
 [params]
 

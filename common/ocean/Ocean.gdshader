@@ -22,7 +22,7 @@ uniform vec4 color_shallow : source_color;
 uniform float beers_law = 2.0;
 uniform float depth_offset = -0.2;
 
-uniform float edge_scale = 0.1;
+uniform float edge_scale = 0.3;
 uniform float near = 1.0;
 uniform float far = 100.0;
 uniform vec3 edge_color : source_color;
