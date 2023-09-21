@@ -3,6 +3,8 @@ shader_type spatial;
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 
+uniform float wave_time = 0; 
+
 uniform vec3 albedo : source_color;
 uniform vec3 albedo2 : source_color;
 uniform float metallic : hint_range(0.0, 1.0) = 0;
@@ -41,7 +43,7 @@ float edge(float depth) {
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	height = texture(wave, world_pos.xz / noise_scale + TIME * time_scale).r;
+	height = texture(wave, world_pos.xz / noise_scale + wave_time * time_scale).r;
 	VERTEX.y += height * height_scale;
 }
 
@@ -60,8 +62,8 @@ void fragment() {
 	float z_pos = edge(FRAGCOORD.z);
 	float z_diff = z_depth - z_pos;
 
-	vec2 time = (TIME * wave_direction) * time_scale;
-	vec2 time2 = (TIME * wave_direction2) * time_scale;
+	vec2 time = (wave_time * wave_direction) * time_scale;
+	vec2 time2 = (wave_time * wave_direction2) * time_scale;
 
 	vec3 normal_blend = mix(texture(texture_normal,world_pos.xz + time).rgb, texture(texture_normal2,world_pos.xz + time2).rgb, 0.5);
 

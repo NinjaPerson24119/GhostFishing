@@ -1,6 +1,7 @@
-[gd_scene load_steps=11 format=3 uid="uid://c0sr6ry54lpov"]
+[gd_scene load_steps=12 format=3 uid="uid://c0sr6ry54lpov"]
 
 [ext_resource type="Shader" path="res://common/ocean/Ocean.gdshader" id="1_r41cr"]
+[ext_resource type="Script" path="res://common/ocean/Ocean.cs" id="2_8mdwi"]
 
 [sub_resource type="FastNoiseLite" id="FastNoiseLite_4lbn8"]
 noise_type = 3
@@ -31,6 +32,7 @@ noise = SubResource("FastNoiseLite_p3fvx")
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_uebxw"]
 render_priority = 0
 shader = ExtResource("1_r41cr")
+shader_parameter/wave_time = 0.0
 shader_parameter/albedo = Color(0.121569, 0.564706, 0.72549, 1)
 shader_parameter/albedo2 = Color(0.541176, 0.839216, 0.972549, 1)
 shader_parameter/metallic = 0.0
@@ -63,9 +65,10 @@ top_radius = 0.1
 bottom_radius = 0.1
 height = 0.5
 
-[node name="Water" type="MeshInstance3D"]
+[node name="Ocean" type="MeshInstance3D"]
 cast_shadow = 0
 mesh = SubResource("QuadMesh_060gm")
+script = ExtResource("2_8mdwi")
 
 [node name="TestMesh" type="MeshInstance3D" parent="."]
 visible = false
