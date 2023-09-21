@@ -15,18 +15,23 @@ public partial class Player : RigidBody3D {
         if (submerged) {
             ApplyCentralForce(Vector3.Up * gravity * float_force * depth);
         }
+        PollControls();
+    }
 
-        if (Input.IsActionPressed("move_forward")) {
-            ApplyCentralForce(Basis.Z  * engine_force);
-        }
-        else if (Input.IsActionPressed("move_backward")) {
-            ApplyCentralForce(Basis.Z * -1 * engine_force);
-        }
-        if (Input.IsActionPressed("turn_left")) {
-            ApplyTorque(Vector3.Up * turn_force);
-        }
-        else if (Input.IsActionPressed("turn_right")) {
-            ApplyTorque(Vector3.Down * turn_force);
+    private void PollControls() {
+        if (submerged) {
+            if (Input.IsActionPressed("move_forward")) {
+                ApplyCentralForce(Basis.Z * engine_force);
+            }
+            else if (Input.IsActionPressed("move_backward")) {
+                ApplyCentralForce(Basis.Z * -1 * engine_force);
+            }
+            if (Input.IsActionPressed("turn_left")) {
+                ApplyTorque(Vector3.Up * turn_force);
+            }
+            else if (Input.IsActionPressed("turn_right")) {
+                ApplyTorque(Vector3.Down * turn_force);
+            }
         }
     }
 

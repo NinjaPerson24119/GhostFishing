@@ -11,7 +11,7 @@ data = PackedVector3Array(0.9608, 0, -0.9608, 1, 0, -1, 1, 0, -0.9608, 0.9608, 0
 [node name="Main" type="Node"]
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.8663, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.411803, 0)
 script = ExtResource("3_t71xa")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
