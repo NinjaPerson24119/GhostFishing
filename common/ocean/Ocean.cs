@@ -11,8 +11,8 @@ public partial class Ocean : MeshInstance3D {
 	public override void _Ready() {
 		material = (ShaderMaterial)Mesh.SurfaceGetMaterial(0);
 
-		var noiseTexture = (Noise)material.GetShaderParameter("wave");
-		noise = noiseTexture.GetSeamlessImage(512, 512);
+		var noiseTexture = (NoiseTexture2D)material.GetShaderParameter("wave");
+		noise = noiseTexture.Noise.GetSeamlessImage(512, 512);
 
 		material.SetShaderParameter("noise_scale", noise_scale);
 		material.SetShaderParameter("height_scale", height_scale);
