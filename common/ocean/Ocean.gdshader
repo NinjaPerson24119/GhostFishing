@@ -30,7 +30,15 @@ uniform float far = 100.0;
 uniform vec3 edge_color : source_color;
 
 varying float height;
-varying vec3 world_pos;
+varying vec4 world_pos;
+
+uniform float water_depth = 10.0;
+uniform float k[3]; // wave number
+uniform float k_x[3]; // wave direction x
+uniform float k_z[3]; // wave direction y
+uniform float a[3]; // amplitude
+uniform float omega[3]; // angular frequency (dependent)
+uniform float phi[3]; // phase
 
 float fresnel(float amount, vec3 normal, vec3 view) {
 	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0)), amount);
@@ -45,6 +53,8 @@ void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	height = texture(wave, world_pos.xz / noise_scale + wave_time * time_scale).r;
 	VERTEX.y += height * height_scale;
+
+	// NORMAL
 }
 
 void fragment() {

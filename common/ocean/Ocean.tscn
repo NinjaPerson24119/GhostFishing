@@ -41,7 +41,7 @@ shader_parameter/wave_direction = Vector2(2, 0)
 shader_parameter/wave_direction2 = Vector2(0, 1)
 shader_parameter/time_scale = 0.025
 shader_parameter/noise_scale = 10.0
-shader_parameter/height_scale = 0.15
+shader_parameter/height_scale = 0.2
 shader_parameter/color_deep = Color(0.0196078, 0.2, 0.266667, 1)
 shader_parameter/color_shallow = Color(0.0862745, 0.454902, 0.588235, 1)
 shader_parameter/beers_law = 2.0
@@ -73,3 +73,11 @@ script = ExtResource("2_8mdwi")
 [node name="TestMesh" type="MeshInstance3D" parent="."]
 visible = false
 mesh = SubResource("CylinderMesh_jcr67")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.955113, 0.296242, 0, -0.296242, 0.955113, 0, 0.664138, 1.53351)
+visible = false
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.925137, -0.148451, -0.349406, 0.379634, 0.361762, 0.851473, 0, -0.920375, 0.391036, 0, 1.20605, 0)
+visible = false

@@ -10,7 +10,7 @@ public partial class Player : RigidBody3D {
     float turn_force = 5.0f;
 
     public override void _PhysicsProcess(double delta) {
-        var depth = GetTree().Root.GetNode<MeshInstance3D>("/root/Main/Ocean").GlobalPosition.Y - GlobalPosition.Y;
+        var depth = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(GlobalPosition) - GlobalPosition.Y;
         submerged = depth > 0;
         if (submerged) {
             ApplyCentralForce(Vector3.Up * gravity * float_force * depth);
