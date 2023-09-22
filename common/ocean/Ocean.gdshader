@@ -1,6 +1,8 @@
 shader_type spatial;
 render_mode world_vertex_coords;
 
+#include "GerstnerWave.gdshaderinc"
+
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
 
@@ -33,62 +35,6 @@ uniform vec3 edge_color : source_color;
 varying float height;
 varying vec3 world_pos;
 
-const int no_waves = 2;
-uniform float gerstner_k_x[no_waves]; // wave direction x
-uniform float gerstner_k_z[no_waves]; // wave direction y
-uniform float gerstner_a[no_waves]; // amplitude
-uniform float gerstner_omega[no_waves]; // angular frequency (dependent)
-uniform float gerstner_phi[no_waves]; // phase
-uniform float gerstner_product_operand_x[no_waves];
-uniform float gerstner_product_operand_z[no_waves];
-
-float theta_i(int i, float x, float z) {
-	return gerstner_k_x[i] * x + gerstner_k_z[i] * z - gerstner_omega[i] * wave_time - gerstner_phi[i];
-}
-
-vec3 gerstner(float x, float z) {
-	// this computes displacement, so we initialize the result to 0 instead of the inital vertex position
-	vec3 result = vec3(0.0);
-	for (int i = 1; i < 2; i++) {
-		float theta = theta_i(i, x, z);
-		result[0] -= gerstner_product_operand_x[i] * sin(theta);
-		result[1] -= gerstner_product_operand_z[i] * sin(theta);
-		result[2] += gerstner_a[i] * cos(theta);
-	}
-	return result;
-}
-
-vec3 gerstner_normal(float x, float z) {
-	float dxnew_dx = 1.0;
-	float dznew_dx = 0.0;
-	float dynew_dx = 0.0;
-
-	float dxnew_dz = 0.0;
-	float dznew_dz = 1.0;
-	float dynew_dz = 0.0;
-
-	for (int i = 1; i < 2; i++) {
-		float theta = theta_i(i, x, z);
-
-		float dtheta_dx = gerstner_k_x[i];
-		float dtheta_dz = gerstner_k_z[i];
-
-		dxnew_dx -= gerstner_product_operand_x[i] * cos(theta) * dtheta_dx;
-		dznew_dx -= gerstner_product_operand_z[i] * cos(theta) * dtheta_dx;
-		dynew_dx -= gerstner_a[i] * sin(theta) * dtheta_dx;
-
-		dxnew_dz -= gerstner_product_operand_x[i] * cos(theta) * dtheta_dz;
-		dznew_dz -= gerstner_product_operand_z[i] * cos(theta) * dtheta_dz;
-		dynew_dz -= gerstner_a[i] * sin(theta) * dtheta_dz;
-	}
-
-	vec3 diff_vec_x = vec3(dxnew_dx, dynew_dx, dznew_dx);
-	vec3 diff_vec_z = vec3(dxnew_dz, dynew_dz, dznew_dz);
-
-	// TODO: some normals are flipped ... why?
-	return normalize(cross(diff_vec_z, diff_vec_x));
-}
-
 float fresnel(float amount, vec3 normal, vec3 view) {
 	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0)), amount);
 }
@@ -102,8 +48,8 @@ void vertex() {
 	height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
 	VERTEX.y += height * height_scale;
 
-	VERTEX += gerstner(VERTEX.x, VERTEX.z).xzy;
-	NORMAL = gerstner_normal(VERTEX.x, VERTEX.z);
+	VERTEX += gerstner(VERTEX.x, VERTEX.z, wave_time).xzy;
+	NORMAL = gerstner_normal(VERTEX.x, VERTEX.z, wave_time);
 }
 
 void fragment() {
