@@ -22,7 +22,6 @@ transform = Transform3D(-1, -2.99003e-08, 8.21505e-08, 0, 0.939693, 0.34202, -8.
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.699052, 0.715071, 0, -0.715071, -0.699052, 0, 29, 0)
-visible = false
 shadow_enabled = true
 
 [node name="Terrain" type="StaticBody3D" parent="."]

@@ -48,7 +48,7 @@ float theta_i(int i, float x, float z) {
 vec3 gerstner(float x, float z) {
 	// this computes displacement, so we initialize the result to 0 instead of the inital vertex position
 	vec3 result = vec3(0.0);
-	for (int i = 0; i < 3; i++) {
+	for (int i = 0; i < 1; i++) {
 		float theta = theta_i(i, x, z);
 		result[0] -= gerstner_product_operand_x[i] * sin(theta);
 		result[1] -= gerstner_product_operand_z[i] * sin(theta);
@@ -74,17 +74,18 @@ vec3 gerstner_normal(float x, float z) {
 
 		dxnew_dx -= gerstner_product_operand_x[i] * cos(theta) * dtheta_dx;
 		dznew_dx -= gerstner_product_operand_z[i] * cos(theta) * dtheta_dx;
-		dynew_dx -= gerstner_a[i] * -sin(theta) * dtheta_dx;
+		dynew_dx -= gerstner_a[i] * sin(theta) * dtheta_dx;
 
 		dxnew_dz -= gerstner_product_operand_x[i] * cos(theta) * dtheta_dz;
 		dznew_dz -= gerstner_product_operand_z[i] * cos(theta) * dtheta_dz;
-		dynew_dz -= gerstner_a[i] * -sin(theta) * dtheta_dz;
+		dynew_dz -= gerstner_a[i] * sin(theta) * dtheta_dz;
 	}
 
 	vec3 diff_vec_x = vec3(dxnew_dx, dynew_dx, dznew_dx);
 	vec3 diff_vec_z = vec3(dxnew_dz, dynew_dz, dznew_dz);
 
-	return cross(diff_vec_z, diff_vec_x);
+	// TODO: some normals are flipped ... why?
+	return normalize(cross(diff_vec_z, diff_vec_x));
 }
 
 float fresnel(float amount, vec3 normal, vec3 view) {
@@ -106,7 +107,6 @@ void vertex() {
 	VERTEX.y += displacement[2];
 
 	NORMAL = gerstner_normal(VERTEX.x, VERTEX.z);
-	//NORMAL = normalize(vec3(1.0));
 }
 
 void fragment() {
