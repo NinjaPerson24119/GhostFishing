@@ -44,8 +44,7 @@ uniform float gerstner_product_operand_z[3];
 vec3 kerstner(float x, float z) {
 	// this computes displacement, so we initialize the result to 0 instead of the inital vertex position
 	vec3 result = vec3(0.0);
-	// DEBUG: let i < 1
-	for (int i = 0; i < 1; i++) {
+	for (int i = 0; i < 3; i++) {
 		float theta_i = gerstner_k_x[i] * x + gerstner_k_z[i] * z - gerstner_omega[i] * wave_time - gerstner_phi[i];
 		result[0] -= gerstner_product_operand_x[i] * sin(theta_i);
 		result[1] -= gerstner_product_operand_z[i] * sin(theta_i);

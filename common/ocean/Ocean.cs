@@ -20,10 +20,10 @@ public partial class Ocean : MeshInstance3D {
 		material.SetShaderParameter("height_scale", height_scale);
 		material.SetShaderParameter("time_scale", time_scale);
 
-		float[] gerstner_amplitude = new float[] { 0.5f, 0.25f, 0.5f };
-		float[] gerstner_phi = new float[] { 0, 0, 0 };
-		float[] gerstner_k_x = new float[] { Mathf.Pi * 0.5f, 0.7f, 0.4f };
-		float[] gerstner_k_z = new float[] { Mathf.Pi * 0.5f, 0.2f, 0.1f };
+		float[] gerstner_amplitude = new float[] { 0.5f, 0.25f, 0.05f };
+		float[] gerstner_phi = new float[] { 0, Mathf.Pi * 1f, Mathf.Pi * 0.5f };
+		float[] gerstner_k_x = new float[] { Mathf.Pi * 0.25f, Mathf.Pi * 0.5f, Mathf.Pi * 1.2f };
+		float[] gerstner_k_z = new float[] { Mathf.Pi * 0.25f, Mathf.Pi * 0.7f, Mathf.Pi * 1f };
 		float[] gerstner_k = new float[3];
 		for (int i = 0; i < 3; i++) {
 			gerstner_k[i] = Mathf.Sqrt(gerstner_k_x[i] * gerstner_k_x[i] + gerstner_k_z[i] * gerstner_k_z[i]);

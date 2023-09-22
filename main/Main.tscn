@@ -11,7 +11,7 @@ data = PackedVector3Array(0.9608, 0, -0.9608, 1, 0, -1, 1, 0, -0.9608, 0.9608, 0
 [node name="Main" type="Node"]
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 9.4252, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.348662, 0)
 script = ExtResource("3_t71xa")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
@@ -31,4 +31,4 @@ transform = Transform3D(50, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0)
 shape = SubResource("ConcavePolygonShape3D_tpf23")
 
 [node name="Ocean" parent="." instance=ExtResource("1_rvexv")]
-transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, 0, 0)
+transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -0.861292, 0)
