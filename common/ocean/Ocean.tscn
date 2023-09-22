@@ -50,7 +50,6 @@ shader_parameter/edge_scale = 0.3
 shader_parameter/near = 1.0
 shader_parameter/far = 100.0
 shader_parameter/edge_color = Color(0.811765, 0.980392, 0.984314, 1)
-shader_parameter/gerstner_k = null
 shader_parameter/gerstner_k_x = null
 shader_parameter/gerstner_k_z = null
 shader_parameter/gerstner_a = null
@@ -84,3 +83,4 @@ mesh = SubResource("CylinderMesh_jcr67")
 
 [node name="Camera3D" type="Camera3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 0.947941, 0.318446, 0, -0.318446, 0.947941, 0, 1.15794, 2.5325)
+visible = false
