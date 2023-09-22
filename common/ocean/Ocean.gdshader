@@ -1,4 +1,5 @@
 shader_type spatial;
+render_mode world_vertex_coords;
 
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
@@ -63,13 +64,12 @@ float edge(float depth) {
 }
 
 void vertex() {
-	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
-	height = texture(wave, world_pos.xz / noise_scale + wave_time * time_scale).r;
-	//VERTEX.y += height * height_scale;
+	height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
+	VERTEX.y += height * height_scale;
 
-	vec3 displacement = kerstner(world_pos.x, world_pos.z);
-	//VERTEX.x += displacement[0];
-	//VERTEX.z += displacement[1];
+	vec3 displacement = kerstner(VERTEX.x, VERTEX.z);
+	VERTEX.x += displacement[0];
+	VERTEX.z += displacement[1];
 	VERTEX.y += displacement[2];
 
 	// NORMAL

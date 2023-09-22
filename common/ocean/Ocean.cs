@@ -7,7 +7,6 @@ public partial class Ocean : MeshInstance3D {
 	float height_scale = 0.15f;
 	float time_scale = 0.025f;
 	double wave_time = 0.0f;
-	// DEBUG
 	float gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
 	float water_depth = 10f;
 
