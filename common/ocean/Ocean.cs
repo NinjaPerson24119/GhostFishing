@@ -8,7 +8,7 @@ public partial class Ocean : MeshInstance3D {
 	float time_scale = 0.025f;
 	double wave_time = 0.0f;
 	float gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
-	float water_depth = 10.0f;
+	float water_depth = 10f;
 
 	public override void _Ready() {
 		material = (ShaderMaterial)Mesh.SurfaceGetMaterial(0);
@@ -20,7 +20,35 @@ public partial class Ocean : MeshInstance3D {
 		material.SetShaderParameter("height_scale", height_scale);
 		material.SetShaderParameter("time_scale", time_scale);
 
-		
+		float[] gerstner_amplitude = new float[] { 0.1f, 0.25f, 0.5f };
+		float[] gerstner_phi = new float[] { 0, 0.25f, 0.66f };
+		float[] gerstner_k_x = new float[] { 0.3f, 0.7f, 0.4f };
+		float[] gerstner_k_z = new float[] { 0.3f, 0.2f, 0.1f };
+		float[] gerstner_k = new float[3];
+		for (int i = 0; i < 3; i++) {
+			gerstner_k[i] = Mathf.Sqrt(gerstner_k_x[i] * gerstner_k_x[i] + gerstner_k_z[i] * gerstner_k_z[i]);
+		}
+		float[] gerstner_omega = new float[3];
+		for (int i = 0; i < 3; i++) {
+			gerstner_omega[i] = Mathf.Sqrt(gravity * gerstner_k[i] * Mathf.Tanh(gerstner_k[i] * water_depth));
+		}
+		float[] gerstner_product_operand_x = new float[3];
+		for (int i = 0; i < 3; i++) {
+			gerstner_product_operand_x[i] = (gerstner_k_x[i] / gerstner_k[i]) * (gerstner_amplitude[i] / Mathf.Tanh(gerstner_k[i] * water_depth));
+		}
+		float[] gerstner_product_operand_z = new float[3];
+		for (int i = 0; i < 3; i++) {
+			gerstner_product_operand_z[i] = (gerstner_k_z[i] / gerstner_k[i]) * (gerstner_amplitude[i] / Mathf.Tanh(gerstner_k[i] * water_depth));
+		}
+
+		material.SetShaderParameter("gerstner_k", gerstner_k);
+		material.SetShaderParameter("gerstner_k_x", gerstner_k_x);
+		material.SetShaderParameter("gerstner_k_z", gerstner_k_z);
+		material.SetShaderParameter("gerstner_a", gerstner_amplitude);
+		material.SetShaderParameter("gerstner_omega", gerstner_omega);
+		material.SetShaderParameter("gerstner_phi", gerstner_phi);
+		material.SetShaderParameter("gerstner_product_operand_x", gerstner_product_operand_x);
+		material.SetShaderParameter("gerstner_product_operand_z", gerstner_product_operand_z);
 	}
 
 	public override void _Process(double delta) {

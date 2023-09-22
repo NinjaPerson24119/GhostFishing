@@ -23,6 +23,7 @@ shadow_enabled = true
 
 [node name="StaticBody3D" type="StaticBody3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.871, 0)
+visible = false
 
 [node name="ground" parent="StaticBody3D" instance=ExtResource("4_e77m6")]
 

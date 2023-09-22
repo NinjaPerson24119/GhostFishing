@@ -41,7 +41,7 @@ shader_parameter/wave_direction = Vector2(2, 0)
 shader_parameter/wave_direction2 = Vector2(0, 1)
 shader_parameter/time_scale = 0.025
 shader_parameter/noise_scale = 10.0
-shader_parameter/height_scale = 0.2
+shader_parameter/height_scale = 0.15
 shader_parameter/color_deep = Color(0.0196078, 0.2, 0.266667, 1)
 shader_parameter/color_shallow = Color(0.0862745, 0.454902, 0.588235, 1)
 shader_parameter/beers_law = 2.0
@@ -50,6 +50,14 @@ shader_parameter/edge_scale = 0.3
 shader_parameter/near = 1.0
 shader_parameter/far = 100.0
 shader_parameter/edge_color = Color(0.811765, 0.980392, 0.984314, 1)
+shader_parameter/gerstner_k = null
+shader_parameter/gerstner_k_x = null
+shader_parameter/gerstner_k_z = null
+shader_parameter/gerstner_a = null
+shader_parameter/gerstner_omega = null
+shader_parameter/gerstner_phi = null
+shader_parameter/gerstner_product_operand_x = null
+shader_parameter/gerstner_product_operand_z = null
 shader_parameter/texture_normal = SubResource("NoiseTexture2D_jlbnl")
 shader_parameter/texture_normal2 = SubResource("NoiseTexture2D_7vti1")
 shader_parameter/wave = SubResource("NoiseTexture2D_6mm4l")
@@ -75,9 +83,4 @@ visible = false
 mesh = SubResource("CylinderMesh_jcr67")
 
 [node name="Camera3D" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.955113, 0.296242, 0, -0.296242, 0.955113, 0, 0.664138, 1.53351)
-visible = false
-
-[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
-transform = Transform3D(0.925137, -0.148451, -0.349406, 0.379634, 0.361762, 0.851473, 0, -0.920375, 0.391036, 0, 1.20605, 0)
-visible = false
+transform = Transform3D(1, 0, 0, 0, 0.947941, 0.318446, 0, -0.318446, 0.947941, 0, 1.15794, 2.5325)

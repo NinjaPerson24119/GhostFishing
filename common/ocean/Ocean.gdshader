@@ -30,15 +30,27 @@ uniform float far = 100.0;
 uniform vec3 edge_color : source_color;
 
 varying float height;
-varying vec4 world_pos;
+varying vec3 world_pos;
 
-uniform float water_depth = 10.0;
-uniform float k[3]; // wave number
-uniform float k_x[3]; // wave direction x
-uniform float k_z[3]; // wave direction y
-uniform float a[3]; // amplitude
-uniform float omega[3]; // angular frequency (dependent)
-uniform float phi[3]; // phase
+uniform float gerstner_k[3]; // wave number
+uniform float gerstner_k_x[3]; // wave direction x
+uniform float gerstner_k_z[3]; // wave direction y
+uniform float gerstner_a[3]; // amplitude
+uniform float gerstner_omega[3]; // angular frequency (dependent)
+uniform float gerstner_phi[3]; // phase
+uniform float gerstner_product_operand_x[3];
+uniform float gerstner_product_operand_z[3];
+
+vec3 kerstner(float x, float z) {
+	vec3 result = vec3(x, z, 0.0);
+	for (int i = 0; i < 3; i++) {
+		float theta_i = gerstner_k_x[i] * x + gerstner_k_z[i] * z + gerstner_omega[i] * wave_time - gerstner_phi[i];
+		result[0] -= gerstner_product_operand_x[i] * sin(theta_i);
+		result[1] -= gerstner_product_operand_z[i] * sin(theta_i);
+		result[2] += gerstner_a[i] * cos(theta_i);
+	}
+	return result;
+}
 
 float fresnel(float amount, vec3 normal, vec3 view) {
 	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0)), amount);
@@ -53,6 +65,11 @@ void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
 	height = texture(wave, world_pos.xz / noise_scale + wave_time * time_scale).r;
 	VERTEX.y += height * height_scale;
+
+	vec3 displacement = kerstner(world_pos.x, world_pos.z);
+	//VERTEX.x += displacement[0];
+	//VERTEX.z += displacement[1];
+	VERTEX.y += displacement[2];
 
 	// NORMAL
 }
