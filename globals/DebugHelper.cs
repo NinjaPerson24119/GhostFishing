@@ -26,14 +26,21 @@ public partial class DebugHelper : Node {
             return;
         }
 
-        if (inputEvent.IsActionPressed("debug_toggle_wireframe")) {
-            Viewport v = GetViewport();
-            if (v.DebugDraw == Viewport.DebugDrawEnum.Wireframe) {
-                v.DebugDraw = Viewport.DebugDrawEnum.Disabled;
-            }
-            else {
-                v.DebugDraw = Viewport.DebugDrawEnum.Wireframe;
-            }
+        if (inputEvent.IsActionPressed("debug_wireframe")) {
+            ToggleDebugDrawEnum(Viewport.DebugDrawEnum.Wireframe);
+        }
+        if (inputEvent.IsActionPressed("debug_normals")) {
+            ToggleDebugDrawEnum(Viewport.DebugDrawEnum.NormalBuffer);
+        }
+    }
+
+    private void ToggleDebugDrawEnum(Viewport.DebugDrawEnum debugDrawEnum) {
+        Viewport v = GetViewport();
+        if (v.DebugDraw == debugDrawEnum) {
+            v.DebugDraw = Viewport.DebugDrawEnum.Disabled;
+        }
+        else {
+            v.DebugDraw = debugDrawEnum;
         }
     }
 }
