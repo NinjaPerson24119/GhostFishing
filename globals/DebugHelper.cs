@@ -1,12 +1,31 @@
 using Godot;
-using System;
 
 public partial class DebugHelper : Node {
+    bool debugMode = false;
+
     public override void _Ready() {
         RenderingServer.SetDebugGenerateWireframes(true);
+        GetNode<Label>("DebugIndicator").Visible = false;
     }
 
     public override void _Input(InputEvent inputEvent) {
+        if (inputEvent.IsActionPressed("exit_to_desktop")) {
+            GetTree().Quit();
+        }
+        if (inputEvent.IsActionPressed("debug_mode_toggle")) {
+            debugMode = !debugMode;
+            if (debugMode) {
+                GetNode<Label>("DebugIndicator").Visible = true;
+            }
+            else {
+                GetNode<Label>("DebugIndicator").Visible = false;
+                GetViewport().DebugDraw = Viewport.DebugDrawEnum.Disabled;
+            }
+        }
+        if (!debugMode) {
+            return;
+        }
+
         if (inputEvent.IsActionPressed("debug_toggle_wireframe")) {
             Viewport v = GetViewport();
             if (v.DebugDraw == Viewport.DebugDrawEnum.Wireframe) {
