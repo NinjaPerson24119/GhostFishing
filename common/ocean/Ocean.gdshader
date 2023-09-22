@@ -33,13 +33,14 @@ uniform vec3 edge_color : source_color;
 varying float height;
 varying vec3 world_pos;
 
-uniform float gerstner_k_x[3]; // wave direction x
-uniform float gerstner_k_z[3]; // wave direction y
-uniform float gerstner_a[3]; // amplitude
-uniform float gerstner_omega[3]; // angular frequency (dependent)
-uniform float gerstner_phi[3]; // phase
-uniform float gerstner_product_operand_x[3];
-uniform float gerstner_product_operand_z[3];
+const int no_waves = 2;
+uniform float gerstner_k_x[no_waves]; // wave direction x
+uniform float gerstner_k_z[no_waves]; // wave direction y
+uniform float gerstner_a[no_waves]; // amplitude
+uniform float gerstner_omega[no_waves]; // angular frequency (dependent)
+uniform float gerstner_phi[no_waves]; // phase
+uniform float gerstner_product_operand_x[no_waves];
+uniform float gerstner_product_operand_z[no_waves];
 
 float theta_i(int i, float x, float z) {
 	return gerstner_k_x[i] * x + gerstner_k_z[i] * z - gerstner_omega[i] * wave_time - gerstner_phi[i];
@@ -48,7 +49,7 @@ float theta_i(int i, float x, float z) {
 vec3 gerstner(float x, float z) {
 	// this computes displacement, so we initialize the result to 0 instead of the inital vertex position
 	vec3 result = vec3(0.0);
-	for (int i = 0; i < 1; i++) {
+	for (int i = 1; i < 2; i++) {
 		float theta = theta_i(i, x, z);
 		result[0] -= gerstner_product_operand_x[i] * sin(theta);
 		result[1] -= gerstner_product_operand_z[i] * sin(theta);
@@ -66,7 +67,7 @@ vec3 gerstner_normal(float x, float z) {
 	float dznew_dz = 1.0;
 	float dynew_dz = 0.0;
 
-	for (int i = 0; i < 3; i++) {
+	for (int i = 1; i < 2; i++) {
 		float theta = theta_i(i, x, z);
 
 		float dtheta_dx = gerstner_k_x[i];
@@ -101,11 +102,7 @@ void vertex() {
 	height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
 	VERTEX.y += height * height_scale;
 
-	vec3 displacement = gerstner(VERTEX.x, VERTEX.z);
-	VERTEX.x += displacement[0];
-	VERTEX.z += displacement[1];
-	VERTEX.y += displacement[2];
-
+	VERTEX += gerstner(VERTEX.x, VERTEX.z).xzy;
 	NORMAL = gerstner_normal(VERTEX.x, VERTEX.z);
 }
 

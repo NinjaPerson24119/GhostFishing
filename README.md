@@ -13,4 +13,6 @@ Hit `\`` to enable debug mode.
 --------------------
 | Key | Action     |
 |-----|------------|
-| 1   | Toggle wireframe |
+| 1   | Toggle wireframe view |
+| 2   | Toggle normals view |
+| 3 | Toggle overdraw view |

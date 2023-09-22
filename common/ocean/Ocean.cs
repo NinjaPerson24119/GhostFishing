@@ -24,20 +24,18 @@ public partial class Ocean : MeshInstance3D {
 		float[] gerstner_phi = new float[] { 0, Mathf.Pi * 1f, Mathf.Pi * 0.5f };
 		float[] gerstner_k_x = new float[] { Mathf.Pi * 0.25f, Mathf.Pi * 0.5f, Mathf.Pi * 1.2f };
 		float[] gerstner_k_z = new float[] { Mathf.Pi * 0.25f, Mathf.Pi * 0.7f, Mathf.Pi * 1f };
+
 		float[] gerstner_k = new float[3];
+		float[] gerstner_omega = new float[3];
+		float[] gerstner_product_operand_x = new float[3];
+		float[] gerstner_product_operand_z = new float[3];
+
 		for (int i = 0; i < 3; i++) {
 			gerstner_k[i] = Mathf.Sqrt(gerstner_k_x[i] * gerstner_k_x[i] + gerstner_k_z[i] * gerstner_k_z[i]);
-		}
-		float[] gerstner_omega = new float[3];
-		for (int i = 0; i < 3; i++) {
+			DebugTools.Assert(gerstner_k[i] * gerstner_amplitude[i] < 1, "Wave function does not satisfy kA < 1");
+
 			gerstner_omega[i] = Mathf.Sqrt(gravity * gerstner_k[i] * Mathf.Tanh(gerstner_k[i] * water_depth));
-		}
-		float[] gerstner_product_operand_x = new float[3];
-		for (int i = 0; i < 3; i++) {
 			gerstner_product_operand_x[i] = (gerstner_k_x[i] / gerstner_k[i]) * (gerstner_amplitude[i] / Mathf.Tanh(gerstner_k[i] * water_depth));
-		}
-		float[] gerstner_product_operand_z = new float[3];
-		for (int i = 0; i < 3; i++) {
 			gerstner_product_operand_z[i] = (gerstner_k_z[i] / gerstner_k[i]) * (gerstner_amplitude[i] / Mathf.Tanh(gerstner_k[i] * water_depth));
 		}
 
