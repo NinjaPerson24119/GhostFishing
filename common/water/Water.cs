@@ -14,7 +14,7 @@ public class Wave {
 	public Wave(float wavelength, float amplitude, float windAngle, float phaseShift, float waterDepth) {
 		// k is the wave number (magnitude of the wave vector)
 		// (kX, kZ) is the wave vector, which is the direction of the wave
-		GD.Print($"Generating wave with wavelength {wavelength}, amplitude {amplitude}, wind angle {windAngle}, and water depth {waterDepth}");
+		GD.Print($"Generating wave with wavelength {wavelength}, amplitude {amplitude}, wind angle {windAngle}, phase shift {phaseShift}");
 		kX = 2 * Mathf.Pi / wavelength * Mathf.Cos(windAngle);
 		kZ = 2 * Mathf.Pi / wavelength * Mathf.Sin(windAngle);
 		k = Mathf.Sqrt(kX * kX + kZ * kZ);
@@ -30,7 +30,7 @@ public struct WaveSetConfig {
 	public int noWaves;
 
 	public float wavelengthAverage;
-	public float wavelengthVarianceStdDev;
+	public float wavelengthStdDev;
 
 	// amplitude is proportional to wavelength so does not get an independent variance
 	public float amplitudeAverage;
@@ -80,7 +80,7 @@ public class WaveSet {
 	}
 
 	private Wave SampleWave(int waveIndex) {
-		float wavelength = _random.Randfn(config.wavelengthAverage, config.wavelengthVarianceStdDev);
+		float wavelength = _random.Randfn(config.wavelengthAverage, config.wavelengthStdDev);
 		wavelength = Mathf.Clamp(wavelength, config.wavelengthAverage / 2, config.wavelengthAverage * 2);
 
 		// sample proportionally with a / l ~ aAverage / lAverage
@@ -132,12 +132,12 @@ public partial class Water : MeshInstance3D {
 		ConfigureShaderSurfacePerturbation();
 
 		WaveSetConfig waveSetConfig = new WaveSetConfig() {
-			noWaves = 4,
-			wavelengthAverage = 6f,
-			wavelengthVarianceStdDev = 1.0f,
-			amplitudeAverage = 0.2f,
+			noWaves = 10,
+			wavelengthAverage = 8f,
+			wavelengthStdDev = 1f,
+			amplitudeAverage = 0.1f,
 			windAngleAverage = Mathf.Pi * 0.75f,
-			windAngleStdDev = Mathf.DegToRad(5f),
+			windAngleStdDev = Mathf.DegToRad(30f),
 			waterDepth = waterDepth,
 		};
 		waveSet = new WaveSet(waveSetConfig);
