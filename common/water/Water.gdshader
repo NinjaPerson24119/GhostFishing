@@ -1,7 +1,10 @@
 shader_type spatial;
 render_mode world_vertex_coords;
 
-#include "GerstnerWave.gdshaderinc"
+// DEBUG: for overdraw render
+//render_mode blend_add, unshaded, world_vertex_coords;
+
+#include "Gerstner.gdshaderinc"
 
 uniform sampler2D DEPTH_TEXTURE : hint_depth_texture, filter_linear_mipmap;
 uniform sampler2D SCREEN_TEXTURE : hint_screen_texture, filter_linear_mipmap;
@@ -81,4 +84,13 @@ void fragment() {
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	NORMAL_MAP = normal_blend;
+
+	// DEBUG: Godot ignores custom shaders in debug draw mode, so we have to do this manually
+	// render normals
+	//ALBEDO = NORMAL;
+
+	// render overdraw
+	// need this at top: render_mode blend_add, unshaded, world_vertex_coords;
+	//ALBEDO = vec3(0.4, 0.8, 0.8);
+	//ALPHA = 0.1;
 }

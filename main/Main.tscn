@@ -1,6 +1,6 @@
 [gd_scene load_steps=7 format=3 uid="uid://eg8wyurlt2wq"]
 
-[ext_resource type="PackedScene" uid="uid://c0sr6ry54lpov" path="res://common/ocean/Ocean.tscn" id="1_rvexv"]
+[ext_resource type="PackedScene" uid="uid://c0sr6ry54lpov" path="res://common/water/Water.tscn" id="1_rvexv"]
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://entities/player/Player.tscn" id="2_teuhj"]
 [ext_resource type="Script" path="res://entities/player/Player.cs" id="3_t71xa"]
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
