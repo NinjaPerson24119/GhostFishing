@@ -10,7 +10,7 @@ public partial class Player : RigidBody3D {
     float turn_force = 5.0f;
 
     public override void _PhysicsProcess(double delta) {
-        var depth = GetTree().Root.GetNode<Water>("/root/Main/Ocean").GetHeight(GlobalPosition) - GlobalPosition.Y;
+        var depth = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(GlobalPosition) - GlobalPosition.Y;
         submerged = depth > 0;
         if (submerged) {
             // TODO: vary forces by Archimedes principle
