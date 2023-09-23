@@ -1,6 +1,5 @@
 using Godot;
 using System.Collections.Generic;
-using System.Linq;
 
 // Gerstner Wave
 public class Wave {
@@ -10,18 +9,20 @@ public class Wave {
 	public float kX { get; private set; }
 	public float kZ { get; private set; }
 	public float angularFrequency { get; private set; }
+	public float phaseShift { get; private set; }
 
-	public Wave(float wavelength, float amplitude, float windAngle, float waterDepth) {
+	public Wave(float wavelength, float amplitude, float windAngle, float phaseShift, float waterDepth) {
 		// k is the wave number (magnitude of the wave vector)
 		// (kX, kZ) is the wave vector, which is the direction of the wave
 		GD.Print($"Generating wave with wavelength {wavelength}, amplitude {amplitude}, wind angle {windAngle}, and water depth {waterDepth}");
 		kX = 2 * Mathf.Pi / wavelength * Mathf.Cos(windAngle);
 		kZ = 2 * Mathf.Pi / wavelength * Mathf.Sin(windAngle);
 		k = Mathf.Sqrt(kX * kX + kZ * kZ);
-		//DebugTools.Assert(k * amplitude < 1, $"Wave function does not satisfy kA < 1. k: {k}, a: {amplitude}");
+		DebugTools.Assert(k * amplitude < 1, $"Wave function does not satisfy kA < 1. k: {k}, a: {amplitude}. Max amplitude for this wave is {1 / k}");
 
 		this.amplitude = amplitude;
 		angularFrequency = Mathf.Sqrt(gravity * k * Mathf.Tanh(k * waterDepth));
+		this.phaseShift = phaseShift;
 	}
 }
 
@@ -29,13 +30,13 @@ public struct WaveSetConfig {
 	public int noWaves;
 
 	public float wavelengthAverage;
-	public float wavelengthVariance;
+	public float wavelengthVarianceStdDev;
 
 	// amplitude is proportional to wavelength so does not get an independent variance
 	public float amplitudeAverage;
 
 	public float windAngleAverage;
-	public float windAngleVariance;
+	public float windAngleStdDev;
 
 	public float waterDepth;
 }
@@ -67,7 +68,7 @@ public class WaveSet {
 	public void SampleAll() {
 		waves.Clear();
 		for (int i = 0; i < config.noWaves; i++) {
-			waves.Add(SampleWave());
+			waves.Add(SampleWave(i));
 		}
 	}
 
@@ -75,23 +76,27 @@ public class WaveSet {
 	// this can be used to gradually update the wave set over time after changing the configuration
 	public void ResampleOnce() {
 		int index = _random.RandiRange(0, config.noWaves - 1);
-		waves[index] = SampleWave();
+		waves[index] = SampleWave(index);
 	}
 
-	private Wave SampleWave() {
-		float wavelength = _random.Randfn(config.wavelengthAverage, config.wavelengthVariance);
+	private Wave SampleWave(int waveIndex) {
+		float wavelength = _random.Randfn(config.wavelengthAverage, config.wavelengthVarianceStdDev);
 		wavelength = Mathf.Clamp(wavelength, config.wavelengthAverage / 2, config.wavelengthAverage * 2);
 
 		// sample proportionally with a / l ~ aAverage / lAverage
 		float amplitude = _amplitudeWavelengthRatio * wavelength;
+		DebugTools.Assert(Mathf.Abs(amplitude / wavelength - _amplitudeWavelengthRatio) < 0.01f, $"Amplitude-wavelength ratio is not being sampled correctly. a: {amplitude}, l: {wavelength}");
 
-		float windAngle = _random.Randfn(config.windAngleAverage, config.windAngleVariance);
+		float windAngle = _random.Randfn(config.windAngleAverage, config.windAngleStdDev);
 		windAngle = Mathf.Wrap(windAngle, 0, Mathf.Pi * 2);
 		float windAngleUpperClamp = Mathf.Wrap(config.windAngleAverage + Mathf.Pi / 4, 0, Mathf.Pi * 2);
-		float windAngleLowerClamp = Mathf.Wrap(config.windAngleAverage + Mathf.Pi / 4, 0, Mathf.Pi * 2);
+		float windAngleLowerClamp = Mathf.Wrap(config.windAngleAverage - Mathf.Pi / 4, 0, Mathf.Pi * 2);
 		windAngle = Mathf.Clamp(windAngle, windAngleLowerClamp, windAngleUpperClamp);
 
-		return new Wave(wavelength, amplitude, windAngle, config.waterDepth);
+		// phase shift has random distribution
+		float phaseShift = waveIndex * (Mathf.Pi * 2) / config.noWaves;
+
+		return new Wave(wavelength, amplitude, windAngle, phaseShift, config.waterDepth);
 	}
 }
 
@@ -114,8 +119,9 @@ public partial class Water : MeshInstance3D {
 		timeScale = 0.025f,
 	};
 
-	float waterDepth = 10f;
+	float waterDepth = 1000f;
 
+	// adjust noWave instead to change the number of waves
 	// this must match the shader
 	const int maxWaves = 10;
 	WaveSet waveSet;
@@ -126,12 +132,12 @@ public partial class Water : MeshInstance3D {
 		ConfigureShaderSurfacePerturbation();
 
 		WaveSetConfig waveSetConfig = new WaveSetConfig() {
-			noWaves = 1,
-			wavelengthAverage = 1f, //0.75f
-			wavelengthVariance = 0.1f * 0.1f,
-			amplitudeAverage = 1f,
-			windAngleAverage = Mathf.Pi,
-			windAngleVariance = Mathf.DegToRad(10f),
+			noWaves = 4,
+			wavelengthAverage = 6f,
+			wavelengthVarianceStdDev = 1.0f,
+			amplitudeAverage = 0.2f,
+			windAngleAverage = Mathf.Pi * 0.75f,
+			windAngleStdDev = Mathf.DegToRad(5f),
 			waterDepth = waterDepth,
 		};
 		waveSet = new WaveSet(waveSetConfig);
@@ -154,14 +160,12 @@ public partial class Water : MeshInstance3D {
 	}
 
 	private void ConfigureShaderGerstnerWaves() {
-		// we don't actually set a non-zero phase shift right now, but we might want to later
-		float[] phi = new float[maxWaves];
-
 		float[] amplitude = new float[maxWaves];
 		float[] k = new float[maxWaves];
 		float[] kX = new float[maxWaves];
 		float[] kZ = new float[maxWaves];
 		float[] omega = new float[maxWaves];
+		float[] phi = new float[maxWaves];
 		float[] productOperandX = new float[maxWaves];
 		float[] productOperandZ = new float[maxWaves];
 
@@ -173,6 +177,7 @@ public partial class Water : MeshInstance3D {
 			kX[i] = waveSet.waves[i].kX;
 			kZ[i] = waveSet.waves[i].kZ;
 			omega[i] = waveSet.waves[i].angularFrequency;
+			phi[i] = waveSet.waves[i].phaseShift;
 
 #if DEBUG
 			GD.Print($"Generated wave {i}:");
@@ -181,6 +186,8 @@ public partial class Water : MeshInstance3D {
 			GD.Print($"\tkX: {kX[i]}");
 			GD.Print($"\tkZ: {kZ[i]}");
 			GD.Print($"\tomega: {omega[i]}");
+			GD.Print($"\tphi: {phi[i]}");
+			GD.Print($"\tkA: {k[i] * amplitude[i]}");
 #endif
 
 			// precompute these for performance

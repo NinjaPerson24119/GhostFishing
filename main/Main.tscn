@@ -34,7 +34,7 @@ transform = Transform3D(50, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0)
 shape = SubResource("ConcavePolygonShape3D_tpf23")
 
 [node name="Ocean" parent="." instance=ExtResource("1_rvexv")]
-transform = Transform3D(100, 0, 0, 0, 1, 0, 0, 0, 100, 0, -0.861292, 0)
+transform = Transform3D(25, 0, 0, 0, 1, 0, 0, 0, 25, 0, -0.861292, 0)
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
 transform = Transform3D(-0.919451, 0.38168, 0.0944985, 1.11759e-08, -0.24033, 0.970691, 0.393204, 0.892503, 0.220971, -15.6434, 17.0687, 18.6465)

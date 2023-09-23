@@ -44,7 +44,7 @@ shader_parameter/wave_time = 0.0
 shader_parameter/albedo = Color(0.121569, 0.564706, 0.72549, 1)
 shader_parameter/albedo2 = Color(0.541176, 0.839216, 0.972549, 1)
 shader_parameter/metallic = 0.0
-shader_parameter/roughness = 0.3
+shader_parameter/roughness = 0.1
 shader_parameter/wave_direction = Vector2(2, 0)
 shader_parameter/wave_direction2 = Vector2(0, 1)
 shader_parameter/time_scale = 0.025
@@ -64,8 +64,8 @@ shader_parameter/wave = SubResource("NoiseTexture2D_6mm4l")
 
 [sub_resource type="QuadMesh" id="QuadMesh_060gm"]
 material = SubResource("ShaderMaterial_uebxw")
-subdivide_width = 200
-subdivide_depth = 200
+subdivide_width = 400
+subdivide_depth = 400
 orientation = 1
 
 [sub_resource type="CylinderMesh" id="CylinderMesh_jcr67"]
