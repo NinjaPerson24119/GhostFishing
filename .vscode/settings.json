@@ -9,4 +9,5 @@
     "omnisharp.enableMsBuildLoadProjectsOnDemand": true,
     "omnisharp.enableEditorConfigSupport": true,
     "editor.acceptSuggestionOnCommitCharacter": false,
+    "dotnet.codeLens.enableReferencesCodeLens": false,
 }
