@@ -35,6 +35,8 @@ uniform float near = 1.0;
 uniform float far = 100.0;
 uniform vec3 edge_color : source_color;
 
+uniform bool debug_visuals;
+
 varying float height;
 varying vec3 world_pos;
 
@@ -84,6 +86,12 @@ void fragment() {
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	NORMAL_MAP = normal_blend;
+
+	// TODO: change this to outline the tile edges
+	if (debug_visuals) {
+		ALBEDO = vec3(0.0);
+		ALPHA = 1.0;
+	}
 
 	// DEBUG: Godot ignores custom shaders in debug draw mode, so we have to do this manually
 	// render normals

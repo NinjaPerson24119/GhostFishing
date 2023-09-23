@@ -49,4 +49,3 @@ spot_range = 100.0
 environment = SubResource("Environment_ib5d1")
 
 [node name="Ocean" parent="." instance=ExtResource("4_smk4x")]
-DebugWaves = true

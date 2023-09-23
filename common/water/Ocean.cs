@@ -3,20 +3,18 @@ using Godot;
 
 // Controls the ocean surface as a grid of water tiles
 public partial class Ocean : Node3D {
-	// TODO: export scene variables
-	public double WaveTime = 0.0f;
-	private ShaderMaterial Material;
-
-	[Export] public int TileRadius {
+	// the number of Ocean tiles in each direction from the origin
+	[Export]
+	public int ViewDistanceInTiles {
 		get {
-			return _tileRadius;
+			return _viewDistanceInTiles;
 		}
 		set {
-			_tileRadius = value;
-			BuildWaterTiles();
+			_viewDistanceInTiles = value;
+			SpawnWaterTiles();
 		}
 	}
-	private int _tileRadius = 1;
+	private int _viewDistanceInTiles = 3;
 
 	[Export]
 	public int NoWaves {
@@ -25,12 +23,11 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_noWaves = value;
-			EmitSignal(SignalName.RebuildShaders);
+			OnWaveSetConfigurationChanged();
 		}
 	}
 	private int _noWaves = 10;
 
-	// TODO: LOD subdivisions
 	[Export]
 	public int Subdivisions {
 		get {
@@ -38,7 +35,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_subdivisions = value;
-			BuildWaterTiles();
+			SpawnWaterTiles();
 		}
 	}
 	private int _subdivisions = 200;
@@ -50,7 +47,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_tileSize = value;
-			BuildWaterTiles();
+			SpawnWaterTiles();
 		}
 	}
 	private float _tileSize = 50;
@@ -62,7 +59,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_waterDepth = value;
-			EmitSignal(SignalName.RebuildShaders);
+			OnWaveSetConfigurationChanged();
 		}
 	}
 	private float _waterDepth = 1000f;
@@ -74,7 +71,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_windAngle = value;
-			EmitSignal(SignalName.RebuildShaders);
+			OnWaveSetConfigurationChanged();
 		}
 	}
 	private float _windAngle = Mathf.Pi;
@@ -85,9 +82,16 @@ public partial class Ocean : Node3D {
 	[Signal]
 	public delegate void RebuildShadersEventHandler();
 
+	public double WaveTime = 0.0f;
+	private ShaderMaterial Material;
+	// the tile indices of the tile at the center of the ocean
+	private Vector2 _originTileIndices = new Vector2(0, 0);
+	private WaveSet _waveSet;
+
 	public override void _Ready() {
 		Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
-		BuildWaterTiles();
+		GenerateWaveSet();
+		SpawnWaterTiles();
 	}
 
 	private void FreeChildren() {
@@ -97,24 +101,22 @@ public partial class Ocean : Node3D {
 		}
 	}
 
-	private void BuildWaterTiles() {
+	private void SpawnWaterTiles() {
+		// make method idempotent
 		FreeChildren();
-		for (int x = -TileRadius; x <= TileRadius; x++) {
-			for (int z = -TileRadius; z <= TileRadius; z++) {
-				WaterTile waterTile = DefaultWaterTile();
-				waterTile.Position = new Vector3(x * TileSize, GlobalPosition.Y, z * TileSize);
-				Vector2 tileIndices = GetTileIndices(waterTile.Position);
-				GD.Print($"Building water tile {tileIndices}");
-				waterTile.Name = GetTileName(tileIndices);
-				
+
+		for (int x = -ViewDistanceInTiles; x <= ViewDistanceInTiles; x++) {
+			for (int z = -ViewDistanceInTiles; z <= ViewDistanceInTiles; z++) {
+				WaterTile waterTile = BuildWaterTile(new Vector2(x, z));
 				AddChild(waterTile);
 			}
 		}
 	}
 
-	private WaterTile DefaultWaterTile() {
-		// must set Name and Position after using this factory
+	private WaterTile BuildWaterTile(Vector2 tileIndices) {
 		WaterTile waterTile = new WaterTile() {
+			Name = GetTileName(tileIndices),
+			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
 			Scale = new Vector3(TileSize, 1, TileSize),
 			Material = (ShaderMaterial)Material.Duplicate(),
 			Mesh = new PlaneMesh() {
@@ -123,10 +125,13 @@ public partial class Ocean : Node3D {
 				SubdivideWidth = Subdivisions,
 				Orientation = PlaneMesh.OrientationEnum.Y,
 			},
+			WavesConfig = _waveSet,
 			DebugWaves = DebugWaves,
+			WaterDepth = WaterDepth,
 		};
 		waterTile.Mesh.SurfaceSetMaterial(0, waterTile.Material);
 		RebuildShaders += waterTile.OnRebuildShaders;
+		GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += waterTile.OnEnableDebugVisualsChanged;
 		return waterTile;
 	}
 
@@ -155,5 +160,38 @@ public partial class Ocean : Node3D {
 			GD.PrintErr($"Failed to GetHeight(). Couldn't find water tile {tileName}");
 			return 0;
 		}
+	}
+
+	// updates the central tile index when the origin changes to a new tile
+	public void OnOriginChanged(Vector3 origin) {
+		// determine which tile the origin is in
+		// it should always be in (0,0)
+		Vector2 newOriginTileIndices = GetTileIndices(origin);
+		if (newOriginTileIndices != _originTileIndices) {
+			// update the origin tile
+			_originTileIndices = newOriginTileIndices;
+
+			// recenter the ocean on the origin tile
+			Position = new Vector3(_originTileIndices.X * TileSize, Position.Y, _originTileIndices.Y * TileSize);
+			DebugTools.Assert(GetTileIndices(origin) == new Vector2(0, 0), $"Origin tile is not (0,0) after recentering. Origin: {origin}, origin tile: {GetTileIndices(origin)}");
+		}
+	}
+
+	private void GenerateWaveSet() {
+		WaveSetConfig waveSetConfig = new WaveSetConfig() {
+			noWaves = NoWaves,
+			wavelengthAverage = 8f,
+			wavelengthStdDev = 1f,
+			amplitudeAverage = 0.1f,
+			windAngleAverage = WindAngle,
+			windAngleStdDev = Mathf.DegToRad(30f),
+			waterDepth = WaterDepth,
+		};
+		_waveSet = new WaveSet(waveSetConfig);
+	}
+
+	public void OnWaveSetConfigurationChanged() {
+		GenerateWaveSet();
+		EmitSignal(SignalName.RebuildShaders);
 	}
 }

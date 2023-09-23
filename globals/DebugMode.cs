@@ -2,7 +2,21 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class DebugMode : Node {
-    bool debugMode = false;
+    private bool debugMode = false;
+
+    [Signal]
+    public delegate void DebugOceanChangedEventHandler(bool debugOcean);
+    public bool DebugOcean {
+        get {
+            return _debugOcean;
+        }
+        private set {
+            _debugOcean = value;
+            EmitSignal(SignalName.DebugOceanChanged, value);
+        }
+    }
+    private bool _debugOcean = false;
+
     Dictionary<string, Viewport.DebugDrawEnum> debugDrawMappings = new Dictionary<string, Viewport.DebugDrawEnum>{
         {"debug_wireframe", Viewport.DebugDrawEnum.Wireframe},
         {"debug_normals", Viewport.DebugDrawEnum.NormalBuffer},
@@ -18,25 +32,43 @@ public partial class DebugMode : Node {
         if (inputEvent.IsActionPressed("exit_to_desktop")) {
             GetTree().Quit();
         }
-
         if (inputEvent.IsActionPressed("debug_mode_toggle")) {
-            debugMode = !debugMode;
-            if (debugMode) {
-                GetNode<Label>("DebugIndicator").Visible = true;
-            }
-            else {
-                GetNode<Label>("DebugIndicator").Visible = false;
-                GetViewport().DebugDraw = Viewport.DebugDrawEnum.Disabled;
-            }
+            ToggleDebugMode();
         }
-        if (!debugMode) {
-            return;
+        if (debugMode) {
+            HandleDebugModeInput(inputEvent);
         }
+    }
 
+    private void ToggleDebugMode() {
+        debugMode = !debugMode;
+        if (debugMode) {
+            OnDebugModeEnabled();
+        }
+        else {
+            OnDebugModeDisabled();
+        }
+    }
+
+    private void OnDebugModeDisabled() {
+        GetNode<Label>("DebugIndicator").Visible = false;
+        GetViewport().DebugDraw = Viewport.DebugDrawEnum.Disabled;
+        DebugOcean = false;
+    }
+
+    private void OnDebugModeEnabled() {
+        GetNode<Label>("DebugIndicator").Visible = true;
+    }
+
+    private void HandleDebugModeInput(InputEvent inputEvent) {
         foreach (KeyValuePair<string, Viewport.DebugDrawEnum> kv in debugDrawMappings) {
             if (inputEvent.IsActionPressed(kv.Key)) {
                 ToggleDebugDrawEnum(kv.Value);
             }
+        }
+        if (inputEvent.IsActionPressed("debug_ocean")) {
+            DebugOcean = !DebugOcean;
+            EmitSignal(SignalName.DebugOceanChanged, DebugOcean);
         }
     }
 

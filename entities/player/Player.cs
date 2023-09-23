@@ -9,6 +9,10 @@ public partial class Player : RigidBody3D {
     float engine_force = 30.0f;
     float turn_force = 5.0f;
 
+    public override void _Ready() {
+        SetNotifyTransform(true);
+    }
+
     public override void _PhysicsProcess(double delta) {
         var depth = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(GlobalPosition) - GlobalPosition.Y;
         submerged = depth > 0;
