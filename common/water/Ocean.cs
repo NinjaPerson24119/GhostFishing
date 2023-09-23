@@ -7,6 +7,17 @@ public partial class Ocean : Node3D {
 	public double WaveTime = 0.0f;
 	private ShaderMaterial Material;
 
+	[Export] public int TileRadius {
+		get {
+			return _tileRadius;
+		}
+		set {
+			_tileRadius = value;
+			BuildWaterTiles();
+		}
+	}
+	private int _tileRadius = 1;
+
 	[Export]
 	public int NoWaves {
 		get {
@@ -68,6 +79,9 @@ public partial class Ocean : Node3D {
 	}
 	private float _windAngle = Mathf.Pi;
 
+	[Export]
+	public bool DebugWaves = false;
+
 	[Signal]
 	public delegate void RebuildShadersEventHandler();
 
@@ -85,10 +99,22 @@ public partial class Ocean : Node3D {
 
 	private void BuildWaterTiles() {
 		FreeChildren();
-		Vector2 tileIndices = GetTileIndices(GlobalPosition);
+		for (int x = -TileRadius; x <= TileRadius; x++) {
+			for (int z = -TileRadius; z <= TileRadius; z++) {
+				WaterTile waterTile = DefaultWaterTile();
+				waterTile.Position = new Vector3(x * TileSize, GlobalPosition.Y, z * TileSize);
+				Vector2 tileIndices = GetTileIndices(waterTile.Position);
+				GD.Print($"Building water tile {tileIndices}");
+				waterTile.Name = GetTileName(tileIndices);
+				
+				AddChild(waterTile);
+			}
+		}
+	}
+
+	private WaterTile DefaultWaterTile() {
+		// must set Name and Position after using this factory
 		WaterTile waterTile = new WaterTile() {
-			Name = GetTileName(tileIndices),
-			Position = new Vector3(0, 0, 0),
 			Scale = new Vector3(TileSize, 1, TileSize),
 			Material = (ShaderMaterial)Material.Duplicate(),
 			Mesh = new PlaneMesh() {
@@ -97,10 +123,11 @@ public partial class Ocean : Node3D {
 				SubdivideWidth = Subdivisions,
 				Orientation = PlaneMesh.OrientationEnum.Y,
 			},
+			DebugWaves = DebugWaves,
 		};
 		waterTile.Mesh.SurfaceSetMaterial(0, waterTile.Material);
 		RebuildShaders += waterTile.OnRebuildShaders;
-		AddChild(waterTile);
+		return waterTile;
 	}
 
 	public override void _Process(double delta) {
@@ -112,7 +139,8 @@ public partial class Ocean : Node3D {
 	}
 
 	private Vector2 GetTileIndices(Vector3 worldPosition) {
-		return new Vector2(Mathf.Floor(worldPosition.X / TileSize), Mathf.Floor(worldPosition.Z / TileSize));
+		Vector3 relativeToOcean = worldPosition - GlobalPosition;
+		return new Vector2(Mathf.Floor(relativeToOcean.X / TileSize), Mathf.Floor(relativeToOcean.Z / TileSize));
 	}
 
 	public float GetHeight(Vector3 worldPosition) {
@@ -122,7 +150,8 @@ public partial class Ocean : Node3D {
 		try {
 			WaterTile waterTile = GetNode<WaterTile>(tileName);
 			return waterTile.GetHeight(worldPosition, WaveTime);
-		} catch (Exception) {
+		}
+		catch (Exception) {
 			GD.PrintErr($"Failed to GetHeight(). Couldn't find water tile {tileName}");
 			return 0;
 		}

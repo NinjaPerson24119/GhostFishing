@@ -10,8 +10,12 @@ public class Wave {
     public float kZ { get; private set; }
     public float angularFrequency { get; private set; }
     public float phaseShift { get; private set; }
+    public float windAngle { get; private set; }
 
     public Wave(float wavelength, float amplitude, float windAngle, float phaseShift, float waterDepth) {
+        // forward prop for debugging
+        this.windAngle = windAngle;
+
         // k is the wave number (magnitude of the wave vector)
         // (kX, kZ) is the wave vector, which is the direction of the wave
         GD.Print($"Generating wave with wavelength {wavelength}, amplitude {amplitude}, wind angle {windAngle}, phase shift {phaseShift}");
@@ -151,6 +155,7 @@ public partial class WaterTile : MeshInstance3D {
     private float _windAngle = Mathf.Pi;
 
     public ShaderMaterial Material;
+    public bool DebugWaves = false;
 
     private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
         noiseScale = 10.0f,
@@ -223,16 +228,17 @@ public partial class WaterTile : MeshInstance3D {
             omega[i] = waveSet.waves[i].angularFrequency;
             phi[i] = waveSet.waves[i].phaseShift;
 
-#if DEBUG
-            GD.Print($"Generated wave {i}:");
-            GD.Print($"\tamplitude: {amplitude[i]}");
-            GD.Print($"\tk: {k[i]}");
-            GD.Print($"\tkX: {kX[i]}");
-            GD.Print($"\tkZ: {kZ[i]}");
-            GD.Print($"\tomega: {omega[i]}");
-            GD.Print($"\tphi: {phi[i]}");
-            GD.Print($"\tkA: {k[i] * amplitude[i]}");
-#endif
+            if (DebugWaves) {
+                GD.Print($"Generated wave {i}:");
+                GD.Print($"\tamplitude: {amplitude[i]}");
+                GD.Print($"\tk: {k[i]}");
+                GD.Print($"\tkX: {kX[i]}");
+                GD.Print($"\tkZ: {kZ[i]}");
+                GD.Print($"\tomega: {omega[i]}");
+                GD.Print($"\tphi: {phi[i]}");
+                GD.Print($"\tkA: {k[i] * amplitude[i]}");
+                GD.Print($"\twindAngle: {waveSet.waves[i].windAngle}");
+            }
 
             // precompute these for performance
             // these are product operands in the x/z displacement sums
