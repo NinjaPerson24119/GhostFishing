@@ -28,7 +28,7 @@ public partial class WaterTile : MeshInstance3D {
 
     public ShaderMaterial Material;
     public WaveSet WavesConfig;
-    public bool DebugWaves = false;
+    public bool LogWaveParameters = false;
 
     private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
         noiseScale = 10.0f,
@@ -87,7 +87,7 @@ public partial class WaterTile : MeshInstance3D {
                 omega[i] = WavesConfig.waves[i].angularFrequency;
                 phi[i] = WavesConfig.waves[i].phaseShift;
 
-                if (DebugWaves) {
+                if (LogWaveParameters) {
                     GD.Print($"Generated wave {i}:");
                     GD.Print($"\tamplitude: {amplitude[i]}");
                     GD.Print($"\tk: {k[i]}");
@@ -125,7 +125,7 @@ public partial class WaterTile : MeshInstance3D {
         return GlobalPosition.Y + surfaceConfig.noise.GetPixel(uvX * surfaceConfig.noise.GetWidth(), uvY * surfaceConfig.noise.GetHeight()).R * surfaceConfig.heightScale;
     }
 
-    public void OnEnableDebugVisualsChanged(bool enabled) {
+    public void SetDebugVisuals(bool enabled) {
         Material.SetShaderParameter("debug_visuals", enabled);
     }
 }

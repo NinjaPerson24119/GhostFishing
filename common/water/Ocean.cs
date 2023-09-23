@@ -77,7 +77,7 @@ public partial class Ocean : Node3D {
 	private float _windAngle = Mathf.Pi;
 
 	[Export]
-	public bool DebugWaves = false;
+	public bool LogWaveParameters = false;
 
 	[Signal]
 	public delegate void RebuildShadersEventHandler();
@@ -92,6 +92,8 @@ public partial class Ocean : Node3D {
 		Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
 		GenerateWaveSet();
 		SpawnWaterTiles();
+
+		GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ConfigureTileDebugVisuals;
 	}
 
 	private void FreeChildren() {
@@ -126,12 +128,11 @@ public partial class Ocean : Node3D {
 				Orientation = PlaneMesh.OrientationEnum.Y,
 			},
 			WavesConfig = _waveSet,
-			DebugWaves = DebugWaves,
+			LogWaveParameters = LogWaveParameters,
 			WaterDepth = WaterDepth,
 		};
 		waterTile.Mesh.SurfaceSetMaterial(0, waterTile.Material);
 		RebuildShaders += waterTile.OnRebuildShaders;
-		GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += waterTile.OnEnableDebugVisualsChanged;
 		return waterTile;
 	}
 
@@ -193,5 +194,11 @@ public partial class Ocean : Node3D {
 	public void OnWaveSetConfigurationChanged() {
 		GenerateWaveSet();
 		EmitSignal(SignalName.RebuildShaders);
+	}
+
+	public void ConfigureTileDebugVisuals(bool setting) {
+		foreach (WaterTile waterTile in GetChildren()) {
+			waterTile.SetDebugVisuals(setting);
+		}
 	}
 }
