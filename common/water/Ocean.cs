@@ -16,7 +16,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _viewDistance = 1000f;
+	private float _viewDistance = 500f;
 	private int _viewDistanceTiles;
 	public void SetViewDistanceTiles() {
 		_viewDistanceTiles = Mathf.CeilToInt(_viewDistance / TileSize);
@@ -34,20 +34,25 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _lodDistance = 400f;
+	private float _lodDistance = 300f;
 
 	// Rounds the computed LOD subdivisions down to the nearest multiple of this value
 	[Export]
-	public int LODSubdivisionSnap {
+	public int LODLevels {
 		get {
-			return _lodSubdivisionSnap;
+			return _lodLevels;
 		}
 		set {
-			_lodSubdivisionSnap = value;
+			_lodLevels = value;
+			SetLODSubdivisionsSnap();
 			QueueRespawnWaterTiles();
 		}
 	}
-	private int _lodSubdivisionSnap = 10;
+	private int _lodLevels = 10;
+	private int _lodSubdivisionsSnap;
+	public void SetLODSubdivisionsSnap() {
+		_lodSubdivisionsSnap = Subdivisions / LODLevels;
+	}
 
 	[Export]
 	public int Subdivisions {
@@ -56,6 +61,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_subdivisions = value;
+			SetLODSubdivisionsSnap();
 			QueueRespawnWaterTiles();
 		}
 	}
@@ -154,8 +160,12 @@ public partial class Ocean : Node3D {
 	private bool _queuedReconfigureWaterTiles = false;
 	private LinearLOD subdivisionsLOD;
 
+	private const float _tileOverlap = 0.1f;
+	private const float _distantTileHeightOffset = -1f;
+
 	public override void _Ready() {
 		SetViewDistanceTiles();
+		SetLODSubdivisionsSnap();
 		SpawnWaterTiles();
 	}
 
@@ -174,13 +184,18 @@ public partial class Ocean : Node3D {
 
 		GD.Print($"Spawning ocean with view distance {ViewDistance} which is {_viewDistanceTiles} water tiles. ({Mathf.Pow(_viewDistanceTiles * 2 + 1, 2)} total tiles)");
 		GenerateWaveSet();
-		subdivisionsLOD = new LinearLOD(_lodDistance, _subdivisions, 0, LODSubdivisionSnap);
+		subdivisionsLOD = new LinearLOD(_lodDistance, _subdivisions, 0, _lodSubdivisionsSnap);
 		for (int x = -_viewDistanceTiles; x <= _viewDistanceTiles; x++) {
 			for (int z = -_viewDistanceTiles; z <= _viewDistanceTiles; z++) {
 				float distanceToNearestTileEdge = TileDistanceFromOrigin(new Vector2(x, z));
 				int lodSubdivisions = subdivisionsLOD.ComputeLOD(distanceToNearestTileEdge);
 
 				WaterTile waterTile = BuildWaterTile(new Vector2(x, z), lodSubdivisions);
+				if (Subdivisions > 0 && waterTile.Subdivisions == 0) {
+					GD.Print("Distant tile detected, adjusting height and disabling waves");
+					waterTile.Position = new Vector3(waterTile.Position.X, waterTile.Position.Y + _distantTileHeightOffset, waterTile.Position.Z);
+					waterTile.ActiveWaves = 0;
+				}
 				AddChild(waterTile);
 			}
 		}
@@ -193,12 +208,11 @@ public partial class Ocean : Node3D {
 	}
 
 	private WaterTile BuildWaterTile(Vector2 tileIndices, int subdivisions) {
-		const float overlap = 0.1f;
 		WaterTile waterTile = new WaterTile() {
 			Name = GetTileName(tileIndices),
 			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
 			// overlap slightly to prevent seams
-			Scale = new Vector3(TileSize + overlap, 1, TileSize + overlap),
+			Scale = new Vector3(TileSize + _tileOverlap, 1, TileSize + _tileOverlap),
 			Subdivisions = subdivisions,
 			WavesConfig = _waveSet,
 			WaterTileDebugLogs = WaterTileDebugLogs,

@@ -35,6 +35,7 @@ public partial class WaterTile : MeshInstance3D {
     }
     private int _subdivisions = 200;
 
+    public int ActiveWaves = maxWaves;
     public WaveSet WavesConfig;
 
     private bool _queueReconfigureShaders = false;
@@ -132,7 +133,9 @@ public partial class WaterTile : MeshInstance3D {
             // only fill the first n waves
             // default k == 0 tells the shader to ignore the wave
             DebugTools.Assert(WavesConfig.waves.Count <= maxWaves, $"Too many waves configured. Max supported is {maxWaves}");
-            for (int i = 0; i < Mathf.Min(WavesConfig.waves.Count, maxWaves); i++) {
+            int wavesToRender = Mathf.Min(WavesConfig.waves.Count, maxWaves);
+            wavesToRender = Mathf.Min(wavesToRender, ActiveWaves);
+            for (int i = 0; i < wavesToRender; i++) {
                 amplitude[i] = WavesConfig.waves[i].amplitude;
                 k[i] = WavesConfig.waves[i].k;
                 kX[i] = WavesConfig.waves[i].kX;
