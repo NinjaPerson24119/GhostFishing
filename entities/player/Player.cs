@@ -9,6 +9,13 @@ public partial class Player : RigidBody3D {
     float engine_force = 30.0f;
     float turn_force = 5.0f;
 
+    [Export]
+    public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
+    private Vector3 _lastSignificantPosition = Vector3.Zero;
+
+    [Signal]
+    public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
+
     public override void _Ready() {
         SetNotifyTransform(true);
     }
@@ -21,6 +28,14 @@ public partial class Player : RigidBody3D {
             ApplyCentralForce(Vector3.Up * gravity * float_force * depth);
         }
         PollControls();
+    }
+
+    public override void _Process(double delta) {
+        if (GlobalPosition.DistanceSquaredTo(_lastSignificantPosition) > PositionChangedSignificanceEpsilon) {
+            GD.Print("Significant position change");
+            EmitSignal(SignalName.PositionChangedSignificantly, GlobalPosition);
+            _lastSignificantPosition = GlobalPosition;
+        }
     }
 
     private void PollControls() {

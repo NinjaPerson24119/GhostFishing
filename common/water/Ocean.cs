@@ -155,6 +155,7 @@ public partial class Ocean : Node3D {
 		return $"WaterTile_{indices.X},{indices.Y}";
 	}
 
+	// returns the tile indices relative to the ocean origin
 	private Vector2 GetTileIndices(Vector3 worldPosition) {
 		Vector3 relativeToOcean = worldPosition - GlobalPosition;
 		return new Vector2(Mathf.Floor(relativeToOcean.X / TileSize), Mathf.Floor(relativeToOcean.Z / TileSize));
@@ -176,16 +177,24 @@ public partial class Ocean : Node3D {
 
 	// updates the central tile index when the origin changes to a new tile
 	public void OnOriginChanged(Vector3 origin) {
-		// determine which tile the origin is in
-		// it should always be in (0,0)
-		Vector2 newOriginTileIndices = GetTileIndices(origin);
+		// returns the tile indices relative to the world origin
+		Vector2 GlobalTileIndices(Vector3 position) {
+			return new Vector2(Mathf.Floor(position.X / TileSize), Mathf.Floor(position.Z / TileSize));
+		}
+		// determine which global tile the origin is in
+		GD.Print($"Recalculating ocean position from received origin {origin}");
+		Vector2 newOriginTileIndices = GlobalTileIndices(origin);
+		GD.Print($"New origin tile indices: {newOriginTileIndices}");
 		if (newOriginTileIndices != _originTileIndices) {
 			// update the origin tile
 			_originTileIndices = newOriginTileIndices;
 
 			// recenter the ocean on the origin tile
 			Position = new Vector3(_originTileIndices.X * TileSize, Position.Y, _originTileIndices.Y * TileSize);
-			DebugTools.Assert(GetTileIndices(origin) == new Vector2(0, 0), $"Origin tile is not (0,0) after recentering. Origin: {origin}, origin tile: {GetTileIndices(origin)}");
+
+			// verify that the origin tile is now (0,0)
+			Vector2 indicesRelativeToOrigin = GetTileIndices(origin);
+			DebugTools.Assert(indicesRelativeToOrigin == new Vector2(0, 0), $"Ocean origin tile is not (0,0) after recentering. Got {indicesRelativeToOrigin}");
 		}
 	}
 
