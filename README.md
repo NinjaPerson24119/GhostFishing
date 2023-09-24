@@ -8,7 +8,7 @@ Horror themed fishing game built in Godot
 
 ## Debug Mode
 
-Hit `\`` to enable debug mode.
+Hit `` backtick ` `` to enable debug mode.
 
 --------------------
 | Key | Action     |
@@ -16,3 +16,4 @@ Hit `\`` to enable debug mode.
 | 1   | Toggle wireframe view |
 | 2   | Toggle normals view |
 | 3 | Toggle overdraw view |
+| 4 | Toggle ocean debug view. Ocean does not render on most debug modes because of its custom shader. |

@@ -86,7 +86,6 @@ public partial class Ocean : Node3D {
 	[Signal]
 	public delegate void RebuildShadersEventHandler();
 
-	public double WaveTime = 0.0f;
 	private ShaderMaterial Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
 	// the tile indices of the tile at the center of the ocean
 	private Vector2 _originTileIndices = new Vector2(0, 0);
@@ -144,8 +143,6 @@ public partial class Ocean : Node3D {
 	}
 
 	public override void _Process(double delta) {
-		WaveTime += delta;
-
 		if (_queuedRespawnWaterTiles) {
 			SpawnWaterTiles();
 		}
@@ -167,7 +164,7 @@ public partial class Ocean : Node3D {
 		string tileName = GetTileName(tileIndices);
 		try {
 			WaterTile waterTile = GetNode<WaterTile>(tileName);
-			return waterTile.GetHeight(worldPosition, WaveTime);
+			return waterTile.GetHeight(worldPosition);
 		}
 		catch (Exception) {
 			GD.PrintErr($"Failed to GetHeight(). Couldn't find water tile {tileName}");
@@ -182,9 +179,7 @@ public partial class Ocean : Node3D {
 			return new Vector2(Mathf.Floor(position.X / TileSize), Mathf.Floor(position.Z / TileSize));
 		}
 		// determine which global tile the origin is in
-		GD.Print($"Recalculating ocean position from received origin {origin}");
 		Vector2 newOriginTileIndices = GlobalTileIndices(origin);
-		GD.Print($"New origin tile indices: {newOriginTileIndices}");
 		if (newOriginTileIndices != _originTileIndices) {
 			// update the origin tile
 			_originTileIndices = newOriginTileIndices;

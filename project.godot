@@ -17,6 +17,7 @@ config/icon="res://cover.png"
 
 [autoload]
 
+GameClock="*res://globals/GameClock.cs"
 DebugMode="*res://globals/DebugMode.tscn"
 
 [display]

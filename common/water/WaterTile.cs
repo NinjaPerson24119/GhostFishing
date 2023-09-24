@@ -44,8 +44,7 @@ public partial class WaterTile : MeshInstance3D {
     }
 
     public override void _Process(double delta) {
-        double waveTime = GetParent<Ocean>().WaveTime;
-        Material.SetShaderParameter("wave_time", waveTime);
+        Material.SetShaderParameter("wave_time", GameClock.Time);
     }
 
     private void ConfigureShader() {
@@ -118,10 +117,10 @@ public partial class WaterTile : MeshInstance3D {
 
     // returns the height of the water at the given world position
     // this always should match the vertex shader algorithm for physics to be visually consistent
-    public float GetHeight(Vector3 worldPosition, double waveTime) {
+    public float GetHeight(Vector3 worldPosition) {
         // TODO: update to Gerstner waves
-        int uvX = (int)Mathf.Wrap(worldPosition.X / surfaceConfig.noiseScale + waveTime * surfaceConfig.timeScale, 0.0, 1.0);
-        int uvY = (int)Mathf.Wrap(worldPosition.Z / surfaceConfig.noiseScale + waveTime * surfaceConfig.timeScale, 0.0, 1.0);
+        int uvX = (int)Mathf.Wrap(worldPosition.X / surfaceConfig.noiseScale + GameClock.Time * surfaceConfig.timeScale, 0.0, 1.0);
+        int uvY = (int)Mathf.Wrap(worldPosition.Z / surfaceConfig.noiseScale + GameClock.Time * surfaceConfig.timeScale, 0.0, 1.0);
         return GlobalPosition.Y + surfaceConfig.noise.GetPixel(uvX * surfaceConfig.noise.GetWidth(), uvY * surfaceConfig.noise.GetHeight()).R * surfaceConfig.heightScale;
     }
 
