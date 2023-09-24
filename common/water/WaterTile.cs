@@ -43,6 +43,7 @@ public partial class WaterTile : MeshInstance3D {
     // load once and duplicate to avoid reloading the shader every time a new water tile is created
     private static ShaderMaterial _loadedMaterial = GD.Load<ShaderMaterial>("res://common/water/Water.material");
     private ShaderMaterial _material = _loadedMaterial.Duplicate() as ShaderMaterial;
+
     private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
         noiseScale = 10.0f,
         heightScale = 0.15f,
@@ -50,7 +51,7 @@ public partial class WaterTile : MeshInstance3D {
     };
     // this must match the shader, do not adjust it to change the number of active waves
     // this represents the maximum supported number of waves in the shader
-    private const int maxWaves = 10;
+    private const int maxWaves = 30;
     private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
 
     public override void _Ready() {
@@ -64,6 +65,13 @@ public partial class WaterTile : MeshInstance3D {
 
     public override void _Process(double delta) {
         _material.SetShaderParameter("wave_time", GameClock.Time);
+
+        if (_queueReconfigureShaders) {
+            ConfigureShader();
+        }
+        if (_queueReconfigureMesh) {
+            ConfigureMesh();
+        }
     }
 
     private void ConfigureMesh() {
@@ -174,7 +182,7 @@ public partial class WaterTile : MeshInstance3D {
         _material.SetShaderParameter("debug_visuals", enabled);
     }
 
-    private void QueueReconfigureShaders() {
+    public void QueueReconfigureShaders() {
         if (WaterTileDebugLogs) {
             GD.Print("Queueing reconfigure water tile shaders");
         }

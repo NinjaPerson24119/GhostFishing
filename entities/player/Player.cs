@@ -16,10 +16,6 @@ public partial class Player : RigidBody3D {
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
-    public override void _Ready() {
-        SetNotifyTransform(true);
-    }
-
     public override void _PhysicsProcess(double delta) {
         var depth = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(GlobalPosition) - GlobalPosition.Y;
         submerged = depth > 0;

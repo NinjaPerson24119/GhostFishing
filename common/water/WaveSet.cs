@@ -85,6 +85,8 @@ public class WaveSet {
             noWaves = noWaves,
             wavelengthAverage = 9f * intensity,
             wavelengthStdDev = 2f * Mathf.Sqrt(intensity),
+            // divide by noWaves to keep the total amplitude constant as we vary the number of summed waves
+            // TODO
             amplitudeAverage = 0.165f * intensity * (1-damping),
             windAngleAverage = windAngle,
             windAngleStdDev = Mathf.DegToRad(30f),
