@@ -11,7 +11,7 @@ public partial class Ocean : Node3D {
 		set {
 			_viewDistance = value;
 			SetViewDistanceTiles();
-			SpawnWaterTiles();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private float _viewDistance = 100f;
@@ -122,6 +122,7 @@ public partial class Ocean : Node3D {
 	}
 
 	private WaterTile BuildWaterTile(Vector2 tileIndices) {
+		GD.Print(GlobalPosition);
 		WaterTile waterTile = new WaterTile() {
 			Name = GetTileName(tileIndices),
 			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
