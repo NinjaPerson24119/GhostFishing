@@ -31,8 +31,8 @@ public partial class Player : RigidBody3D {
     }
 
     public override void _Process(double delta) {
+        // only notify when the player has moved significantly
         if (GlobalPosition.DistanceSquaredTo(_lastSignificantPosition) > PositionChangedSignificanceEpsilon) {
-            GD.Print("Significant position change");
             EmitSignal(SignalName.PositionChangedSignificantly, GlobalPosition);
             _lastSignificantPosition = GlobalPosition;
         }

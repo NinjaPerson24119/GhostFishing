@@ -86,7 +86,6 @@ public partial class Ocean : Node3D {
 	[Signal]
 	public delegate void RebuildShadersEventHandler();
 
-	private ShaderMaterial Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
 	// the tile indices of the tile at the center of the ocean
 	private Vector2 _originTileIndices = new Vector2(0, 0);
 	private WaveSet _waveSet;
@@ -127,18 +126,11 @@ public partial class Ocean : Node3D {
 			Name = GetTileName(tileIndices),
 			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
 			Scale = new Vector3(TileSize, 1, TileSize),
-			Material = (ShaderMaterial)Material.Duplicate(),
-			Mesh = new PlaneMesh() {
-				Size = new Vector2(1, 1),
-				SubdivideDepth = Subdivisions,
-				SubdivideWidth = Subdivisions,
-				Orientation = PlaneMesh.OrientationEnum.Y,
-			},
+			Subdivisions = Subdivisions,	
 			WavesConfig = _waveSet,
 			WaterTileDebugLogs = WaterTileDebugLogs,
 			WaterDepth = WaterDepth,
 		};
-		waterTile.Mesh.SurfaceSetMaterial(0, waterTile.Material);
 		return waterTile;
 	}
 

@@ -1,4 +1,3 @@
-using System.Collections;
 using Godot;
 
 public struct ShaderSurfacePerturbationConfig {
@@ -8,12 +7,7 @@ public struct ShaderSurfacePerturbationConfig {
     public float timeScale;
 }
 
-// Owns the shading and dynamics of a single water tile
 public partial class WaterTile : MeshInstance3D {
-    // this must match the shader, do not adjust it to change the number of active waves
-    // this represents the maximum supported number of waves in the shader
-    private const int maxWaves = 10;
-
     [Export]
     public float WaterDepth {
         get {
@@ -29,9 +23,28 @@ public partial class WaterTile : MeshInstance3D {
     [Export]
     public bool WaterTileDebugLogs = false;
 
-    public ShaderMaterial Material;
+    [Export]
+    public int Subdivisions {
+        get {
+            return _subdivisions;
+        }
+        set {
+            _subdivisions = value;
+            QueueReconfigureMesh();
+        }
+    }
+    private int _subdivisions = 200;
+
     public WaveSet WavesConfig;
+
     private bool _queueReconfigureShaders = false;
+    private bool _queueReconfigureMesh = false;
+
+    // load once and duplicate to avoid reloading the shader every time a new water tile is created
+    private static ShaderMaterial _loadedMaterial = GD.Load<ShaderMaterial>("res://common/water/Water.material");
+
+    // DEBUG: make shaders the same
+    private ShaderMaterial _material = _loadedMaterial; //.Duplicate() as ShaderMaterial;
 
     private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
         noiseScale = 10.0f,
@@ -39,12 +52,44 @@ public partial class WaterTile : MeshInstance3D {
         timeScale = 0.025f,
     };
 
+    // this must match the shader, do not adjust it to change the number of active waves
+    // this represents the maximum supported number of waves in the shader
+    private const int maxWaves = 10;
+
+    private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
+
     public override void _Ready() {
+        ConfigureMesh();
         ConfigureShader();
     }
 
     public override void _Process(double delta) {
-        Material.SetShaderParameter("wave_time", GameClock.Time);
+        _material.SetShaderParameter("wave_time", GameClock.Time);
+    }
+
+    private void ConfigureMesh() {
+        if (Mesh == null || _queueReconfigureMesh) {
+            // verify that we have a plane
+            if (Mesh != null && Mesh is PlaneMesh) {
+                var planeMesh = (PlaneMesh)Mesh;
+                // if the subdivisions have changed, unref the old mesh
+                if (planeMesh.SubdivideWidth != Subdivisions) {
+                    refCountedMeshes.Unref(planeMesh.SubdivideWidth);
+                }
+            }
+            Mesh = refCountedMeshes.GetAndRef(Subdivisions);
+            Mesh.SurfaceSetMaterial(0, _material);
+        }
+        _queueReconfigureMesh = false;
+    }
+
+    private static PlaneMesh BuildMesh(int resolution) {
+        PlaneMesh mesh = new PlaneMesh() {
+            Size = new Vector2(1, 1),
+            SubdivideDepth = resolution,
+            SubdivideWidth = resolution,
+        };
+        return mesh;
     }
 
     private void ConfigureShader() {
@@ -55,12 +100,12 @@ public partial class WaterTile : MeshInstance3D {
     }
 
     private void ConfigureShaderSurfacePerturbation() {
-        var noiseTexture = (NoiseTexture2D)Material.GetShaderParameter("wave");
+        var noiseTexture = (NoiseTexture2D)_material.GetShaderParameter("wave");
         surfaceConfig.noise = noiseTexture.Noise.GetSeamlessImage(512, 512);
 
-        Material.SetShaderParameter("noise_scale", surfaceConfig.noiseScale);
-        Material.SetShaderParameter("height_scale", surfaceConfig.heightScale);
-        Material.SetShaderParameter("time_scale", surfaceConfig.timeScale);
+        _material.SetShaderParameter("noise_scale", surfaceConfig.noiseScale);
+        _material.SetShaderParameter("height_scale", surfaceConfig.heightScale);
+        _material.SetShaderParameter("time_scale", surfaceConfig.timeScale);
     }
 
     private void ConfigureShaderGerstnerWaves() {
@@ -105,14 +150,14 @@ public partial class WaterTile : MeshInstance3D {
             }
         }
 
-        Material.SetShaderParameter("gerstner_k", k);
-        Material.SetShaderParameter("gerstner_k_x", kX);
-        Material.SetShaderParameter("gerstner_k_z", kZ);
-        Material.SetShaderParameter("gerstner_a", amplitude);
-        Material.SetShaderParameter("gerstner_omega", omega);
-        Material.SetShaderParameter("gerstner_phi", phi);
-        Material.SetShaderParameter("gerstner_product_operand_x", productOperandX);
-        Material.SetShaderParameter("gerstner_product_operand_z", productOperandZ);
+        _material.SetShaderParameter("gerstner_k", k);
+        _material.SetShaderParameter("gerstner_k_x", kX);
+        _material.SetShaderParameter("gerstner_k_z", kZ);
+        _material.SetShaderParameter("gerstner_a", amplitude);
+        _material.SetShaderParameter("gerstner_omega", omega);
+        _material.SetShaderParameter("gerstner_phi", phi);
+        _material.SetShaderParameter("gerstner_product_operand_x", productOperandX);
+        _material.SetShaderParameter("gerstner_product_operand_z", productOperandZ);
     }
 
     // returns the height of the water at the given world position
@@ -125,7 +170,7 @@ public partial class WaterTile : MeshInstance3D {
     }
 
     public void SetDebugVisuals(bool enabled) {
-        Material.SetShaderParameter("debug_visuals", enabled);
+        _material.SetShaderParameter("debug_visuals", enabled);
     }
 
     private void QueueReconfigureShaders() {
@@ -133,5 +178,12 @@ public partial class WaterTile : MeshInstance3D {
             GD.Print("Queueing reconfigure water tile shaders");
         }
         _queueReconfigureShaders = true;
+    }
+
+    private void QueueReconfigureMesh() {
+        if (WaterTileDebugLogs) {
+            GD.Print("Queueing reconfigure water tile mesh");
+        }
+        _queueReconfigureMesh = true;
     }
 }
