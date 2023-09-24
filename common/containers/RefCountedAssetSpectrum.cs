@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Godot;
 
+// TODO: this should really have tests
+
 // This class refcounts assets that occur in a spectrum of indices.
 // It receives a builder to build the asset for a given index if it doesn't exist.
 public class RefCountedAssetSpectrum<Index, T> {
@@ -18,9 +20,8 @@ public class RefCountedAssetSpectrum<Index, T> {
         if (!_assets.ContainsKey(index)) {
             GD.Print("Building asset for index: ", index);
             _assets[index] = _builder(index);
-        } else {
-            GD.Print("Reusing asset for index: ", index);
         }
+        AdjustRefCount(index, 1);
         return _assets[index];
     }
 
