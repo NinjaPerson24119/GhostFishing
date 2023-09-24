@@ -67,9 +67,8 @@ public class WaveSet {
         DebugTools.Assert(Mathf.Abs(amplitude / wavelength - _amplitudeWavelengthRatio) < 0.01f, $"Amplitude-wavelength ratio is not being sampled correctly. a: {amplitude}, l: {wavelength}");
 
         float windAngle = _random.Randfn(config.windAngleAverage, config.windAngleStdDev);
-        windAngle = Mathf.Wrap(windAngle, 0, Mathf.Pi * 2);
-        float windAngleUpperClamp = Mathf.Wrap(config.windAngleAverage + _windAngleClampRadius, 0, Mathf.Pi * 2);
-        float windAngleLowerClamp = Mathf.Wrap(config.windAngleAverage - _windAngleClampRadius, 0, Mathf.Pi * 2);
+        float windAngleUpperClamp = config.windAngleAverage + _windAngleClampRadius;
+        float windAngleLowerClamp = config.windAngleAverage - _windAngleClampRadius;
         windAngle = Mathf.Clamp(windAngle, windAngleLowerClamp, windAngleUpperClamp);
 
         // phase shift has random distribution

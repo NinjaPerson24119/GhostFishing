@@ -37,7 +37,7 @@ shape = SubResource("ConcavePolygonShape3D_tpf23")
 
 [node name="SpotLight3D" type="SpotLight3D" parent="."]
 transform = Transform3D(-0.919451, 0.38168, 0.0944985, 1.11759e-08, -0.24033, 0.970691, 0.393204, 0.892503, 0.220971, -15.6434, 17.0687, 18.6465)
-light_energy = 100.0
+light_energy = 35.0
 shadow_enabled = true
 spot_range = 100.0
 
@@ -52,4 +52,8 @@ environment = SubResource("Environment_ib5d1")
 
 [node name="Ocean" type="Node3D" parent="."]
 script = ExtResource("5_mnq5h")
-ViewDistance = 1000.0
+ViewDistance = 200.0
+NoWaves = 4
+Subdivisions = 100
+TileSize = 10.0
+WaterDepth = 1.0
