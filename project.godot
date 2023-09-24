@@ -91,3 +91,7 @@ debug_ocean={
 3d_physics/layer_1="ships"
 3d_physics/layer_2="terrain"
 3d_physics/layer_3="water"
+
+[rendering]
+
+anti_aliasing/quality/msaa_3d=3

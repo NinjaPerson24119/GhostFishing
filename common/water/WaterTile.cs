@@ -18,7 +18,7 @@ public partial class WaterTile : MeshInstance3D {
             QueueReconfigureShaders();
         }
     }
-    private float _waterDepth;
+    private float _waterDepth = 1000f;
 
     [Export]
     public bool WaterTileDebugLogs = false;
@@ -54,6 +54,10 @@ public partial class WaterTile : MeshInstance3D {
     private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
 
     public override void _Ready() {
+        if (WavesConfig == null) {
+            WaveSetConfig config = WaveSet.BuildConfig(maxWaves, Mathf.Pi, WaterDepth);
+            WavesConfig = new WaveSet(config);
+        }
         ConfigureMesh();
         ConfigureShader();
     }

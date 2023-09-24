@@ -18,6 +18,9 @@ public struct WaveSetConfig {
 }
 
 public class WaveSet {
+    private const float _wavelengthClampFactor = 2;
+    private const float _windAngleClampRadius = Mathf.Pi / 2;
+
     public WaveSetConfig config { get; private set; }
 
     private float _amplitudeWavelengthRatio;
@@ -57,7 +60,7 @@ public class WaveSet {
 
     private Wave SampleWave(int waveIndex) {
         float wavelength = _random.Randfn(config.wavelengthAverage, config.wavelengthStdDev);
-        wavelength = Mathf.Clamp(wavelength, config.wavelengthAverage / 2, config.wavelengthAverage * 2);
+        wavelength = Mathf.Clamp(wavelength, config.wavelengthAverage / _wavelengthClampFactor, config.wavelengthAverage * _wavelengthClampFactor);
 
         // sample proportionally with a / l ~ aAverage / lAverage
         float amplitude = _amplitudeWavelengthRatio * wavelength;
@@ -65,13 +68,26 @@ public class WaveSet {
 
         float windAngle = _random.Randfn(config.windAngleAverage, config.windAngleStdDev);
         windAngle = Mathf.Wrap(windAngle, 0, Mathf.Pi * 2);
-        float windAngleUpperClamp = Mathf.Wrap(config.windAngleAverage + Mathf.Pi / 4, 0, Mathf.Pi * 2);
-        float windAngleLowerClamp = Mathf.Wrap(config.windAngleAverage - Mathf.Pi / 4, 0, Mathf.Pi * 2);
+        float windAngleUpperClamp = Mathf.Wrap(config.windAngleAverage + _windAngleClampRadius, 0, Mathf.Pi * 2);
+        float windAngleLowerClamp = Mathf.Wrap(config.windAngleAverage - _windAngleClampRadius, 0, Mathf.Pi * 2);
         windAngle = Mathf.Clamp(windAngle, windAngleLowerClamp, windAngleUpperClamp);
 
         // phase shift has random distribution
         float phaseShift = waveIndex * (Mathf.Pi * 2) / config.noWaves;
 
         return new Wave(wavelength, amplitude, windAngle, phaseShift, config.waterDepth);
+    }
+
+    public static WaveSetConfig BuildConfig(int noWaves, float windAngle, float waterDepth) {
+        WaveSetConfig waveSetConfig = new WaveSetConfig() {
+            noWaves = noWaves,
+            wavelengthAverage = 8f,
+            wavelengthStdDev = 1f,
+            amplitudeAverage = 0.1f,
+            windAngleAverage = windAngle,
+            windAngleStdDev = Mathf.DegToRad(30f),
+            waterDepth = waterDepth,
+        };
+        return waveSetConfig;
     }
 }

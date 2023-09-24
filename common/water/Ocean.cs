@@ -187,16 +187,8 @@ public partial class Ocean : Node3D {
 	}
 
 	private void GenerateWaveSet() {
-		WaveSetConfig waveSetConfig = new WaveSetConfig() {
-			noWaves = NoWaves,
-			wavelengthAverage = 8f,
-			wavelengthStdDev = 1f,
-			amplitudeAverage = 0.1f,
-			windAngleAverage = WindAngle,
-			windAngleStdDev = Mathf.DegToRad(30f),
-			waterDepth = WaterDepth,
-		};
-		_waveSet = new WaveSet(waveSetConfig);
+		WaveSetConfig config = WaveSet.BuildConfig(NoWaves, WindAngle, WaterDepth);
+		_waveSet = new WaveSet(config);
 	}
 
 	public void ConfigureTileDebugVisuals(bool setting) {
