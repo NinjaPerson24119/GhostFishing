@@ -1,3 +1,4 @@
+using System.Collections;
 using Godot;
 
 public struct ShaderSurfacePerturbationConfig {
@@ -20,15 +21,17 @@ public partial class WaterTile : MeshInstance3D {
         }
         set {
             _waterDepth = value;
-            // TODO: triggers during instantiation? too early
-            //OnRebuildShaders();
+            QueueReconfigureShaders();
         }
     }
     private float _waterDepth;
 
+    [Export]
+    public bool WaterTileDebugLogs = false;
+
     public ShaderMaterial Material;
     public WaveSet WavesConfig;
-    public bool LogWaveParameters = false;
+    private bool _queueReconfigureShaders = false;
 
     private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
         noiseScale = 10.0f,
@@ -45,13 +48,9 @@ public partial class WaterTile : MeshInstance3D {
         Material.SetShaderParameter("wave_time", waveTime);
     }
 
-    public void OnRebuildShaders() {
-        Ocean parent = GetParent<Ocean>();
-        WaterDepth = parent.WaterDepth;
-        ConfigureShader();
-    }
-
     private void ConfigureShader() {
+        _queueReconfigureShaders = false;
+
         ConfigureShaderSurfacePerturbation();
         ConfigureShaderGerstnerWaves();
     }
@@ -79,7 +78,8 @@ public partial class WaterTile : MeshInstance3D {
         if (WaterDepth > 0) {
             // only fill the first n waves
             // default k == 0 tells the shader to ignore the wave
-            for (int i = 0; i < WavesConfig.waves.Count; i++) {
+            DebugTools.Assert(WavesConfig.waves.Count <= maxWaves, $"Too many waves configured. Max supported is {maxWaves}");
+            for (int i = 0; i < Mathf.Min(WavesConfig.waves.Count, maxWaves); i++) {
                 amplitude[i] = WavesConfig.waves[i].amplitude;
                 k[i] = WavesConfig.waves[i].k;
                 kX[i] = WavesConfig.waves[i].kX;
@@ -87,7 +87,7 @@ public partial class WaterTile : MeshInstance3D {
                 omega[i] = WavesConfig.waves[i].angularFrequency;
                 phi[i] = WavesConfig.waves[i].phaseShift;
 
-                if (LogWaveParameters) {
+                if (WaterTileDebugLogs) {
                     GD.Print($"Generated wave {i}:");
                     GD.Print($"\tamplitude: {amplitude[i]}");
                     GD.Print($"\tk: {k[i]}");
@@ -127,5 +127,12 @@ public partial class WaterTile : MeshInstance3D {
 
     public void SetDebugVisuals(bool enabled) {
         Material.SetShaderParameter("debug_visuals", enabled);
+    }
+
+    private void QueueReconfigureShaders() {
+        if (WaterTileDebugLogs) {
+            GD.Print("Queueing reconfigure water tile shaders");
+        }
+        _queueReconfigureShaders = true;
     }
 }

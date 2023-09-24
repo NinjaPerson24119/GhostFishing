@@ -27,7 +27,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_noWaves = value;
-			OnWaveSetConfigurationChanged();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private int _noWaves = 10;
@@ -39,7 +39,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_subdivisions = value;
-			SpawnWaterTiles();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private int _subdivisions = 200;
@@ -51,7 +51,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_tileSize = value;
-			SpawnWaterTiles();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private float _tileSize = 50;
@@ -63,7 +63,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_waterDepth = value;
-			OnWaveSetConfigurationChanged();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private float _waterDepth = 1000f;
@@ -75,27 +75,26 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_windAngle = value;
-			OnWaveSetConfigurationChanged();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private float _windAngle = Mathf.Pi;
 
 	[Export]
-	public bool LogWaveParameters = false;
+	public bool WaterTileDebugLogs = false;
 
 	[Signal]
 	public delegate void RebuildShadersEventHandler();
 
 	public double WaveTime = 0.0f;
-	private ShaderMaterial Material;
+	private ShaderMaterial Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
 	// the tile indices of the tile at the center of the ocean
 	private Vector2 _originTileIndices = new Vector2(0, 0);
 	private WaveSet _waveSet;
+	private bool _queuedRespawnWaterTiles = false;
 
 	public override void _Ready() {
-		Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
 		SetViewDistanceTiles();
-		GenerateWaveSet();
 		SpawnWaterTiles();
 
 		GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ConfigureTileDebugVisuals;
@@ -109,10 +108,13 @@ public partial class Ocean : Node3D {
 	}
 
 	private void SpawnWaterTiles() {
+		_queuedRespawnWaterTiles = false;
+		
 		// make method idempotent
 		FreeChildren();
 
-		GD.Print($"Spawning water tiles with view distance {_viewDistanceTiles} and subdivisions {_subdivisions}");
+		GD.Print($"Spawning ocean with view distance of {_viewDistanceTiles} water tiles.");
+		GenerateWaveSet();
 		for (int x = -_viewDistanceTiles; x <= _viewDistanceTiles; x++) {
 			for (int z = -_viewDistanceTiles; z <= _viewDistanceTiles; z++) {
 				WaterTile waterTile = BuildWaterTile(new Vector2(x, z));
@@ -134,16 +136,19 @@ public partial class Ocean : Node3D {
 				Orientation = PlaneMesh.OrientationEnum.Y,
 			},
 			WavesConfig = _waveSet,
-			LogWaveParameters = LogWaveParameters,
+			WaterTileDebugLogs = WaterTileDebugLogs,
 			WaterDepth = WaterDepth,
 		};
 		waterTile.Mesh.SurfaceSetMaterial(0, waterTile.Material);
-		RebuildShaders += waterTile.OnRebuildShaders;
 		return waterTile;
 	}
 
 	public override void _Process(double delta) {
 		WaveTime += delta;
+
+		if (_queuedRespawnWaterTiles) {
+			SpawnWaterTiles();
+		}
 	}
 
 	private string GetTileName(Vector2 indices) {
@@ -197,14 +202,14 @@ public partial class Ocean : Node3D {
 		_waveSet = new WaveSet(waveSetConfig);
 	}
 
-	public void OnWaveSetConfigurationChanged() {
-		GenerateWaveSet();
-		EmitSignal(SignalName.RebuildShaders);
-	}
-
 	public void ConfigureTileDebugVisuals(bool setting) {
 		foreach (WaterTile waterTile in GetChildren()) {
 			waterTile.SetDebugVisuals(setting);
 		}
+	}
+
+	public void QueueRespawnWaterTiles() {
+		GD.Print("Queuing respawn ocean water tiles");
+		_queuedRespawnWaterTiles = true;
 	}
 }
