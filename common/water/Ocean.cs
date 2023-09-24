@@ -14,7 +14,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _viewDistance = 100f;
+	private float _viewDistance = 400f;
 	private int _viewDistanceTiles;
 	public void SetViewDistanceTiles() {
 		_viewDistanceTiles = Mathf.CeilToInt(_viewDistance / TileSize);
@@ -54,7 +54,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _tileSize = 50;
+	private float _tileSize = 20;
 
 	[Export]
 	public float WaterDepth {
@@ -66,7 +66,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _waterDepth = 1000f;
+	private float _waterDepth = 200f;
 
 	[Export]
 	public float WindAngle {
@@ -79,6 +79,30 @@ public partial class Ocean : Node3D {
 		}
 	}
 	private float _windAngle = Mathf.Pi;
+
+	[Export(PropertyHint.Range, "0.01,10,0.01")]
+	public float Intensity {
+		get {
+			return _intensity;
+		}
+		set {
+			_intensity = value;
+			QueueRespawnWaterTiles();
+		}
+	}
+	private float _intensity = 0.5f;
+
+	[Export(PropertyHint.Range, "0.0,1,0.01")]
+	public float Damping {
+		get {
+			return _damping;
+		}
+		set {
+			_damping = value;
+			QueueRespawnWaterTiles();
+		}
+	}
+	private float _damping = 0.5f;
 
 	[Export]
 	public bool WaterTileDebugLogs = false;
@@ -107,7 +131,7 @@ public partial class Ocean : Node3D {
 
 	private void SpawnWaterTiles() {
 		_queuedRespawnWaterTiles = false;
-		
+
 		// make method idempotent
 		FreeChildren();
 
@@ -126,7 +150,7 @@ public partial class Ocean : Node3D {
 			Name = GetTileName(tileIndices),
 			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
 			Scale = new Vector3(TileSize, 1, TileSize),
-			Subdivisions = Subdivisions,	
+			Subdivisions = Subdivisions,
 			WavesConfig = _waveSet,
 			WaterTileDebugLogs = WaterTileDebugLogs,
 			WaterDepth = WaterDepth,
@@ -186,7 +210,7 @@ public partial class Ocean : Node3D {
 	}
 
 	private void GenerateWaveSet() {
-		WaveSetConfig config = WaveSet.BuildConfig(NoWaves, WindAngle, WaterDepth);
+		WaveSetConfig config = WaveSet.BuildConfig(NoWaves, WindAngle, WaterDepth, Intensity, Damping);
 		_waveSet = new WaveSet(config);
 	}
 

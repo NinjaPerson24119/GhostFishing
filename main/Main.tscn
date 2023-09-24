@@ -52,8 +52,4 @@ environment = SubResource("Environment_ib5d1")
 
 [node name="Ocean" type="Node3D" parent="."]
 script = ExtResource("5_mnq5h")
-ViewDistance = 200.0
-NoWaves = 4
-Subdivisions = 100
-TileSize = 10.0
-WaterDepth = 1.0
+Intensity = 0.88

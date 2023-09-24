@@ -87,7 +87,7 @@ void fragment() {
 	ROUGHNESS = roughness;
 	NORMAL_MAP = normal_blend;
 
-	// TODO: change this to outline the tile edges
+	// Outline the edges of the water tile black
 	if (debug_visuals && (UV.x < 0.01 || UV.x > 0.99 || UV.y < 0.01 || UV.y > 0.99)) {
 		ALBEDO = vec3(0.0);
 		ALPHA = 1.0;

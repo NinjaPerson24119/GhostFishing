@@ -77,12 +77,15 @@ public class WaveSet {
         return new Wave(wavelength, amplitude, windAngle, phaseShift, config.waterDepth);
     }
 
-    public static WaveSetConfig BuildConfig(int noWaves, float windAngle, float waterDepth) {
+    public static WaveSetConfig BuildConfig(int noWaves, float windAngle, float waterDepth, float intensity = 1.0f, float damping = 0.0f) {
+        DebugTools.Assert(intensity > 0, "Intensity must be positive");
+        DebugTools.Assert(waterDepth > 0, "Water depth must be positive");
+
         WaveSetConfig waveSetConfig = new WaveSetConfig() {
             noWaves = noWaves,
-            wavelengthAverage = 8f,
-            wavelengthStdDev = 1f,
-            amplitudeAverage = 0.1f,
+            wavelengthAverage = 9f * intensity,
+            wavelengthStdDev = 2f * Mathf.Sqrt(intensity),
+            amplitudeAverage = 0.165f * intensity * (1-damping),
             windAngleAverage = windAngle,
             windAngleStdDev = Mathf.DegToRad(30f),
             waterDepth = waterDepth,
