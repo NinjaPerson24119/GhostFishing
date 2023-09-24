@@ -53,9 +53,12 @@ float edge(float depth) {
 
 void vertex() {
 	if (!no_displacement) {
-		height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
 		VERTEX += gerstner(VERTEX.x, VERTEX.z, wave_time).xzy;
 		NORMAL = gerstner_normal(VERTEX.x, VERTEX.z, wave_time);
+
+		// apply slight noise to waves
+		// use direction of normal so it looks natural and we don't have to recompute the normal
+		height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
 		VERTEX += NORMAL * height * height_scale;
 	}
 }

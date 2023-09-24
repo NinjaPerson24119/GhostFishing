@@ -29,6 +29,9 @@ script = ExtResource("3_t71xa")
 
 [node name="Camera3D" type="Camera3D" parent="Player"]
 transform = Transform3D(-1, -2.99003e-08, 8.21505e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -4.16729)
+fov = 100.0
+near = 1.0
+far = 1000.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, -0.699052, 0.715071, 0, -0.715071, -0.699052, 0, 29, 0)
@@ -60,9 +63,9 @@ environment = SubResource("Environment_ib5d1")
 
 [node name="Ocean" type="Node3D" parent="."]
 script = ExtResource("5_mnq5h")
-ViewDistance = 100.0
-LODDistance = 60.0
-LODLevels = 2
+LODLevels = 40
+Subdivisions = 200
+TileSize = 101
 
 [node name="PlayerOrigin" type="MeshInstance3D" parent="."]
 visible = false
@@ -71,4 +74,5 @@ script = ExtResource("6_10prx")
 
 [node name="Water" type="MeshInstance3D" parent="."]
 transform = Transform3D(20, 0, 0, 0, 1, 0, 0, 0, 20, 5, 2, 10)
+visible = false
 script = ExtResource("6_rl8uo")

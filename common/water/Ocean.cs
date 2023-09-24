@@ -34,7 +34,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _lodDistance = 300f;
+	private float _lodDistance = 400f;
 
 	// Rounds the computed LOD subdivisions down to the nearest multiple of this value
 	[Export]
@@ -48,7 +48,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private int _lodLevels = 10;
+	private int _lodLevels = 20;
 	private int _lodSubdivisionsSnap;
 	public void SetLODSubdivisionsSnap() {
 		_lodSubdivisionsSnap = Subdivisions / LODLevels;
@@ -217,6 +217,10 @@ public partial class Ocean : Node3D {
 			WavesConfig = _waveSet,
 			WaterTileDebugLogs = WaterTileDebugLogs,
 			WaterDepth = WaterDepth,
+			SurfaceNoiseScale = 10f,
+			SurfaceHeightScale = 0.2f,
+			SurfaceTimeScale = 0.025f,
+			NoDisplacement = false,
 		};
 		return waterTile;
 	}
