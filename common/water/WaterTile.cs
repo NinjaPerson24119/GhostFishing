@@ -42,20 +42,15 @@ public partial class WaterTile : MeshInstance3D {
 
     // load once and duplicate to avoid reloading the shader every time a new water tile is created
     private static ShaderMaterial _loadedMaterial = GD.Load<ShaderMaterial>("res://common/water/Water.material");
-
-    // DEBUG: make shaders the same
-    private ShaderMaterial _material = _loadedMaterial; //.Duplicate() as ShaderMaterial;
-
+    private ShaderMaterial _material = _loadedMaterial.Duplicate() as ShaderMaterial;
     private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
         noiseScale = 10.0f,
         heightScale = 0.15f,
         timeScale = 0.025f,
     };
-
     // this must match the shader, do not adjust it to change the number of active waves
     // this represents the maximum supported number of waves in the shader
     private const int maxWaves = 10;
-
     private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
 
     public override void _Ready() {
@@ -100,8 +95,10 @@ public partial class WaterTile : MeshInstance3D {
     }
 
     private void ConfigureShaderSurfacePerturbation() {
-        var noiseTexture = (NoiseTexture2D)_material.GetShaderParameter("wave");
-        surfaceConfig.noise = noiseTexture.Noise.GetSeamlessImage(512, 512);
+        if (surfaceConfig.noise == null) {
+            var noiseTexture = (NoiseTexture2D)_material.GetShaderParameter("wave");
+            surfaceConfig.noise = noiseTexture.Noise.GetSeamlessImage(512, 512);
+        }
 
         _material.SetShaderParameter("noise_scale", surfaceConfig.noiseScale);
         _material.SetShaderParameter("height_scale", surfaceConfig.heightScale);

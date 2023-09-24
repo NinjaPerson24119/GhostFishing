@@ -52,6 +52,6 @@ environment = SubResource("Environment_ib5d1")
 
 [node name="Ocean" type="Node3D" parent="."]
 script = ExtResource("5_mnq5h")
-ViewDistance = 200.0
+ViewDistance = 1000.0
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="."]
