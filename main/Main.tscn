@@ -59,9 +59,10 @@ environment = SubResource("Environment_ib5d1")
 
 [node name="Ocean" type="Node3D" parent="."]
 script = ExtResource("5_mnq5h")
-ViewDistance = 40.0
-LODDistance = 30.0
-LODSubdivisionsStep = 25
+ViewDistance = 50.0
+LODDistance = 40.0
+Subdivisions = 50
+TileSize = 5
 Damping = 0.7
 
 [node name="PlayerOrigin" type="MeshInstance3D" parent="."]

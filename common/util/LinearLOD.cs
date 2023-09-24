@@ -25,8 +25,8 @@ public class LinearLOD {
             return (int)_distanceToLOD[distance];
         }
 
-        float lodProgressionPercentage = Mathf.Clamp(distance / _distance, 0, 1);
-        int result = (int)((1 - lodProgressionPercentage) * _startValue);
+        float lodProgression = Mathf.Clamp(distance / _distance, 0, 1);
+        int result = (int)((1 - lodProgression) * _startValue);
 
         // round to nearest lower multiple of step
         result = result - (result % _step);
@@ -36,7 +36,7 @@ public class LinearLOD {
 
         if (!_computedLODsLogCheck.ContainsKey(result)) {
             _computedLODsLogCheck[result] = true;
-            GD.Print($"Computed LOD at distance {distance} with result {result} (progression percentage {lodProgressionPercentage}%))");
+            GD.Print($"Computed LOD at distance {distance} with result {result} (progression percentage {lodProgression*100}%))");
         }
 
         _distanceToLOD[distance] = result;

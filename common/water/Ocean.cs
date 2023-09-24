@@ -38,16 +38,16 @@ public partial class Ocean : Node3D {
 
 	// Rounds the computed LOD subdivisions down to the nearest multiple of this value
 	[Export]
-	public int LODSubdivisionsStep {
+	public int LODSubdivisionSnap {
 		get {
-			return _lodSubdivisionsStep;
+			return _lodSubdivisionSnap;
 		}
 		set {
-			_lodSubdivisionsStep = value;
+			_lodSubdivisionSnap = value;
 			QueueRespawnWaterTiles();
 		}
 	}
-	private int _lodSubdivisionsStep = 10;
+	private int _lodSubdivisionSnap = 10;
 
 	[Export]
 	public int Subdivisions {
@@ -174,10 +174,10 @@ public partial class Ocean : Node3D {
 
 		GD.Print($"Spawning ocean with view distance {ViewDistance} which is {_viewDistanceTiles} water tiles. ({Mathf.Pow(_viewDistanceTiles * 2 + 1, 2)} total tiles)");
 		GenerateWaveSet();
-		subdivisionsLOD = new LinearLOD(_lodDistance, _subdivisions, 0, _lodSubdivisionsStep);
+		subdivisionsLOD = new LinearLOD(_lodDistance, _subdivisions, 0, LODSubdivisionSnap);
 		for (int x = -_viewDistanceTiles; x <= _viewDistanceTiles; x++) {
 			for (int z = -_viewDistanceTiles; z <= _viewDistanceTiles; z++) {
-				float distanceToNearestTileEdge = TileDistance(new Vector2(x, z));
+				float distanceToNearestTileEdge = TileDistanceFromOrigin(new Vector2(x, z));
 				int lodSubdivisions = subdivisionsLOD.ComputeLOD(distanceToNearestTileEdge);
 
 				WaterTile waterTile = BuildWaterTile(new Vector2(x, z), lodSubdivisions);
@@ -187,10 +187,9 @@ public partial class Ocean : Node3D {
 		GD.Print($"Reused {subdivisionsLOD.ReusedDistances} LOD distances");
 	}
 
-	private float TileDistance(Vector2 tileIndices) {
-		float x = Mathf.Abs(tileIndices.X);
-		float z = Mathf.Abs(tileIndices.Y);
-		return Mathf.Sqrt(Mathf.Pow(x, 2) + Mathf.Pow(z, 2)) * TileSize;
+	private float TileDistanceFromOrigin(Vector2 tileIndices) {
+		Vector2 position = tileIndices.Abs() * TileSize;
+		return Mathf.Sqrt(Mathf.Pow(position.X, 2) + Mathf.Pow(position.Y, 2));
 	}
 
 	private WaterTile BuildWaterTile(Vector2 tileIndices, int subdivisions) {
@@ -222,13 +221,18 @@ public partial class Ocean : Node3D {
 		return $"WaterTile_{indices.X},{indices.Y}";
 	}
 
-	// returns the tile indices relative to the ocean origin
-	private Vector2 GetTileIndices(Vector3 worldPosition) {
+	private Vector3 AlignPositionToOceanOriginCorner(Vector3 position) {
 		// note that the ocean is centered on the origin tile
 		// e.g. the bounds for being in the origin tile are (-tileSize/2, tileSize/2)
+		Vector3 alignedPosition = position + new Vector3(TileSize / 2, 0, TileSize / 2);
+		return alignedPosition;
+	}
+
+	// returns the tile indices relative to the ocean origin
+	private Vector2 GetTileIndices(Vector3 worldPosition) {
 		Vector3 relativeToOcean = worldPosition - GlobalPosition;
-		Vector3 shiftedRelativeToOcean = relativeToOcean + new Vector3(TileSize / 2, 0, TileSize / 2);
-		return new Vector2(Mathf.Floor(shiftedRelativeToOcean.X / TileSize), Mathf.Floor(shiftedRelativeToOcean.Z / TileSize));
+		Vector3 shiftedPosition = AlignPositionToOceanOriginCorner(relativeToOcean);
+		return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Z / TileSize));
 	}
 
 	public float GetHeight(Vector3 worldPosition) {
@@ -249,7 +253,7 @@ public partial class Ocean : Node3D {
 	public void OnOriginChanged(Vector3 origin) {
 		// returns the tile indices relative to the world origin
 		Vector2 GlobalTileIndices(Vector3 position) {
-			Vector3 shiftedPosition = position + new Vector3(TileSize / 2, 0, TileSize / 2);
+			Vector3 shiftedPosition = AlignPositionToOceanOriginCorner(position);
 			return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Z / TileSize));
 		}
 		// determine which global tile the origin is in
