@@ -1,12 +1,5 @@
 using Godot;
 
-public struct ShaderSurfacePerturbationConfig {
-    public Image noise;
-    public float noiseScale;
-    public float heightScale;
-    public float timeScale;
-}
-
 public partial class WaterTile : MeshInstance3D {
     [Export]
     public float WaterDepth {
@@ -35,7 +28,66 @@ public partial class WaterTile : MeshInstance3D {
     }
     private int _subdivisions = 200;
 
-    public int ActiveWaves = maxWaves;
+    [Export]
+    public bool NoDisplacement {
+        get {
+            return _noDisplacement;
+        }
+        set {
+            _noDisplacement = value;
+            QueueReconfigureShaders();
+        }
+    }
+    private bool _noDisplacement = false;
+
+    [Export]
+    public int ActiveWaves {
+        get {
+            return _activeWaves;
+        }
+        set {
+            _activeWaves = value;
+            QueueReconfigureShaders();
+        }
+    }
+    private int _activeWaves = maxWaves;
+
+    [ExportGroup("Surface Perturbation")]
+    [Export]
+    public float SurfaceNoiseScale {
+        get {
+            return _surfaceNoiseScale;
+        }
+        set {
+            _surfaceNoiseScale = value;
+            QueueReconfigureShaders();
+        }
+    }
+    private float _surfaceNoiseScale = 10.0f;
+    [Export]
+    public float SurfaceHeightScale {
+        get {
+            return _surfaceHeightScale;
+        }
+        set {
+            _surfaceHeightScale = value;
+            QueueReconfigureShaders();
+        }
+    }
+    private float _surfaceHeightScale = 0.2f;
+    [Export]
+    public float SurfaceTimeScale {
+        get {
+            return _surfaceTimeScale;
+        }
+        set {
+            _surfaceTimeScale = value;
+            QueueReconfigureShaders();
+        }
+    }
+    private float _surfaceTimeScale = 0.025f;
+    private static Image _surfaceNoise;
+
     public WaveSet WavesConfig;
 
     private bool _queueReconfigureShaders = false;
@@ -45,11 +97,6 @@ public partial class WaterTile : MeshInstance3D {
     private static ShaderMaterial _loadedMaterial = GD.Load<ShaderMaterial>("res://common/water/Water.material");
     private ShaderMaterial _material = _loadedMaterial.Duplicate() as ShaderMaterial;
 
-    private static ShaderSurfacePerturbationConfig surfaceConfig = new ShaderSurfacePerturbationConfig() {
-        noiseScale = 10.0f,
-        heightScale = 0.15f,
-        timeScale = 0.025f,
-    };
     // this must match the shader, do not adjust it to change the number of active waves
     // this represents the maximum supported number of waves in the shader
     private const int maxWaves = 30;
@@ -57,7 +104,7 @@ public partial class WaterTile : MeshInstance3D {
 
     public override void _Ready() {
         if (WavesConfig == null) {
-            WaveSetConfig config = WaveSet.BuildConfig(maxWaves, Mathf.Pi, WaterDepth);
+            WaveSetConfig config = WaveSet.BuildConfig(10, Mathf.Pi, WaterDepth);
             WavesConfig = new WaveSet(config);
         }
         ConfigureMesh();
@@ -103,19 +150,20 @@ public partial class WaterTile : MeshInstance3D {
     private void ConfigureShader() {
         _queueReconfigureShaders = false;
 
+        _material.SetShaderParameter("no_displacement", NoDisplacement);
         ConfigureShaderSurfacePerturbation();
         ConfigureShaderGerstnerWaves();
     }
 
     private void ConfigureShaderSurfacePerturbation() {
-        if (surfaceConfig.noise == null) {
+        if (_surfaceNoise == null) {
             var noiseTexture = (NoiseTexture2D)_material.GetShaderParameter("wave");
-            surfaceConfig.noise = noiseTexture.Noise.GetSeamlessImage(512, 512);
+            _surfaceNoise = noiseTexture.Noise.GetSeamlessImage(512, 512);
         }
 
-        _material.SetShaderParameter("noise_scale", surfaceConfig.noiseScale);
-        _material.SetShaderParameter("height_scale", surfaceConfig.heightScale);
-        _material.SetShaderParameter("time_scale", surfaceConfig.timeScale);
+        _material.SetShaderParameter("noise_scale", _surfaceNoiseScale);
+        _material.SetShaderParameter("height_scale", _surfaceHeightScale);
+        _material.SetShaderParameter("time_scale", _surfaceTimeScale);
     }
 
     private void ConfigureShaderGerstnerWaves() {
@@ -176,9 +224,9 @@ public partial class WaterTile : MeshInstance3D {
     // this always should match the vertex shader algorithm for physics to be visually consistent
     public float GetHeight(Vector3 worldPosition) {
         // TODO: update to Gerstner waves
-        int uvX = (int)Mathf.Wrap(worldPosition.X / surfaceConfig.noiseScale + GameClock.Time * surfaceConfig.timeScale, 0.0, 1.0);
-        int uvY = (int)Mathf.Wrap(worldPosition.Z / surfaceConfig.noiseScale + GameClock.Time * surfaceConfig.timeScale, 0.0, 1.0);
-        return GlobalPosition.Y + surfaceConfig.noise.GetPixel(uvX * surfaceConfig.noise.GetWidth(), uvY * surfaceConfig.noise.GetHeight()).R * surfaceConfig.heightScale;
+        int uvX = (int)Mathf.Wrap(worldPosition.X / _surfaceNoiseScale + GameClock.Time * _surfaceTimeScale, 0.0, 1.0);
+        int uvY = (int)Mathf.Wrap(worldPosition.Z / _surfaceNoiseScale + GameClock.Time * _surfaceTimeScale, 0.0, 1.0);
+        return GlobalPosition.Y + _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R * _surfaceHeightScale;
     }
 
     public void SetDebugVisuals(bool enabled) {

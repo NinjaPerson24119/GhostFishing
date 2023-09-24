@@ -37,6 +37,8 @@ uniform vec3 edge_color : source_color;
 
 uniform bool debug_visuals;
 
+uniform bool no_displacement;
+
 varying float height;
 varying vec3 world_pos;
 
@@ -50,11 +52,12 @@ float edge(float depth) {
 }
 
 void vertex() {
-	height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
-	VERTEX.y += height * height_scale;
-
-	VERTEX += gerstner(VERTEX.x, VERTEX.z, wave_time).xzy;
-	NORMAL = gerstner_normal(VERTEX.x, VERTEX.z, wave_time);
+	if (!no_displacement) {
+		height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
+		VERTEX += gerstner(VERTEX.x, VERTEX.z, wave_time).xzy;
+		NORMAL = gerstner_normal(VERTEX.x, VERTEX.z, wave_time);
+		VERTEX += NORMAL * height * height_scale;
+	}
 }
 
 void fragment() {

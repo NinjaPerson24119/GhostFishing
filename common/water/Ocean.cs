@@ -191,10 +191,10 @@ public partial class Ocean : Node3D {
 				int lodSubdivisions = subdivisionsLOD.ComputeLOD(distanceToNearestTileEdge);
 
 				WaterTile waterTile = BuildWaterTile(new Vector2(x, z), lodSubdivisions);
+				// if the tile is distant, move it down and disable waves
 				if (Subdivisions > 0 && waterTile.Subdivisions == 0) {
-					GD.Print("Distant tile detected, adjusting height and disabling waves");
 					waterTile.Position = new Vector3(waterTile.Position.X, waterTile.Position.Y + _distantTileHeightOffset, waterTile.Position.Z);
-					waterTile.ActiveWaves = 0;
+					waterTile.NoDisplacement = true;
 				}
 				AddChild(waterTile);
 			}
