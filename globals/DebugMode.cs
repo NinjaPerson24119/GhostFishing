@@ -28,6 +28,10 @@ public partial class DebugMode : Node {
         GetNode<Label>("DebugIndicator").Visible = false;
     }
 
+    public override void _Process(double delta) {
+        GetNode<Label>("DebugIndicator").Text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
+    }
+
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent.IsActionPressed("exit_to_desktop")) {
             GetTree().Quit();
