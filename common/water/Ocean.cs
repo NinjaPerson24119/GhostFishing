@@ -3,18 +3,22 @@ using Godot;
 
 // Controls the ocean surface as a grid of water tiles
 public partial class Ocean : Node3D {
-	// the number of Ocean tiles in each direction from the origin
 	[Export]
-	public int ViewDistanceInTiles {
+	public float ViewDistance {
 		get {
-			return _viewDistanceInTiles;
+			return _viewDistance;
 		}
 		set {
-			_viewDistanceInTiles = value;
+			_viewDistance = value;
+			SetViewDistanceTiles();
 			SpawnWaterTiles();
 		}
 	}
-	private int _viewDistanceInTiles = 3;
+	private float _viewDistance = 100f;
+	private int _viewDistanceTiles;
+	public void SetViewDistanceTiles() {
+		_viewDistanceTiles = Mathf.CeilToInt(_viewDistance / TileSize);
+	}
 
 	[Export]
 	public int NoWaves {
@@ -90,6 +94,7 @@ public partial class Ocean : Node3D {
 
 	public override void _Ready() {
 		Material = GD.Load<ShaderMaterial>("res://common/water/Water.material");
+		SetViewDistanceTiles();
 		GenerateWaveSet();
 		SpawnWaterTiles();
 
@@ -107,8 +112,9 @@ public partial class Ocean : Node3D {
 		// make method idempotent
 		FreeChildren();
 
-		for (int x = -ViewDistanceInTiles; x <= ViewDistanceInTiles; x++) {
-			for (int z = -ViewDistanceInTiles; z <= ViewDistanceInTiles; z++) {
+		GD.Print($"Spawning water tiles with view distance {_viewDistanceTiles} and subdivisions {_subdivisions}");
+		for (int x = -_viewDistanceTiles; x <= _viewDistanceTiles; x++) {
+			for (int z = -_viewDistanceTiles; z <= _viewDistanceTiles; z++) {
 				WaterTile waterTile = BuildWaterTile(new Vector2(x, z));
 				AddChild(waterTile);
 			}
