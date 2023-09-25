@@ -65,7 +65,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private int _subdivisions = 100;
+	private int _subdivisions = 400;
 
 	[Export]
 	public int TileSize {
@@ -77,7 +77,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private int _tileSize = 20;
+	private int _tileSize = 100;
 
 	[ExportGroup("Wave Configuration")]
 	[Export(PropertyHint.Range, "0,30,")]
@@ -155,17 +155,39 @@ public partial class Ocean : Node3D {
 
 	// the tile indices of the tile at the center of the ocean
 	private Vector2 _originTileIndices = new Vector2(0, 0);
-	private WaveSet _waveSet;
+
+	public WaveSet WavesConfig {
+		get {
+			return _wavesConfig;
+		}
+		set {
+			if (_wavesConfig == null) {
+				GD.Print("Ocean wave set to initial value");
+			}
+			else {
+				GD.Print("Ocean wave set changed");
+			}
+			_wavesConfig = value;
+			QueueReconfigureWaterTiles(false);
+		}
+	}
+	private WaveSet _wavesConfig;
+
 	private bool _queuedRespawnWaterTiles = false;
 	private bool _queuedReconfigureWaterTiles = false;
+	private bool _queuedReconfigureWaterTilesDoRegenerateWaveSet = false;
+
 	private LinearLOD subdivisionsLOD;
 
 	private const float _tileOverlap = 0.1f;
 	private const float _distantTileHeightOffset = -1f;
 
 	public override void _Ready() {
-		SetViewDistanceTiles();
-		SetLODSubdivisionsSnap();
+		// unset queued flags to prevent duplicate events
+		_queuedRespawnWaterTiles = false;
+		_queuedReconfigureWaterTiles = false;
+		_queuedReconfigureWaterTilesDoRegenerateWaveSet = false;
+
 		SpawnWaterTiles();
 	}
 
@@ -179,12 +201,15 @@ public partial class Ocean : Node3D {
 	private void SpawnWaterTiles() {
 		_queuedRespawnWaterTiles = false;
 
+		SetViewDistanceTiles();
+		SetLODSubdivisionsSnap();
+
 		// make method idempotent
 		FreeChildren();
 
 		GD.Print($"Spawning ocean with view distance {ViewDistance} which is {_viewDistanceTiles} water tiles. ({Mathf.Pow(_viewDistanceTiles * 2 + 1, 2)} total tiles)");
 		GenerateWaveSet();
-		subdivisionsLOD = new LinearLOD(_lodDistance, _subdivisions, 0, _lodSubdivisionsSnap);
+		subdivisionsLOD = new LinearLOD(_lodDistance, Subdivisions, 0, _lodSubdivisionsSnap);
 		for (int x = -_viewDistanceTiles; x <= _viewDistanceTiles; x++) {
 			for (int z = -_viewDistanceTiles; z <= _viewDistanceTiles; z++) {
 				float distanceToNearestTileEdge = TileDistanceFromOrigin(new Vector2(x, z));
@@ -199,6 +224,7 @@ public partial class Ocean : Node3D {
 				AddChild(waterTile);
 			}
 		}
+		GD.Print("All water tiles spawned");
 		GD.Print($"Reused {subdivisionsLOD.ReusedDistances} LOD distances");
 	}
 
@@ -208,13 +234,13 @@ public partial class Ocean : Node3D {
 	}
 
 	private WaterTile BuildWaterTile(Vector2 tileIndices, int subdivisions) {
-		WaterTile waterTile = new WaterTile() {
+		WaterTile waterTile = new WaterTile {
 			Name = GetTileName(tileIndices),
 			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
 			// overlap slightly to prevent seams
 			Scale = new Vector3(TileSize + _tileOverlap, 1, TileSize + _tileOverlap),
 			Subdivisions = subdivisions,
-			WavesConfig = _waveSet,
+			WavesConfig = WavesConfig,
 			WaterTileDebugLogs = WaterTileDebugLogs,
 			WaterDepth = WaterDepth,
 			SurfaceNoiseScale = 10f,
@@ -291,7 +317,7 @@ public partial class Ocean : Node3D {
 
 	private void GenerateWaveSet() {
 		WaveSetConfig config = WaveSet.BuildConfig(NoWaves, WindAngle, WaterDepth, Intensity, Damping);
-		_waveSet = new WaveSet(config);
+		WavesConfig = new WaveSet(config);
 	}
 
 	public void ConfigureTileDebugVisuals(bool setting) {
@@ -305,20 +331,27 @@ public partial class Ocean : Node3D {
 		_queuedRespawnWaterTiles = true;
 	}
 
-	private void QueueReconfigureWaterTiles() {
+	private void QueueReconfigureWaterTiles(bool regenerateWaveSet = true) {
 		GD.Print("Queuing reconfigure ocean water tiles");
 		_queuedReconfigureWaterTiles = true;
+		_queuedReconfigureWaterTilesDoRegenerateWaveSet = regenerateWaveSet;
 	}
 
 	private void ReconfigureWaterTiles() {
+		GD.Print("Reconfiguring water tiles");
+
 		_queuedReconfigureWaterTiles = false;
 
-		GD.Print("Reconfiguring water tiles");
-		GenerateWaveSet();
+		if (_queuedReconfigureWaterTilesDoRegenerateWaveSet) {
+			GD.Print("Regenerating wave set in water tile reconfigure");
+			GenerateWaveSet();
+		}
+		_queuedReconfigureWaterTilesDoRegenerateWaveSet = false;
+
 		foreach (WaterTile waterTile in GetChildren()) {
 			waterTile.WaterDepth = WaterDepth;
 			waterTile.WaterTileDebugLogs = WaterTileDebugLogs;
-			waterTile.WavesConfig = _waveSet;
+			waterTile.WavesConfig = WavesConfig;
 			waterTile.QueueReconfigureShaders();
 		}
 	}

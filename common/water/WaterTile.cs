@@ -104,6 +104,7 @@ public partial class WaterTile : MeshInstance3D {
 
     public override void _Ready() {
         if (WavesConfig == null) {
+            GD.Print("Generating default wave set because none was provided.");
             WaveSetConfig config = WaveSet.BuildConfig(10, Mathf.Pi, WaterDepth);
             WavesConfig = new WaveSet(config);
         }
@@ -130,6 +131,7 @@ public partial class WaterTile : MeshInstance3D {
                 // if the subdivisions have changed, unref the old mesh
                 if (planeMesh.SubdivideWidth != Subdivisions) {
                     refCountedMeshes.Unref(planeMesh.SubdivideWidth);
+                    Mesh = null;
                 }
             }
             Mesh = refCountedMeshes.GetAndRef(Subdivisions);
