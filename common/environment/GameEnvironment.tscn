@@ -1,0 +1,22 @@
+[gd_scene load_steps=3 format=3 uid="uid://brrd5dfqqljyv"]
+
+[ext_resource type="Script" path="res://common/environment/GameEnvironment.cs" id="1_vcosx"]
+
+[sub_resource type="Environment" id="Environment_rinca"]
+ambient_light_source = 1
+
+[node name="GameEnvironment" type="Node3D"]
+script = ExtResource("1_vcosx")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.0236996, 0.999719, 0, -0.999719, 0.0236996, 0, 29, 0)
+light_angular_distance = 0.5
+shadow_enabled = true
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, -0.998877, 0.047386, 0, -0.047386, -0.998877, 0, 29.6873, -28.9919)
+light_angular_distance = 0.5
+shadow_enabled = true
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_rinca")

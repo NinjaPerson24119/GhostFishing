@@ -4,7 +4,7 @@ using Godot;
 // Controls the ocean surface as a grid of water tiles
 public partial class Ocean : Node3D {
 	// The farthest distance from the origin that a water tile will be spawned
-	[ExportGroup("Render Configuration")]
+	[ExportGroup("Rendering")]
 	[Export]
 	public float ViewDistance {
 		get {
@@ -79,7 +79,7 @@ public partial class Ocean : Node3D {
 	}
 	private int _tileSize = 100;
 
-	[ExportGroup("Wave Configuration")]
+	[ExportGroup("Waves")]
 	[Export(PropertyHint.Range, "0,30,")]
 	public int NoWaves {
 		get {
