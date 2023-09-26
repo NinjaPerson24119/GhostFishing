@@ -13,7 +13,7 @@ sky_material = SubResource("ShaderMaterial_mkdp7")
 
 [sub_resource type="Environment" id="Environment_b4yav"]
 background_mode = 2
-background_energy_multiplier = 0.0
+background_energy_multiplier = 0.01
 sky = SubResource("Sky_blepi")
 ambient_light_source = 1
 ambient_light_sky_contribution = 0.0
@@ -32,18 +32,16 @@ environment = SubResource("Environment_b4yav")
 light_color = Color(1, 1, 0.933333, 1)
 light_angular_distance = 0.5
 shadow_enabled = true
-directional_shadow_fade_start = 1.0
 directional_shadow_max_distance = 1000.0
 sky_mode = 1
 script = ExtResource("2_y7bsm")
-DebugLogs = true
+LightEnergyAtSolarNoon = 0.6
 
 [node name="MoonLight" type="DirectionalLight3D" parent="."]
 light_color = Color(0.764706, 1, 1, 1)
 light_angular_distance = 0.5
 shadow_enabled = true
-directional_shadow_fade_start = 1.0
 directional_shadow_max_distance = 1000.0
 sky_mode = 1
 script = ExtResource("2_y7bsm")
-LightEnergyAtSolarNoon = 0.1
+LightEnergyAtSolarNoon = 0.05

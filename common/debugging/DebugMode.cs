@@ -29,7 +29,11 @@ public partial class DebugMode : Node {
     }
 
     public override void _Process(double delta) {
-        GetNode<Label>("DebugIndicator").Text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
+        string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
+        if (GameClock.Paused) {
+            text += "\nPAUSED";
+        }
+        GetNode<Label>("DebugIndicator").Text = text;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -73,6 +77,9 @@ public partial class DebugMode : Node {
         if (inputEvent.IsActionPressed("debug_ocean")) {
             DebugOcean = !DebugOcean;
             EmitSignal(SignalName.DebugOceanChanged, DebugOcean);
+        }
+        if (inputEvent.IsActionPressed("debug_pause")) {
+            GameClock.TogglePause();
         }
     }
 

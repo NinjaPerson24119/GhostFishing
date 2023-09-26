@@ -3,31 +3,52 @@ using Godot;
 public partial class Sky : Node3D {
 	private const string _sunPathLight = "SunLight";
 	private const string _moonPathLight = "MoonLight";
-	private float _sunCycle;
-	private float _moonCycle;
+	private const string _worldEnvironmentPath = "WorldEnvironment";
+
+	private Environment environment;
 
 	[Export]
 	public float SecondsAtSunriseModuloTime = 8 * GameClock.SecondsPerHour;
 
-	public override void _Ready() {
-		SetLightCycles();
+	[Export]
+	public float DayTimeSkyMaxLightEnergy = 0.4f;
+	[Export]
+	public float DayTimeMinLightEnergy = 0.2f;
+	[Export]
+	public float NightTimeSkyMaxLightEnergy = 0.2f;
+	[Export]
+	public float NightTimeMinLightEnergy = 0.1f;
+	[Export]
+	public Color SunLightColor {
+		get {
+			return _sunLightColor;
+		}
+		set {
+			_sunLightColor = value;
+			GetNode<PlanetaryLight>(_sunPathLight).LightColor = value;
+		}
+	}
+	private Color _sunLightColor = Color.FromString("#ffffee", Colors.White);
+	[Export]
+	public Color MoonLightColor {
+		get {
+			return _moonLightColor;
+		}
+		set {
+			_moonLightColor = value;
+			GetNode<PlanetaryLight>(_moonPathLight).LightColor = value;
+		}
+	}
+	private Color _moonLightColor = Color.FromString("#c3ffff", Colors.White);
 
+	public override void _Ready() {
+		environment = GetNode<WorldEnvironment>(_worldEnvironmentPath).Environment;
+
+		SetLightCycles();
 		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_sunPathLight).Update);
 		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_moonPathLight).Update);
-		GetNode<PlanetaryLight>(_sunPathLight).CycleProgressionChanged += UpdateSunCycle;
-		GetNode<PlanetaryLight>(_moonPathLight).CycleProgressionChanged += UpdateMoonCycle;
-	}
-
-	public override void _Process(double delta) {
-		//GD.Print($"Sun: {_sunCycle}, Moon: {_moonCycle}");
-	}
-
-	public void UpdateSunCycle(float cycleProgression) {
-		_sunCycle = cycleProgression;
-	}
-
-	public void UpdateMoonCycle(float cycleProgression) {
-		_moonCycle = cycleProgression;
+		GetNode<PlanetaryLight>(_sunPathLight).PlanetaryLightChanged += OnSunChanged;
+		GetNode<PlanetaryLight>(_moonPathLight).PlanetaryLightChanged += OnMoonChanged;
 	}
 
 	private void SetLightCycles() {
@@ -40,5 +61,21 @@ public partial class Sky : Node3D {
 		moon.StartSecondsModuloTime = sun.StartSecondsModuloTime + sun.DurationSeconds;
 		moon.DurationSeconds = GameClock.SecondsPerDay / 2f;
 		moon.Start();
+	}
+
+	// Set sky as constant multiple of sun/moon energy so it doesn't appear disproportionately bright/dark
+	public void OnSunChanged(float cycleProgression, float elevationFactor, float lightEnergy) {
+		if (cycleProgression != -1) {
+			environment.BackgroundColor = _sunLightColor;
+			environment.BackgroundEnergyMultiplier = lightEnergy * 0.1f;
+		}
+	}
+
+	public void OnMoonChanged(float cycleProgression, float elevationFactor, float lightEnergy) {
+		if (cycleProgression != -1) {
+			environment.BackgroundColor = _sunLightColor;
+			environment.BackgroundEnergyMultiplier = lightEnergy * 0.1f;
+			//BackgroundEnergyMultiplier = Mathf.Max((1 - elevationFactor) * NightTimeSkyMaxLightEnergy, NightTimeMinLightEnergy);
+		}
 	}
 }

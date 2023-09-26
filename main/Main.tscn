@@ -37,12 +37,14 @@ shape = SubResource("ConcavePolygonShape3D_tpf23")
 
 [node name="SpotLight3D" type="SpotLight3D" parent="IslandGroup"]
 transform = Transform3D(-0.919451, 0.38168, 0.0944987, 1.11759e-08, -0.24033, 0.970691, 0.393204, 0.892503, 0.220972, -15.6434, 17.0687, 18.6465)
+visible = false
 light_energy = 35.0
 shadow_enabled = true
 spot_range = 100.0
 
 [node name="SpotLight3D2" type="SpotLight3D" parent="IslandGroup"]
 transform = Transform3D(-0.919451, 0.351809, 0.175612, 7.45058e-09, -0.446619, 0.894724, 0.393204, 0.822655, 0.410645, -25.4186, 23.2238, -4.21151)
+visible = false
 light_energy = 25.0
 shadow_enabled = true
 spot_range = 100.0
@@ -51,12 +53,18 @@ spot_range = 100.0
 script = ExtResource("5_mnq5h")
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.348662, 0)
 script = ExtResource("3_t71xa")
 
 [node name="Camera3DWithAttributes" type="Camera3D" parent="Player"]
-transform = Transform3D(-1, -2.99003e-08, 8.21505e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -4.16729)
+transform = Transform3D(-1, -2.99003e-08, 8.21506e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -3.96492)
 attributes = SubResource("CameraAttributesPractical_jxq7l")
 fov = 100.0
 near = 1.0
 far = 1000.0
+
+[node name="SpotLight3D" type="SpotLight3D" parent="Player"]
+transform = Transform3D(-1, 7.10543e-15, -1.50996e-07, 9.73623e-09, 0.997919, -0.0644801, 1.50682e-07, -0.0644801, -0.997919, 0, 0.946107, 3.28559)
+light_energy = 10.0
+shadow_enabled = true
+spot_range = 15.0
+spot_angle = 60.0

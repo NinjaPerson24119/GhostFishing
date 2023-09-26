@@ -9,7 +9,7 @@ public partial class GameClock : Node {
     public static float SecondsPerDay = 24 * SecondsPerHour;
 
     [Export]
-    // 60 minutes per second
+    // 10 minutes per second
     private double _gameSecondsPerRealSecond = 60 * 60f;
     public static double GameSecondsPerRealSecond { get => _singleton._gameSecondsPerRealSecond; }
 
@@ -17,6 +17,12 @@ public partial class GameClock : Node {
     // start game with sun rising
     private double _gameSeconds = 7.5 * SecondsPerHour;
     public static double GameSeconds { get => _singleton._gameSeconds; }
+
+    private bool _paused = false;
+    public static bool Paused { get => _singleton._paused; }
+    public static void TogglePause() {
+        _singleton._paused = !_singleton._paused;
+    }
 
     // cannot return signal from function, so we need action functions like Connect/Disconnect
     [Signal]
@@ -31,7 +37,9 @@ public partial class GameClock : Node {
 
     public override void _Process(double delta) {
         // do not rely on RealClock.RealTime because updating the timescale could cause us to time travel to the past
-        _gameSeconds += delta * _gameSecondsPerRealSecond;
-        EmitSignal(SignalName._gameSecondsChanged, _gameSeconds);
+        if (!_singleton._paused) {
+            _gameSeconds += delta * _gameSecondsPerRealSecond;
+            EmitSignal(SignalName._gameSecondsChanged, _gameSeconds);
+        }
     }
 }

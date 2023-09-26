@@ -2,7 +2,7 @@ using Godot;
 
 public partial class Player : RigidBody3D {
     float gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
-    float float_force = 2.0f;
+    float float_force = 3.0f;
     float water_drag = 0.05f;
     float water_angular_drag = 0.05f;
     bool submerged = false;

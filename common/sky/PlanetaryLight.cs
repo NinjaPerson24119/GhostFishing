@@ -27,7 +27,7 @@ public partial class PlanetaryLight : DirectionalLight3D {
     public bool DebugLogs = false;
 
     [Signal]
-    public delegate void CycleProgressionChangedEventHandler(float cycleProgression);
+    public delegate void PlanetaryLightChangedEventHandler(float cycleProgression, float elevationFactor, float lightEnergy);
 
     public float CycleProgression { get; private set; } = -1;
     public float ElevationFactor { get; private set; }
@@ -56,8 +56,8 @@ public partial class PlanetaryLight : DirectionalLight3D {
             if (DebugLogs) {
                 GD.Print($"{Name} - Cycle: {CycleProgression}, ElevationFactor: {ElevationFactor}, LightAngle: {Mathf.RadToDeg(LightAngle)}, LightEnergy: {LightEnergy}");
             }
+            EmitSignal(SignalName.PlanetaryLightChanged, CycleProgression, ElevationFactor, LightEnergy);
         }
-        EmitSignal(SignalName.CycleProgressionChanged, CycleProgression);
     }
 
     // returns progression factor [0,1] through cycle, or -1 if not in cycle
@@ -88,7 +88,7 @@ public partial class PlanetaryLight : DirectionalLight3D {
 
     private void UpdateIntensity(float elevationFactor) {
         // taper intensity around midday and sunrise/sunset
-        // the steepness needs to be ~10 or the range won't span [0,1]
+        // steepness <10 will not actually achieve 100% intensity, but that's sometimes fine
         LightEnergy = Sigmoid(elevationFactor, 0.5f, 10f) * LightEnergyAtSolarNoon;
     }
 
