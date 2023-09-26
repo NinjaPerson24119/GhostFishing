@@ -1,8 +1,8 @@
 using Godot;
 
 public partial class GameEnvironment : Node3D {
-	public const int SECONDS_IN_HOUR = 60 * 60;
-	public const float SECONDS_PER_DAY = 24 * SECONDS_IN_HOUR;
+	public const int SECONDS_PER_HOUR = 60 * 60;
+	public const float SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
 
 	[Export]
 	// 10 minutes per second
@@ -17,10 +17,10 @@ public partial class GameEnvironment : Node3D {
 			_gameSecondsToday = value;
 		}
 	}
-	private double _gameSecondsToday = 6 * SECONDS_IN_HOUR;
+	private double _gameSecondsToday = 7.5 * SECONDS_PER_HOUR;
 
 	[Export]
-	public float secondsAtSunrise = 8 * SECONDS_IN_HOUR;
+	public float SecondsAtSunrise = 8 * SECONDS_PER_HOUR;
 
 	[Export]
 	public float WindAngle = 0f;
@@ -32,43 +32,34 @@ public partial class GameEnvironment : Node3D {
 
 	private RandomNumberGenerator _random = new RandomNumberGenerator();
 
+	public override void _Ready() {
+		SetLightCycles();
+
+		GameSecondsTodayChanged += GetNode<DayNightCycle>("Sun").Update;
+        GameSecondsTodayChanged += GetNode<DayNightCycle>("Moon").Update;
+	}
+
 	public override void _Process(double delta) {
 		// do not rely on RealClock.RealTime because updating the timescale could cause us to go backwards
 		GameSecondsToday += delta * GameSecondsPerRealSecond;
 		GameSecondsToday = GameSecondsToday % SECONDS_PER_DAY;
 		EmitSignal(SignalName.GameSecondsTodayChanged, GameSecondsToday);
 
-		UpdateSunAndMoon();
 		UpdateWind(delta);
 	}
 
-	public void UpdateSunAndMoon() {
-		float dayNightFactor = DayNightFactor(GameSecondsToday, SECONDS_PER_DAY, secondsAtSunrise);
+	private void SetLightCycles() {
+		DayNightCycle sun = GetNode<DayNightCycle>("Sun");
+		sun.StartSeconds = SecondsAtSunrise;
+		sun.EndSeconds = SecondsAtSunrise + SecondsAtSunrise;
 
-		// sun rises in the East and sets in the West
-		// point 0, -90, -180 for East, Midday, West respectively
-		DirectionalLight3D sun = GetNode<DirectionalLight3D>("Sun");
-		float sunFactor = Mathf.Clamp(dayNightFactor, 0, 1);
-		sun.Rotation = new Vector3(0, 0, (1 - sunFactor) * -180);
-
-		// moon rises in the West and sets in the East
-		// point 0, 90, 180 for West, Midnight, East respectively
-		DirectionalLight3D moon = GetNode<DirectionalLight3D>("Moon");
-		float moonFactor = Mathf.Clamp(dayNightFactor, -1, 0);
-		moon.Rotation = new Vector3(0, 0, moonFactor * 180);
-
-		sun.Visible = dayNightFactor >= 0;
-		moon.Visible = dayNightFactor < 0;
-	}
-
-	private float DayNightFactor(double time, float period, float sunrise) {
-		float scale = 2 * Mathf.Pi / period;
-		float translation = Mathf.Pi / 2 - 2 * Mathf.Pi * sunrise / period;
-		return (float)-Mathf.Cos(scale * time + translation);
+		DayNightCycle moon = GetNode<DayNightCycle>("Moon");
+		moon.StartSeconds = sun.EndSeconds;
+		moon.EndSeconds = sun.StartSeconds;
 	}
 
 	private void UpdateWind(double delta) {
-		float windAngleChangePerSecond = WindAngleChangePerHour / SECONDS_IN_HOUR;
+		float windAngleChangePerSecond = WindAngleChangePerHour / SECONDS_PER_HOUR;
 		float direction = _random.Randi() % 2 == 0 ? 1 : -1;
 		WindAngle += direction * windAngleChangePerSecond * (float)delta;
 

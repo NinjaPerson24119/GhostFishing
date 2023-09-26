@@ -1,22 +1,32 @@
-[gd_scene load_steps=3 format=3 uid="uid://brrd5dfqqljyv"]
+[gd_scene load_steps=4 format=3 uid="uid://brrd5dfqqljyv"]
 
 [ext_resource type="Script" path="res://common/environment/GameEnvironment.cs" id="1_vcosx"]
+[ext_resource type="Script" path="res://common/environment/DayNightCycle.cs" id="2_tuifu"]
 
 [sub_resource type="Environment" id="Environment_rinca"]
-ambient_light_source = 1
+ambient_light_source = 3
 
 [node name="GameEnvironment" type="Node3D"]
 script = ExtResource("1_vcosx")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.0236996, 0.999719, 0, -0.999719, 0.0236996, 0, 29, 0)
-light_angular_distance = 0.5
-shadow_enabled = true
-
-[node name="Moon" type="DirectionalLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, -0.998877, 0.047386, 0, -0.047386, -0.998877, 0, 29.6873, -28.9919)
-light_angular_distance = 0.5
-shadow_enabled = true
-
 [node name="WorldEnvironment" type="WorldEnvironment" parent="."]
 environment = SubResource("Environment_rinca")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+light_angular_distance = 0.5
+shadow_enabled = true
+directional_shadow_max_distance = 1000.0
+sky_mode = 1
+script = ExtResource("2_tuifu")
+StartSeconds = 28800.0
+EndSeconds = 72000.0
+
+[node name="Moon" type="DirectionalLight3D" parent="."]
+light_angular_distance = 0.5
+shadow_enabled = true
+directional_shadow_max_distance = 1000.0
+sky_mode = 1
+script = ExtResource("2_tuifu")
+StartSeconds = 72000.0
+EndSeconds = 28800.0
+IntensityAtSolarNoon = 0.1
