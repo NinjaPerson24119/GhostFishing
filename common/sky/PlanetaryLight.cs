@@ -81,7 +81,7 @@ public partial class PlanetaryLight : DirectionalLight3D {
         }
         else {
             // after midday
-            LightAngle = LightAngleAtRise * (1 - elevationFactor) + solarNoonAngle * elevationFactor;
+            LightAngle = LightAngleAtSet * (1 - elevationFactor) + solarNoonAngle * elevationFactor;
         }
         Rotation = new Vector3(LightAngle, 0, 0);
     }
