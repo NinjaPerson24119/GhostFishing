@@ -6,6 +6,6 @@ public partial class Main : Node {
         GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += GetNode<Ocean>("Ocean").ConfigureTileDebugVisuals;
 
         GetNode<Player>("Player").PositionChangedSignificantly += GetNode<Ocean>("Ocean").OnOriginChanged;
-        GetNode<GameEnvironment>("GameEnvironment").GameSecondsChanged += GetNode<TimeDisplay>("/root/Main/GameHUD/TimeDisplay").Update;
+        GameClock.ConnectGameSecondsChanged(GetNode<TimeDisplay>("/root/Main/HUD/TimeDisplay").Update);
     }
 }

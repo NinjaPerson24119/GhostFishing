@@ -17,8 +17,8 @@ config/icon="res://cover.png"
 
 [autoload]
 
-RealClock="*res://globals/RealClock.cs"
-DebugMode="*res://globals/DebugMode.tscn"
+RealClock="*res://common/time/RealClock.cs"
+DebugMode="*res://common/debugging/DebugMode.tscn"
 
 [display]
 
