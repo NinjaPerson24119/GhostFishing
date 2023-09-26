@@ -83,10 +83,7 @@ public partial class PlanetaryLight : DirectionalLight3D {
             // after midday
             LightAngle = LightAngleAtRise * (1 - elevationFactor) + solarNoonAngle * elevationFactor;
         }
-
-        // TODO: updating rotation breaks light
-        //Rotation = new Vector3(LightAngle, 0, 0);
-        Rotation = new Vector3(-Mathf.Pi / 2, 0, 0);
+        Rotation = new Vector3(LightAngle, 0, 0);
     }
 
     private void UpdateIntensity(float elevationFactor) {

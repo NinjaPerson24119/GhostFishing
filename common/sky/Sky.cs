@@ -1,8 +1,8 @@
 using Godot;
 
 public partial class Sky : WorldEnvironment {
-	private const string _sunPath = "Sun";
-	private const string _moonPath = "Moon";
+	private const string _sunPathLight = "SunLight";
+	private const string _moonPathLight = "MoonLight";
 	private float _sunCycle;
 	private float _moonCycle;
 
@@ -12,15 +12,14 @@ public partial class Sky : WorldEnvironment {
 	public override void _Ready() {
 		SetLightCycles();
 
-		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_sunPath).Update);
-		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_moonPath).Update);
-		GetNode<PlanetaryLight>(_sunPath).CycleProgressionChanged += UpdateSunCycle;
-		GetNode<PlanetaryLight>(_moonPath).CycleProgressionChanged += UpdateMoonCycle;
+		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_sunPathLight).Update);
+		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_moonPathLight).Update);
+		GetNode<PlanetaryLight>(_sunPathLight).CycleProgressionChanged += UpdateSunCycle;
+		GetNode<PlanetaryLight>(_moonPathLight).CycleProgressionChanged += UpdateMoonCycle;
 	}
 
 	public override void _Process(double delta) {
-		GD.Print($"Sun: {_sunCycle}, Moon: {_moonCycle}");
-
+		//GD.Print($"Sun: {_sunCycle}, Moon: {_moonCycle}");
 	}
 
 	public void UpdateSunCycle(float cycleProgression) {
@@ -32,12 +31,12 @@ public partial class Sky : WorldEnvironment {
 	}
 
 	private void SetLightCycles() {
-		PlanetaryLight sun = GetNode<PlanetaryLight>(_sunPath);
+		PlanetaryLight sun = GetNode<PlanetaryLight>(_sunPathLight);
 		sun.StartSecondsModuloTime = SecondsAtSunriseModuloTime;
 		sun.DurationSeconds = GameClock.SecondsPerDay / 2f;
 		sun.Start();
 
-		PlanetaryLight moon = GetNode<PlanetaryLight>(_moonPath);
+		PlanetaryLight moon = GetNode<PlanetaryLight>(_moonPathLight);
 		moon.StartSecondsModuloTime = sun.StartSecondsModuloTime + sun.DurationSeconds;
 		moon.DurationSeconds = GameClock.SecondsPerDay / 2f;
 		moon.Start();

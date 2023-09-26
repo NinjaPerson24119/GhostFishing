@@ -1,23 +1,36 @@
-[gd_scene load_steps=4 format=3 uid="uid://brrd5dfqqljyv"]
+[gd_scene load_steps=6 format=3 uid="uid://brrd5dfqqljyv"]
 
 [ext_resource type="Script" path="res://common/sky/Sky.cs" id="1_gvmb6"]
 [ext_resource type="Script" path="res://common/sky/PlanetaryLight.cs" id="2_y7bsm"]
 
-[sub_resource type="Environment" id="Environment_pchkh"]
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_4budb"]
+sky_top_color = Color(0.47451, 0.819608, 1, 1)
+sun_angle_max = 34.21
+
+[sub_resource type="Sky" id="Sky_vt1er"]
+sky_material = SubResource("ProceduralSkyMaterial_4budb")
+
+[sub_resource type="Environment" id="Environment_b4yav"]
+background_mode = 2
+background_energy_multiplier = 0.1
+sky = SubResource("Sky_vt1er")
+ambient_light_source = 1
+reflected_light_source = 2
 
 [node name="Sky" type="WorldEnvironment"]
-environment = SubResource("Environment_pchkh")
+environment = SubResource("Environment_b4yav")
 script = ExtResource("1_gvmb6")
 
-[node name="Sun" type="DirectionalLight3D" parent="."]
+[node name="SunLight" type="DirectionalLight3D" parent="."]
 light_color = Color(1, 1, 0.933333, 1)
 light_angular_distance = 0.5
 shadow_enabled = true
 directional_shadow_max_distance = 1000.0
 sky_mode = 1
 script = ExtResource("2_y7bsm")
+DebugLogs = true
 
-[node name="Moon" type="DirectionalLight3D" parent="."]
+[node name="MoonLight" type="DirectionalLight3D" parent="."]
 light_color = Color(0.764706, 1, 1, 1)
 light_angular_distance = 0.5
 shadow_enabled = true
