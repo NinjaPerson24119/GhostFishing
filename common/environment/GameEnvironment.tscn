@@ -5,6 +5,9 @@
 
 [sub_resource type="Environment" id="Environment_rinca"]
 ambient_light_source = 3
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_sky_contribution = 0.5
+ambient_light_energy = 0.01
 
 [node name="GameEnvironment" type="Node3D"]
 script = ExtResource("1_vcosx")
@@ -13,20 +16,19 @@ script = ExtResource("1_vcosx")
 environment = SubResource("Environment_rinca")
 
 [node name="Sun" type="DirectionalLight3D" parent="."]
+light_color = Color(1, 1, 0.933333, 1)
 light_angular_distance = 0.5
 shadow_enabled = true
 directional_shadow_max_distance = 1000.0
 sky_mode = 1
 script = ExtResource("2_tuifu")
-StartSeconds = 28800.0
-EndSeconds = 72000.0
+LightEnergyAtSolarNoon = 0.8
 
 [node name="Moon" type="DirectionalLight3D" parent="."]
+light_color = Color(0.764706, 1, 1, 1)
 light_angular_distance = 0.5
 shadow_enabled = true
 directional_shadow_max_distance = 1000.0
 sky_mode = 1
 script = ExtResource("2_tuifu")
-StartSeconds = 72000.0
-EndSeconds = 28800.0
-IntensityAtSolarNoon = 0.1
+LightEnergyAtSolarNoon = 0.01

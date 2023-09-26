@@ -5,22 +5,23 @@ public partial class GameEnvironment : Node3D {
 	public const float SECONDS_PER_DAY = 24 * SECONDS_PER_HOUR;
 
 	[Export]
-	// 10 minutes per second
-	public double GameSecondsPerRealSecond { get; private set; } = 10 * 60f;
+	// 60 minutes per second
+	public double GameSecondsPerRealSecond { get; private set; } = 60 * 60f;
 
 	[Export]
-	private double GameSecondsToday {
+	private double GameSeconds {
 		get {
-			return _gameSecondsToday;
+			return _gameSeconds;
 		}
 		set {
-			_gameSecondsToday = value;
+			_gameSeconds = value;
 		}
 	}
-	private double _gameSecondsToday = 7.5 * SECONDS_PER_HOUR;
+	// start game with sun rising
+	private double _gameSeconds = 7.5 * SECONDS_PER_HOUR;
 
 	[Export]
-	public float SecondsAtSunrise = 8 * SECONDS_PER_HOUR;
+	public float SecondsAtSunriseModuloTime = 8 * SECONDS_PER_HOUR;
 
 	[Export]
 	public float WindAngle = 0f;
@@ -28,34 +29,37 @@ public partial class GameEnvironment : Node3D {
 	public float WindAngleChangePerHour = 10f;
 
 	[Signal]
-	public delegate void GameSecondsTodayChangedEventHandler(double gameSecondsToday);
+	public delegate void GameSecondsChangedEventHandler(double gameSeconds);
 
 	private RandomNumberGenerator _random = new RandomNumberGenerator();
 
 	public override void _Ready() {
 		SetLightCycles();
 
-		GameSecondsTodayChanged += GetNode<DayNightCycle>("Sun").Update;
-        GameSecondsTodayChanged += GetNode<DayNightCycle>("Moon").Update;
+		GameSecondsChanged += GetNode<DayNightCycle>("Sun").Update;
+		GameSecondsChanged += GetNode<DayNightCycle>("Moon").Update;
+		GetNode<DayNightCycle>("Sun").CycleProgressionChanged += GetNode<WorldEnvironmentInstance>("WorldEnvironmentInstance").UpdateSunCycle;
+		GetNode<DayNightCycle>("Moon").CycleProgressionChanged += GetNode<WorldEnvironmentInstance>("WorldEnvironmentInstance").UpdateMoonCycle;
 	}
 
 	public override void _Process(double delta) {
-		// do not rely on RealClock.RealTime because updating the timescale could cause us to go backwards
-		GameSecondsToday += delta * GameSecondsPerRealSecond;
-		GameSecondsToday = GameSecondsToday % SECONDS_PER_DAY;
-		EmitSignal(SignalName.GameSecondsTodayChanged, GameSecondsToday);
+		// do not rely on RealClock.RealTime because updating the timescale could cause us to time travel to the past
+		GameSeconds += delta * GameSecondsPerRealSecond;
+		EmitSignal(SignalName.GameSecondsChanged, GameSeconds);
 
 		UpdateWind(delta);
 	}
 
 	private void SetLightCycles() {
 		DayNightCycle sun = GetNode<DayNightCycle>("Sun");
-		sun.StartSeconds = SecondsAtSunrise;
-		sun.EndSeconds = SecondsAtSunrise + SecondsAtSunrise;
+		sun.StartSecondsModuloTime = SecondsAtSunriseModuloTime;
+		sun.DurationSeconds = SECONDS_PER_DAY / 2f;
+		//sun.Start();
 
 		DayNightCycle moon = GetNode<DayNightCycle>("Moon");
-		moon.StartSeconds = sun.EndSeconds;
-		moon.EndSeconds = sun.StartSeconds;
+		moon.StartSecondsModuloTime = sun.StartSecondsModuloTime + sun.DurationSeconds;
+		moon.DurationSeconds = SECONDS_PER_DAY / 2f;
+		//moon.Start();
 	}
 
 	private void UpdateWind(double delta) {

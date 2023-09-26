@@ -3,16 +3,14 @@ using Godot;
 // need residual intensities after end of period, but sun and moon do not overlap
 
 public partial class DayNightCycle : DirectionalLight3D {
-    [Export]
-    public float StartSeconds;
-    [Export]
-    public float EndSeconds;
-    // If true, the cycle period is considered the outside of the (start, end) interval.
-    private bool _useExteriorOfWindow = false;
-    private float _cyclePeriodSeconds;
+    // these are controlled by GameEnvironment (hence the lack of an Export attribute)
+    // start of period relative to module time (24hrs clock)
+    public float StartSecondsModuloTime;
+    // how long to keep the light on for after the start
+    public float DurationSeconds;
 
     [Export]
-    public float IntensityAtSolarNoon = 1f;
+    public float LightEnergyAtSolarNoon = 1f;
 
     /*
      * X axis is East-West
@@ -25,56 +23,58 @@ public partial class DayNightCycle : DirectionalLight3D {
     [Export]
     public float LightAngleAtSet = -Mathf.Pi;
 
+    [Signal]
+    public delegate void CycleProgressionChangedEventHandler(float cycleProgression);
+
     public float CycleProgression { get; private set; }
     public float ElevationFactor { get; private set; }
     public float LightAngle { get; private set; }
-    public float Intensity { get; private set; }
 
-    public override void _Ready() {
-        // if the period would cross the end of day, we need to use the exterior of the window
-        _useExteriorOfWindow = StartSeconds > EndSeconds;
-
-        float cyclePeriodInsideOfWindow = Mathf.Abs(StartSeconds - EndSeconds);
-        if (_useExteriorOfWindow) {
-            // swap bounds
-            float temp = StartSeconds;
-            StartSeconds = EndSeconds;
-            EndSeconds = temp;
-
-            // calculate period outside of window
-            _cyclePeriodSeconds = GameEnvironment.SECONDS_PER_HOUR * 24 - cyclePeriodInsideOfWindow;
-        }
-        else {
-            _cyclePeriodSeconds = cyclePeriodInsideOfWindow;
-        }
-        GD.Print($"{Name} cycle: {_cyclePeriodSeconds / GameEnvironment.SECONDS_PER_HOUR} hours");
+    // Wait for GameEnvironment to configuration to be set
+    public bool Started { get; private set; } = false;
+    public void Start() {
+        Started = true;
+        DebugTools.Assert(DurationSeconds < GameEnvironment.SECONDS_PER_DAY, "DurationSeconds must be less than a day");
+        GD.Print($"{Name} Cycle - Start Hour: {StartSecondsModuloTime / GameEnvironment.SECONDS_PER_HOUR}, Duration Hours: {DurationSeconds / GameEnvironment.SECONDS_PER_HOUR}");
     }
 
-    public void Update(double gameSecondsToday) {
-        UpdateCycleProgression((float)gameSecondsToday);
+    public void Update(double gameSeconds) {
+        if (!Started) {
+            return;
+        }
+
+        UpdateCycleProgression((float)gameSeconds);
         Visible = CycleProgression != -1;
         if (Visible) {
             UpdateElevationFactor(CycleProgression);
             UpdateLightAngle(CycleProgression, ElevationFactor);
             UpdateIntensity(ElevationFactor);
 
-            GD.Print($"{Name} - Cycle: {CycleProgression}, ElevationFactor: {ElevationFactor}, LightAngle: {LightAngle}, Intensity: {Intensity}");
+            GD.Print($"{Name} - Cycle: {CycleProgression}, ElevationFactor: {ElevationFactor}, LightAngle: {Mathf.RadToDeg(LightAngle)}, LightEnergy: {LightEnergy}");
         }
     }
 
     // returns progression factor [0,1] through cycle, or -1 if not in cycle
-    private void UpdateCycleProgression(float gameSecondsToday) {
-        bool inWindow = gameSecondsToday >= StartSeconds && gameSecondsToday <= EndSeconds;
-        if (!_useExteriorOfWindow) {
-            inWindow = !inWindow;
+    private void UpdateCycleProgression(float gameSeconds) {
+        //7 => 0 * 24 + 7, so sub one set for moon on first run
+        //9 => 0 * 24 + 8, and 9 > 8, so no sub
+        float startOfLastCycle = Mathf.Floor(gameSeconds / GameEnvironment.SECONDS_PER_DAY) * GameEnvironment.SECONDS_PER_DAY + StartSecondsModuloTime;
+        if (startOfLastCycle > gameSeconds) {
+            // we are in the first cycle
+            startOfLastCycle -= GameEnvironment.SECONDS_PER_DAY;
         }
 
-        if (!inWindow) {
+        //GD.Print($"Shifted game second hours: {gameSeconds / GameEnvironment.SECONDS_PER_HOUR}");
+        //GD.Print($"{Name} - Start of last cycle: {startOfLastCycle / GameEnvironment.SECONDS_PER_HOUR}");
+        float secondsIntoCycle = gameSeconds - startOfLastCycle;
+        //GD.Print($"{Name} - Hours into cycle: {gameSeconds / GameEnvironment.SECONDS_PER_HOUR} - {startOfLastCycle / GameEnvironment.SECONDS_PER_HOUR} = {secondsIntoCycle / GameEnvironment.SECONDS_PER_HOUR}");
+        if (secondsIntoCycle > DurationSeconds) {
+            //GD.Print($"Skip {Name}: {secondsIntoCycle / GameEnvironment.SECONDS_PER_HOUR} > {DurationSeconds / GameEnvironment.SECONDS_PER_HOUR}");
             CycleProgression = -1;
             return;
         }
-        float secondsIntoCycle = gameSecondsToday - StartSeconds;
-        CycleProgression = secondsIntoCycle / _cyclePeriodSeconds;
+
+        CycleProgression = secondsIntoCycle / DurationSeconds;
     }
 
     private void UpdateElevationFactor(float cycleProgression) {
@@ -83,23 +83,26 @@ public partial class DayNightCycle : DirectionalLight3D {
     }
 
     private void UpdateLightAngle(float cycleProgression, float elevationFactor) {
-        float halfPeriod = _cyclePeriodSeconds / 2;
-        // angle is step function dependent on whether the cycle is before or after midday
+        // weighted average to solar noon, with elevation factor as weight
+        // don't want to directly calculate elevation angle as function of cycle time since it's not linear
+        float solarNoonAngle = (LightAngleAtRise + LightAngleAtSet) / 2;
         if (cycleProgression < 0.5) {
             // before midday
-            LightAngle = LightAngleAtRise + halfPeriod * elevationFactor;
+            LightAngle = LightAngle = LightAngleAtRise * (1 - elevationFactor) + solarNoonAngle * elevationFactor;
         }
         else {
             // after midday
-            LightAngle = LightAngleAtSet - halfPeriod * elevationFactor;
+            LightAngle = LightAngleAtRise * (1 - elevationFactor) + solarNoonAngle * elevationFactor;
         }
-        Rotation = new Vector3(LightAngle, 0, 0);
+
+        // TODO: updating rotation breaks light
+        //Rotation = new Vector3(LightAngle, 0, 0);
+        Rotation = new Vector3(-Mathf.Pi / 2, 0, 0);
     }
 
     private void UpdateIntensity(float elevationFactor) {
-        Intensity = elevationFactor * IntensityAtSolarNoon;
         // taper intensity around midday and sunrise/sunset
-        LightEnergy = Sigmoid(Intensity, 0.5f, 10f);
+        LightEnergy = Sigmoid(elevationFactor, 0.5f, 10f) * LightEnergyAtSolarNoon;
     }
 
     public static float Sigmoid(float x, float midpoint, float steepness) {
