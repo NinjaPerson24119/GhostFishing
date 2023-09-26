@@ -62,19 +62,8 @@ public partial class PlanetaryLight : DirectionalLight3D {
 
     // returns progression factor [0,1] through cycle, or -1 if not in cycle
     private void UpdateCycleProgression(float gameSeconds) {
-        float startOfLastCycle = Mathf.Floor(gameSeconds / GameClock.SecondsPerDay) * GameClock.SecondsPerDay + StartSecondsModuloTime;
-        if (startOfLastCycle > gameSeconds) {
-            // we are in the first cycle
-            startOfLastCycle -= GameClock.SecondsPerDay;
-        }
-
-        float secondsIntoCycle = gameSeconds - startOfLastCycle;
-        if (secondsIntoCycle > DurationSeconds) {
-            CycleProgression = -1;
-            return;
-        }
-
-        CycleProgression = secondsIntoCycle / DurationSeconds;
+        ScheduledEvent e = new ScheduledEvent(StartSecondsModuloTime, DurationSeconds, GameClock.SecondsPerDay);
+        CycleProgression = e.GetProgression(gameSeconds);
     }
 
     private void UpdateElevationFactor(float cycleProgression) {
