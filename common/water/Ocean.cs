@@ -102,7 +102,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _tileOverlap = 0.1f;
+	private float _tileOverlap = 0.001f;
 
 	[ExportGroup("Waves")]
 	[Export(PropertyHint.Range, "0,30,")]
