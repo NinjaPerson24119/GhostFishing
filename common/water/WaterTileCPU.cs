@@ -29,9 +29,12 @@ public partial class WaterTileCPU : MeshInstance3D {
         mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, _planeMesh.GetMeshArrays());
         var mdt = new MeshDataTool();
         mdt.CreateFromSurface(mesh, 0);
+        GD.Print(mdt.GetVertexCount());
         for (var i = 0; i < mdt.GetVertexCount(); i++) {
             Vector3 vertex = mdt.GetVertex(i);
-            vertex += new Vector3(0, -0.01f * i, 0);
+            //var displacement = _ocean.GetDisplacement(vertex);
+            //vertex += displacement;
+            vertex = new Vector3(vertex.X, Mathf.Sin(Mathf.Pi / 11 * (i % 22)) * 1f, vertex.Z);
             mdt.SetVertex(i, vertex);
         }
         mesh.ClearSurfaces();

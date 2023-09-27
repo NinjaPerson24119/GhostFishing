@@ -121,6 +121,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.843645, -0.772246, -2.3035
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.862516, -3.85398)
 
 [node name="WaterTileCPU" type="MeshInstance3D" parent="."]
-transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 0, 1.00498, 14.2974)
+transform = Transform3D(10, 0, 0, 0, 1, 0, 0, 0, 10, 0, 7.55511, 14.2974)
 mesh = SubResource("PlaneMesh_us5c3")
 script = ExtResource("9_sht6q")
