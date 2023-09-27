@@ -15,10 +15,11 @@ public partial class GameClock : Node {
 
     [Export]
     // start game with sun rising
-    private double _gameSeconds = 7.5 * SecondsPerHour;
+    private double _gameSeconds = 10 * SecondsPerHour;
     public static double GameSeconds { get => _singleton._gameSeconds; }
 
-    private bool _paused = false;
+    // DEBUG
+    private bool _paused = true;
     public static bool Paused { get => _singleton._paused; }
     public static void TogglePause() {
         _singleton._paused = !_singleton._paused;
@@ -39,7 +40,7 @@ public partial class GameClock : Node {
         // do not rely on RealClock.RealTime because updating the timescale could cause us to time travel to the past
         if (!_singleton._paused) {
             _gameSeconds += delta * _gameSecondsPerRealSecond;
-            EmitSignal(SignalName._gameSecondsChanged, _gameSeconds);
         }
+        EmitSignal(SignalName._gameSecondsChanged, _gameSeconds);
     }
 }
