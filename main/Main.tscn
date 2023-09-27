@@ -60,7 +60,6 @@ shadow_enabled = true
 spot_range = 100.0
 
 [node name="Ocean" type="Node3D" parent="."]
-visible = false
 script = ExtResource("5_mnq5h")
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
