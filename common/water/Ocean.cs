@@ -36,6 +36,19 @@ public partial class Ocean : Node3D {
 	}
 	private float _lodDistance = 400f;
 
+	// The minimum number of subdivisions for a water tile that isn't beyond the LOD distance
+	[Export]
+	public int MinSubdivisions {
+		get {
+			return _minSubdivisions;
+		}
+		set {
+			_minSubdivisions = value;
+			QueueRespawnWaterTiles();
+		}
+	}
+	private int _minSubdivisions = 100;
+
 	// Rounds the computed LOD subdivisions down to the nearest multiple of this value
 	[Export]
 	public int LODLevels {
@@ -213,7 +226,12 @@ public partial class Ocean : Node3D {
 		for (int x = -_viewDistanceTiles; x <= _viewDistanceTiles; x++) {
 			for (int z = -_viewDistanceTiles; z <= _viewDistanceTiles; z++) {
 				float distanceToNearestTileEdge = TileDistanceFromOrigin(new Vector2(x, z));
+
+				// avoid case where subdivisions aren't quite 0, but low enough to severely distort wave patterns
 				int lodSubdivisions = subdivisionsLOD.ComputeLOD(distanceToNearestTileEdge);
+				if (lodSubdivisions > 0) {
+					lodSubdivisions = Mathf.Max(lodSubdivisions, MinSubdivisions);
+				}
 
 				WaterTile waterTile = BuildWaterTile(new Vector2(x, z), lodSubdivisions);
 				// if the tile is distant, move it down and disable waves
