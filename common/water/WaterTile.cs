@@ -230,7 +230,6 @@ public partial class WaterTile : MeshInstance3D {
         // calculate Gerstner portion of displacement
         Gerstner gerstner = new Gerstner(WavesConfig);
         Vector3 gerstnerDisplacement = gerstner.Displacement(worldPosition.X, worldPosition.Z, (float)RealClock.RealTime);
-        return gerstnerDisplacement;
 
         // calculate noise portion of displacement
         Vector3 normal = gerstner.Normal(worldPosition.X, worldPosition.Z, (float)RealClock.RealTime);

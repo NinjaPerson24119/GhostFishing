@@ -11,30 +11,19 @@ public partial class WaterTileCPU : MeshInstance3D {
     }
 
     public override void _Process(double delta) {
-        /*
-        Vector3[] faceVertices = _planeMesh.GetFaces();
-        var st = new SurfaceTool();
-        st.SetMaterial(_planeMesh.SurfaceGetMaterial(0));
-        st.Begin(Mesh.PrimitiveType.Triangles);
-        for (int i = 0; i < faceVertices.Length; i++) {
-            var displacement = _ocean.GetDisplacement(faceVertices[i]);
-            GD.Print($"Displacement: {displacement}");
-            Vector3 newVertex = faceVertices[i] + displacement;
-            st.AddVertex(newVertex);
-        }
-        Mesh = st.Commit();
-        */
-
         var mesh = new ArrayMesh();
         mesh.AddSurfaceFromArrays(Mesh.PrimitiveType.Triangles, _planeMesh.GetMeshArrays());
         var mdt = new MeshDataTool();
         mdt.CreateFromSurface(mesh, 0);
-        GD.Print(mdt.GetVertexCount());
         for (var i = 0; i < mdt.GetVertexCount(); i++) {
             Vector3 vertex = mdt.GetVertex(i);
+
+            // the vertices are basically UV on [-0.5, 0.5]
+            // scale them across the desired tile size
+            vertex = vertex * 50;
+
             var displacement = _ocean.GetDisplacement(vertex);
             vertex += displacement;
-            //vertex = new Vector3(vertex.X, Mathf.Sin(Mathf.Pi / 11 * (i % 22)) * 1f, vertex.Z);
             mdt.SetVertex(i, vertex);
         }
         mesh.ClearSurfaces();
