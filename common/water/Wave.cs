@@ -10,10 +10,13 @@ public class Wave {
     public float angularFrequency { get; private set; }
     public float phaseShift { get; private set; }
     public float windAngle { get; private set; }
+    public float productOperandX { get; private set; }
+    public float productOperandZ { get; private set; }
+    public float waterDepth { get; private set; }
 
     public Wave(float wavelength, float amplitude, float windAngle, float phaseShift, float waterDepth) {
-        // forward prop for debugging completeness
         this.windAngle = windAngle;
+        this.waterDepth = waterDepth;
 
         // k is the wave number (magnitude of the wave vector)
         // (kX, kZ) is the wave vector, which is the direction of the wave
@@ -25,5 +28,10 @@ public class Wave {
         this.amplitude = amplitude;
         angularFrequency = Mathf.Sqrt(gravity * k * Mathf.Tanh(k * waterDepth));
         this.phaseShift = phaseShift;
+
+        // precompute these for performance
+        // these are product operands in the x and z displacement sums
+        productOperandX = (kX / k) * (amplitude / Mathf.Tanh(k * waterDepth));
+        productOperandZ = (kZ / k) * (amplitude / Mathf.Tanh(k * waterDepth));
     }
 }

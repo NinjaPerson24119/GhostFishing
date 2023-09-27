@@ -186,12 +186,15 @@ public partial class WaterTile : MeshInstance3D {
             int wavesToRender = Mathf.Min(WavesConfig.waves.Count, maxWaves);
             wavesToRender = Mathf.Min(wavesToRender, ActiveWaves);
             for (int i = 0; i < wavesToRender; i++) {
-                amplitude[i] = WavesConfig.waves[i].amplitude;
-                k[i] = WavesConfig.waves[i].k;
-                kX[i] = WavesConfig.waves[i].kX;
-                kZ[i] = WavesConfig.waves[i].kZ;
-                omega[i] = WavesConfig.waves[i].angularFrequency;
-                phi[i] = WavesConfig.waves[i].phaseShift;
+                Wave w = WavesConfig.waves[i];
+                amplitude[i] = w.amplitude;
+                k[i] = w.k;
+                kX[i] = w.kX;
+                kZ[i] = w.kZ;
+                omega[i] = w.angularFrequency;
+                phi[i] = w.phaseShift;
+                productOperandX[i] = w.productOperandX;
+                productOperandZ[i] = w.productOperandZ;
 
                 if (WaterTileDebugLogs) {
                     GD.Print($"Generated wave {i}:");
@@ -202,13 +205,8 @@ public partial class WaterTile : MeshInstance3D {
                     GD.Print($"\tomega: {omega[i]}");
                     GD.Print($"\tphi: {phi[i]}");
                     GD.Print($"\tkA: {k[i] * amplitude[i]}");
-                    GD.Print($"\twindAngle: {WavesConfig.waves[i].windAngle}");
+                    GD.Print($"\twindAngle: {w.windAngle}");
                 }
-
-                // precompute these for performance
-                // these are product operands in the x and z displacement sums
-                productOperandX[i] = (kX[i] / k[i]) * (amplitude[i] / Mathf.Tanh(k[i] * WaterDepth));
-                productOperandZ[i] = (kZ[i] / k[i]) * (amplitude[i] / Mathf.Tanh(k[i] * WaterDepth));
             }
         }
 
@@ -225,10 +223,30 @@ public partial class WaterTile : MeshInstance3D {
     // returns the height of the water at the given world position
     // this always should match the vertex shader algorithm for physics to be visually consistent
     public float GetHeight(Vector3 worldPosition) {
-        // TODO: update to Gerstner waves
+        if (NoDisplacement) {
+            return GlobalPosition.Y;
+        }
+
+        // calculate Gerstner portion of displacement
+        Gerstner gerstner = new Gerstner(WavesConfig);
+        Vector3 gerstnerDisplacement = gerstner.Displacement(worldPosition.X, worldPosition.Z, (float)RealClock.RealTime);
+        Vector3 result = GlobalPosition + gerstnerDisplacement;
+
+        // calculate noise portion of displacement
+        Vector3 normal = gerstner.Normal(worldPosition.X, worldPosition.Z, (float)RealClock.RealTime);
+
         int uvX = (int)Mathf.Wrap(worldPosition.X / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
         int uvY = (int)Mathf.Wrap(worldPosition.Z / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
-        return GlobalPosition.Y + _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R * _surfaceHeightScale;
+        float noiseHeight = _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
+
+        result += normal * noiseHeight * _surfaceHeightScale;
+
+        return result.Y;
+    }
+
+    // expose this method for testing purposes
+    public static float StaticGetHeight(Vector3 worldPosition) {
+        
     }
 
     public void SetDebugVisuals(bool enabled) {

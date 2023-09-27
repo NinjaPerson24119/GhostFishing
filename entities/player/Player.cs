@@ -2,7 +2,7 @@ using Godot;
 
 public partial class Player : RigidBody3D {
     [Export]
-    public float FloatForce = 2.0f;
+    public float buoyancyDampener = 0.5f;
     [Export]
     float WaterDrag = 0.07f;
     [Export]
@@ -38,16 +38,13 @@ public partial class Player : RigidBody3D {
         Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
         int submergedPoints = 0;
         foreach (Node3D contactPoint in waterContactPoints.GetChildren()) {
-            // TODO: forgot to compute Gerstner heights
             float waterY = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(contactPoint.GlobalPosition);
             float depth = waterY - contactPoint.GlobalPosition.Y;
             if (depth > 0) {
                 submergedPoints++;
                 // Archimedes Principle: F = ρgV
                 float volumeDisplaced = _horizontalSliceArea * depth;
-                GD.Print($"Old: {_gravity * FloatForce * depth}");
-                GD.Print($"New: {_waterDensity * _gravity * volumeDisplaced}, depth: {depth}, delta: {delta}");
-                ApplyForce(Vector3.Up * (float)delta * _waterDensity * _gravity * volumeDisplaced, contactPoint.GlobalPosition);
+                ApplyForce(Vector3.Up * (1 - buoyancyDampener) * (float)delta * _waterDensity * _gravity * volumeDisplaced, contactPoint.GlobalPosition);
             }
         }
         submerged = submergedPoints > 0;
@@ -56,6 +53,7 @@ public partial class Player : RigidBody3D {
 
     public override void _Process(double delta) {
         // only notify when the player has moved significantly
+        // primary subscriber to this is the Ocean for recentering
         if (GlobalPosition.DistanceSquaredTo(_lastSignificantPosition) > PositionChangedSignificanceEpsilon) {
             EmitSignal(SignalName.PositionChangedSignificantly, GlobalPosition);
             _lastSignificantPosition = GlobalPosition;
