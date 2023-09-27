@@ -1,12 +1,34 @@
 using Godot;
 
 public partial class WaterTileCPU : MeshInstance3D {
-    private WaveSet _waveSet;
+    private Ocean _ocean;
     private Mesh _planeMesh;
+    private WaterTile _waterTile;
+
     public override void _Ready() {
-        _waveSet = GetNode<Ocean>("Ocean").WavesConfig;
+        _ocean = GetNode<Ocean>("Ocean");
         _planeMesh = Mesh;
-        _waterTile
+        AddChild(BuildWaterTile(Vector2.Zero, _ocean.Subdivisions));
+    }
+
+    private WaterTile BuildWaterTile(Vector2 tileIndices, int subdivisions) {
+        int TileSize = _ocean.TileSize;
+        WaterTile waterTile = new WaterTile {
+            Name = "WaterTile_GPU_for_CPU_Simulation",
+            Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
+            // overlap slightly to prevent seams
+            Scale = new Vector3(TileSize, 1, TileSize),
+            Subdivisions = subdivisions,
+            WavesConfig = _ocean.WavesConfig,
+            WaterTileDebugLogs = false,
+            WaterDepth = _ocean.WaterDepth,
+            SurfaceNoiseScale = 10f,
+            SurfaceHeightScale = 0.2f,
+            SurfaceTimeScale = 0.025f,
+            NoDisplacement = false,
+            Visible = false, // don't actually render this one
+        };
+        return waterTile;
     }
 
     public override void _Process() {

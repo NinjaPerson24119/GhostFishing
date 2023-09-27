@@ -244,11 +244,6 @@ public partial class WaterTile : MeshInstance3D {
         return result.Y;
     }
 
-    // expose this method for testing purposes
-    public static float StaticGetHeight(Vector3 worldPosition) {
-        
-    }
-
     public void SetDebugVisuals(bool enabled) {
         _material.SetShaderParameter("debug_visuals", enabled);
     }
