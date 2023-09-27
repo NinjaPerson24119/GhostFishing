@@ -35,7 +35,7 @@ shadow_enabled = true
 directional_shadow_max_distance = 1000.0
 sky_mode = 1
 script = ExtResource("2_y7bsm")
-LightEnergyAtSolarNoon = 0.6
+LightEnergyAtSolarNoon = 0.7
 
 [node name="MoonLight" type="DirectionalLight3D" parent="."]
 light_color = Color(0.764706, 1, 1, 1)

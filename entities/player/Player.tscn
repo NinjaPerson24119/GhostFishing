@@ -9,7 +9,7 @@ points = PackedVector3Array(1.23771, 0.599986, 1.7025, 0.123577, 0.786792, 2.479
 collision_mask = 7
 can_sleep = false
 
-[node name="RowBoat" parent="." instance=ExtResource("1_rivqw")]
+[node name="Model" parent="." instance=ExtResource("1_rivqw")]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)

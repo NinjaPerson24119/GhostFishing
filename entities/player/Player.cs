@@ -1,28 +1,52 @@
 using Godot;
 
 public partial class Player : RigidBody3D {
-    float gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
-    float float_force = 3.0f;
-    float water_drag = 0.05f;
-    float water_angular_drag = 0.05f;
-    bool submerged = false;
-    float engine_force = 30.0f;
-    float turn_force = 5.0f;
+    [Export]
+    public float FloatForce = 2.0f;
+    [Export]
+    float WaterDrag = 0.07f;
+    [Export]
+    float WaterAngularDrag = 0.05f;
+    [Export]
+    float EngineForce = 30.0f;
+    [Export]
+    float TurnForce = 5.0f;
 
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
 
+    private bool submerged = false;
+    private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
+    private float _waterDensity = 1000; // kg/m^3
+    private Aabb _absBounds;
+    private float _horizontalSliceArea;
+
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
+    public override void _Ready() {
+        _absBounds = GetNode<Node3D>("Model").GetNode<MeshInstance3D>("Boat").GetAabb().Abs();
+        _horizontalSliceArea = _absBounds.Size.X * _absBounds.Size.Z;
+        GD.Print($"Boat Size: {_absBounds.Size}. Horizontal slice area: {_horizontalSliceArea}");
+    }
+
     public override void _PhysicsProcess(double delta) {
-        var depth = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(GlobalPosition) - GlobalPosition.Y;
-        submerged = depth > 0;
-        if (submerged) {
-            // TODO: vary forces by Archimedes principle
-            ApplyCentralForce(Vector3.Up * gravity * float_force * depth);
+        Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
+        int submergedPoints = 0;
+        foreach (Node3D contactPoint in waterContactPoints.GetChildren()) {
+            float waterY = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(contactPoint.GlobalPosition);
+            float depth = waterY - contactPoint.GlobalPosition.Y;
+            if (depth > 0) {
+                submergedPoints++;
+                // Archimedes Principle: F = ρgV
+                float volumeDisplaced = _horizontalSliceArea * depth;
+                GD.Print($"Old: {_gravity * FloatForce * depth}");
+                GD.Print($"New: {_waterDensity * _gravity * volumeDisplaced}, depth: {depth}, delta: {delta}");
+                ApplyForce(Vector3.Up * (float)delta * _waterDensity * _gravity * volumeDisplaced, contactPoint.GlobalPosition);
+            }
         }
+        submerged = submergedPoints > 0;
         PollControls();
     }
 
@@ -37,24 +61,24 @@ public partial class Player : RigidBody3D {
     private void PollControls() {
         if (submerged) {
             if (Input.IsActionPressed("move_forward")) {
-                ApplyCentralForce(Basis.Z * engine_force);
+                ApplyCentralForce(Basis.Z * EngineForce);
             }
             else if (Input.IsActionPressed("move_backward")) {
-                ApplyCentralForce(Basis.Z * -1 * engine_force);
+                ApplyCentralForce(Basis.Z * -1 * EngineForce);
             }
             if (Input.IsActionPressed("turn_left")) {
-                ApplyTorque(Vector3.Up * turn_force);
+                ApplyTorque(Vector3.Up * TurnForce);
             }
             else if (Input.IsActionPressed("turn_right")) {
-                ApplyTorque(Vector3.Down * turn_force);
+                ApplyTorque(Vector3.Down * TurnForce);
             }
         }
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
         if (submerged) {
-            state.LinearVelocity *= 1 - water_drag;
-            state.AngularVelocity *= 1 - water_angular_drag;
+            state.LinearVelocity *= 1 - WaterDrag;
+            state.AngularVelocity *= 1 - WaterAngularDrag;
         }
     }
 }

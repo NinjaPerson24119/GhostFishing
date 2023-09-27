@@ -53,18 +53,40 @@ spot_range = 100.0
 script = ExtResource("5_mnq5h")
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.69887, 0)
+mass = 100.0
 script = ExtResource("3_t71xa")
 
 [node name="Camera3DWithAttributes" type="Camera3D" parent="Player"]
-transform = Transform3D(-1, -2.99003e-08, 8.21506e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -3.96492)
+transform = Transform3D(-1, -2.99003e-08, 8.21506e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -5.50209)
 attributes = SubResource("CameraAttributesPractical_jxq7l")
 fov = 100.0
 near = 1.0
 far = 1000.0
 
 [node name="SpotLight3D" type="SpotLight3D" parent="Player"]
-transform = Transform3D(-1, 7.10543e-15, -1.50996e-07, 9.73623e-09, 0.997919, -0.0644801, 1.50682e-07, -0.0644801, -0.997919, 0, 0.946107, 3.28559)
-light_energy = 10.0
+transform = Transform3D(-1, -2.22045e-14, -1.50996e-07, 9.73623e-09, 0.997919, -0.0644801, 1.50682e-07, -0.0644801, -0.997919, 0, 0.991574, 3.78552)
+light_energy = 8.0
+light_volumetric_fog_energy = 0.012
+light_bake_mode = 0
 shadow_enabled = true
-spot_range = 15.0
-spot_angle = 60.0
+spot_range = 25.0
+spot_angle_attenuation = 0.3
+
+[node name="WaterContactPoints" type="Node3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0125014, 0)
+
+[node name="Marker3D" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.719367, 0)
+
+[node name="Marker3D2" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.0205312, -0.649631, -3.08544)
+
+[node name="Marker3D3" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.701637, 3.09585)
+
+[node name="Marker3D4" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.862656, -0.770108, 0)
+
+[node name="Marker3D5" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.777083, -0.772246, 0)
