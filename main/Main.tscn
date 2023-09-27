@@ -54,8 +54,9 @@ script = ExtResource("5_mnq5h")
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.69887, 0)
-mass = 100.0
+mass = 200.0
 script = ExtResource("3_t71xa")
+EngineForce = 500.0
 
 [node name="Camera3DWithAttributes" type="Camera3D" parent="Player"]
 transform = Transform3D(-1, -2.99003e-08, 8.21506e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -5.50209)
@@ -90,3 +91,18 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.862656, -0.770108, 0)
 
 [node name="Marker3D5" type="Marker3D" parent="Player/WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.777083, -0.772246, 0)
+
+[node name="Marker3D6" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.777083, -0.772246, 2.09612)
+
+[node name="Marker3D7" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.777083, -0.772246, -2.30356)
+
+[node name="Marker3D8" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.807136, -0.772246, 2.20337)
+
+[node name="Marker3D9" type="Marker3D" parent="Player/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.843645, -0.772246, -2.30356)
+
+[node name="ControlPoint" type="Marker3D" parent="Player"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.862516, -3.85398)

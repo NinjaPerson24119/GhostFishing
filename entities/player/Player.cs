@@ -21,6 +21,7 @@ public partial class Player : RigidBody3D {
     private float _waterDensity = 1000; // kg/m^3
     private Aabb _absBounds;
     private float _horizontalSliceArea;
+    private Marker3D _controlPoint;
 
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
@@ -29,12 +30,15 @@ public partial class Player : RigidBody3D {
         _absBounds = GetNode<Node3D>("Model").GetNode<MeshInstance3D>("Boat").GetAabb().Abs();
         _horizontalSliceArea = _absBounds.Size.X * _absBounds.Size.Z;
         GD.Print($"Boat Size: {_absBounds.Size}. Horizontal slice area: {_horizontalSliceArea}");
+
+        _controlPoint = GetNode<Marker3D>("ControlPoint");
     }
 
     public override void _PhysicsProcess(double delta) {
         Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
         int submergedPoints = 0;
         foreach (Node3D contactPoint in waterContactPoints.GetChildren()) {
+            // TODO: forgot to compute Gerstner heights
             float waterY = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(contactPoint.GlobalPosition);
             float depth = waterY - contactPoint.GlobalPosition.Y;
             if (depth > 0) {
@@ -60,11 +64,13 @@ public partial class Player : RigidBody3D {
 
     private void PollControls() {
         if (submerged) {
+            GD.Print("Submerged");
+            Vector3 towardsFront = (GlobalPosition - _controlPoint.GlobalPosition).Normalized();
             if (Input.IsActionPressed("move_forward")) {
-                ApplyCentralForce(Basis.Z * EngineForce);
+                ApplyForce(towardsFront * EngineForce, _controlPoint.GlobalPosition);
             }
             else if (Input.IsActionPressed("move_backward")) {
-                ApplyCentralForce(Basis.Z * -1 * EngineForce);
+                ApplyCentralForce(towardsFront * -1 * EngineForce);
             }
             if (Input.IsActionPressed("turn_left")) {
                 ApplyTorque(Vector3.Up * TurnForce);
