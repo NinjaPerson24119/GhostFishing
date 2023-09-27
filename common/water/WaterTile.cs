@@ -220,17 +220,16 @@ public partial class WaterTile : MeshInstance3D {
         _material.SetShaderParameter("gerstner_product_operand_z", productOperandZ);
     }
 
-    // returns the height of the water at the given world position
+    // returns the displacement of the water at the given world position
     // this always should match the vertex shader algorithm for physics to be visually consistent
-    public float GetHeight(Vector3 worldPosition) {
+    public Vector3 GetDisplacement(Vector3 worldPosition) {
         if (NoDisplacement) {
-            return GlobalPosition.Y;
+            return Vector3.Zero;
         }
 
         // calculate Gerstner portion of displacement
         Gerstner gerstner = new Gerstner(WavesConfig);
         Vector3 gerstnerDisplacement = gerstner.Displacement(worldPosition.X, worldPosition.Z, (float)RealClock.RealTime);
-        Vector3 result = GlobalPosition + gerstnerDisplacement;
 
         // calculate noise portion of displacement
         Vector3 normal = gerstner.Normal(worldPosition.X, worldPosition.Z, (float)RealClock.RealTime);
@@ -239,9 +238,7 @@ public partial class WaterTile : MeshInstance3D {
         int uvY = (int)Mathf.Wrap(worldPosition.Z / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
         float noiseHeight = _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
 
-        result += normal * noiseHeight * _surfaceHeightScale;
-
-        return result.Y;
+        return gerstnerDisplacement + normal * noiseHeight * _surfaceHeightScale;
     }
 
     public void SetDebugVisuals(bool enabled) {

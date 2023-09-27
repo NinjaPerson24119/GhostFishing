@@ -38,8 +38,10 @@ public partial class Player : RigidBody3D {
         Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
         int submergedPoints = 0;
         foreach (Node3D contactPoint in waterContactPoints.GetChildren()) {
-            float waterY = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetHeight(contactPoint.GlobalPosition);
-            float depth = waterY - contactPoint.GlobalPosition.Y;
+            // TODO: stop ignoring displacement on XZ plane
+            Vector3 waterDisplacement = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetDisplacement(contactPoint.GlobalPosition);
+            Vector3 realContactPoint = contactPoint.GlobalPosition + waterDisplacement;
+            float depth = realContactPoint.Y - contactPoint.GlobalPosition.Y;
             if (depth > 0) {
                 submergedPoints++;
                 // Archimedes Principle: F = ρgV
@@ -62,7 +64,7 @@ public partial class Player : RigidBody3D {
 
     private void PollControls() {
         if (submerged) {
-            GD.Print("Submerged");
+            //GD.Print("Submerged");
             Vector3 towardsFront = (GlobalPosition - _controlPoint.GlobalPosition).Normalized();
             if (Input.IsActionPressed("move_forward")) {
                 ApplyForce(towardsFront * EngineForce, _controlPoint.GlobalPosition);

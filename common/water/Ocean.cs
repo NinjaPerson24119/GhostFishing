@@ -279,17 +279,17 @@ public partial class Ocean : Node3D {
 		return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Z / TileSize));
 	}
 
-	public float GetHeight(Vector3 worldPosition) {
+	public Vector3 GetDisplacement(Vector3 worldPosition) {
 		// delegate to water tile which may vary in configuration
 		Vector2 tileIndices = GetTileIndices(worldPosition);
 		string tileName = GetTileName(tileIndices);
 		try {
 			WaterTile waterTile = GetNode<WaterTile>(tileName);
-			return waterTile.GetHeight(worldPosition);
+			return waterTile.GetDisplacement(worldPosition);
 		}
 		catch (Exception) {
 			GD.PrintErr($"Failed to GetHeight(). Couldn't find water tile {tileName}");
-			return 0;
+			return Vector3.Zero;
 		}
 	}
 
