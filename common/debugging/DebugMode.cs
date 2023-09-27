@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class DebugMode : Node {
-    private bool debugMode = false;
+    private bool debugMode = true;
 
     [Signal]
     public delegate void DebugOceanChangedEventHandler(bool debugOcean);
@@ -20,7 +20,7 @@ public partial class DebugMode : Node {
     Dictionary<string, Viewport.DebugDrawEnum> debugDrawMappings = new Dictionary<string, Viewport.DebugDrawEnum>{
         {"debug_wireframe", Viewport.DebugDrawEnum.Wireframe},
         {"debug_normals", Viewport.DebugDrawEnum.NormalBuffer},
-        {"debug_overdraw", Viewport.DebugDrawEnum.Overdraw}
+        {"debug_overdraw", Viewport.DebugDrawEnum.Overdraw},
     };
 
     public override void _Ready() {
@@ -80,6 +80,9 @@ public partial class DebugMode : Node {
         }
         if (inputEvent.IsActionPressed("debug_pause")) {
             GameClock.TogglePause();
+        }
+        if (inputEvent.IsActionPressed("debug_reset_boat")) {
+            GetNode<Player>("/root/Main/Player").ResetAboveWater();
         }
     }
 

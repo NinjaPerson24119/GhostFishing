@@ -1,8 +1,8 @@
 using Godot;
 
 public partial class Player : RigidBody3D {
-    [Export]
-    public float buoyancyDampener = 0.5f;
+    [Export(PropertyHint.Range, "0,1,0.01")]
+    public float BuoyancyDamping = 0f;
     [Export]
     float WaterDrag = 0.07f;
     [Export]
@@ -37,16 +37,22 @@ public partial class Player : RigidBody3D {
     public override void _PhysicsProcess(double delta) {
         Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
         int submergedPoints = 0;
+        int totalPoints = waterContactPoints.GetChildCount();
         foreach (Node3D contactPoint in waterContactPoints.GetChildren()) {
             // TODO: stop ignoring displacement on XZ plane
             Vector3 waterDisplacement = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetDisplacement(contactPoint.GlobalPosition);
-            Vector3 realContactPoint = contactPoint.GlobalPosition + waterDisplacement;
-            float depth = realContactPoint.Y - contactPoint.GlobalPosition.Y;
+            Vector3 waterContactPoint = contactPoint.GlobalPosition + waterDisplacement;
+            GD.Print($"Water height = {waterContactPoint.Y}, boat height = {contactPoint.GlobalPosition.Y}");
+            float depth = 0 - contactPoint.GlobalPosition.Y;
             if (depth > 0) {
                 submergedPoints++;
                 // Archimedes Principle: F = ρgV
-                float volumeDisplaced = _horizontalSliceArea * depth;
-                ApplyForce(Vector3.Up * (1 - buoyancyDampener) * (float)delta * _waterDensity * _gravity * volumeDisplaced, contactPoint.GlobalPosition);
+                float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _absBounds.Size.Y);
+                GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
+                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
+                float distributedForce = buoyancyForce * Mathf.Clamp(depth / _absBounds.Size.Y, 0, 1);
+                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * (float)delta * distributedForce, contactPoint.GlobalPosition);
+                break;
             }
         }
         submerged = submergedPoints > 0;
@@ -64,7 +70,7 @@ public partial class Player : RigidBody3D {
 
     private void PollControls() {
         if (submerged) {
-            //GD.Print("Submerged");
+            GD.Print("Submerged");
             Vector3 towardsFront = (GlobalPosition - _controlPoint.GlobalPosition).Normalized();
             if (Input.IsActionPressed("move_forward")) {
                 ApplyForce(towardsFront * EngineForce, _controlPoint.GlobalPosition);
@@ -86,5 +92,17 @@ public partial class Player : RigidBody3D {
             state.LinearVelocity *= 1 - WaterDrag;
             state.AngularVelocity *= 1 - WaterAngularDrag;
         }
+    }
+
+    public void ResetAboveWater() {
+        CallDeferred(nameof(DeferredResetAboveWater));
+    }
+
+    public void DeferredResetAboveWater() {
+        LinearVelocity = Vector3.Zero;
+        AngularVelocity = Vector3.Zero;
+        Ocean ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
+        GlobalPosition = new Vector3(GlobalPosition.X, ocean.GlobalPosition.Y + 1f, GlobalPosition.Z);
+        Rotation = Vector3.Zero;
     }
 }
