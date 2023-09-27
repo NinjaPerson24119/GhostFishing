@@ -92,6 +92,18 @@ public partial class Ocean : Node3D {
 	}
 	private int _tileSize = 100;
 
+	[Export]
+	public float TileOverlap {
+		get {
+			return _tileOverlap;
+		}
+		set {
+			_tileOverlap = value;
+			QueueRespawnWaterTiles();
+		}
+	}
+	private float _tileOverlap = 0.1f;
+
 	[ExportGroup("Waves")]
 	[Export(PropertyHint.Range, "0,30,")]
 	public int NoWaves {
@@ -191,8 +203,6 @@ public partial class Ocean : Node3D {
 	private bool _queuedReconfigureWaterTilesDoRegenerateWaveSet = false;
 
 	private LinearLOD subdivisionsLOD;
-
-	private const float _tileOverlap = 0.1f;
 	private const float _distantTileHeightOffset = -1f;
 
 	public override void _Ready() {
@@ -256,7 +266,7 @@ public partial class Ocean : Node3D {
 			Name = GetTileName(tileIndices),
 			Position = new Vector3(tileIndices.X * TileSize, GlobalPosition.Y, tileIndices.Y * TileSize),
 			// overlap slightly to prevent seams
-			Scale = new Vector3(TileSize + _tileOverlap, 1, TileSize + _tileOverlap),
+			Scale = new Vector3(TileSize + TileOverlap, 1, TileSize + TileOverlap),
 			Subdivisions = subdivisions,
 			WavesConfig = WavesConfig,
 			WaterTileDebugLogs = WaterTileDebugLogs,

@@ -30,9 +30,7 @@ uniform vec4 color_shallow : source_color;
 uniform float beers_law = 2.0;
 uniform float depth_offset = -0.2;
 
-uniform float edge_scale = 0.3;
-uniform float near = 1.0;
-uniform float far = 100.0;
+uniform float edge_scale = 1;
 uniform vec3 edge_color : source_color;
 
 uniform bool debug_visuals;
@@ -46,9 +44,13 @@ float fresnel(float amount, vec3 normal, vec3 view) {
 	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0)), amount);
 }
 
-float edge(float depth) {
-	depth = 2.0 * depth - 1.0;
-	return near * far /  (far + depth * (near - far));
+float linear_depth(float depth, vec2 screen_uv, mat4 inv_projection_matrix) {
+	// NDC assumes Vulkan
+	vec3 ndc = vec3(screen_uv * 2.0 - 1.0, depth);
+	vec4 view = inv_projection_matrix * vec4(ndc, 1.0);
+	view.xyz /= view.w;
+	float linear_depth = -view.z;
+	return linear_depth;
 }
 
 void vertex() {
@@ -58,13 +60,18 @@ void vertex() {
 
 		// apply slight noise to waves
 		// use direction of normal so it looks natural and we don't have to recompute the normal
-		height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).r;
+		height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).x;
 		VERTEX += NORMAL * height * height_scale;
 	}
 }
 
 void fragment() {
-	float depth_texture = texture(DEPTH_TEXTURE, SCREEN_UV).r * 2.0 - 1.0;
+	// compute linear depth difference between fragment and depth buffer
+	float depth_buffer_linear = linear_depth(texture(DEPTH_TEXTURE, SCREEN_UV).x, SCREEN_UV, INV_PROJECTION_MATRIX);
+	float depth_fragment_linear = linear_depth(FRAGCOORD.z, SCREEN_UV, INV_PROJECTION_MATRIX);
+	float depth_difference = depth_buffer_linear - depth_fragment_linear;
+
+	float depth_texture = texture(DEPTH_TEXTURE, SCREEN_UV).x * 2.0 - 1.0;
 	float depth = PROJECTION_MATRIX[3][2] / (depth_texture + PROJECTION_MATRIX[2][2]);
 	float depth_blend = exp((depth+VERTEX.z + depth_offset) * -beers_law);
 	depth_blend = clamp(1.0 - depth_blend, 0.0, 1.0);
@@ -74,10 +81,6 @@ void fragment() {
 	vec3 depth_color = mix(color_shallow.rgb, color_deep.rgb, depth_blend_power);
 	vec3 color = mix(screen_color * depth_color, depth_color * 0.25, depth_blend_power * 0.5);
 
-	float z_depth = edge(texture(DEPTH_TEXTURE, SCREEN_UV).x);
-	float z_pos = edge(FRAGCOORD.z);
-	float z_diff = z_depth - z_pos;
-
 	vec2 time = (wave_time * wave_direction) * time_scale;
 	vec2 time2 = (wave_time * wave_direction2) * time_scale;
 
@@ -86,12 +89,15 @@ void fragment() {
 	float fresnel = fresnel(5.0, NORMAL, VIEW);
 	vec3 surface_color = mix(albedo, albedo2, fresnel);
 
-	vec3 depth_color_adj = mix(edge_color, color, step(edge_scale, z_diff));
+	vec3 depth_color_adj = mix(edge_color, color, step(edge_scale, depth_difference));
 
 	ALBEDO = clamp(surface_color + depth_color_adj, vec3(0.0), vec3(1.0));
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
 	NORMAL_MAP = normal_blend;
+
+	// set alpha so Godot knows to render the water as transparent
+	ALPHA = 0.8;
 
 	// Outline the edges of the water tile black
 	if (debug_visuals && (UV.x < 0.01 || UV.x > 0.99 || UV.y < 0.01 || UV.y > 0.99)) {
