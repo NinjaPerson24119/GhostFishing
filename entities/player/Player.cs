@@ -1,23 +1,23 @@
 using Godot;
 
-public partial class Player : CharacterBody3D {
+public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,10")]
     public float BoatDepth = 2.0f;
-    [Export(PropertyHint.Range, "0,100")]
-    public float EngineMetersPerSecond = 50f;
-    [Export(PropertyHint.Range, "0,360")]
-    public float TurnDegreesPerSecond = 30;
-    private float _turnRadiansPerSecond => Mathf.DegToRad(TurnDegreesPerSecond);
+
+    [Export]
+    float WaterDrag = 0.07f;
+    [Export]
+    float WaterAngularDrag = 0.05f;
+    [Export]
+    float EngineForce = 30.0f;
+    [Export]
+    float TurnForce = 5.0f;
 
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
 
-    private bool submerged = false;
-    private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
-    private float _waterDensity = 1000; // kg/m^3
     private Aabb _absBounds;
-    private float _horizontalSliceArea;
     private Ocean _ocean;
 
     [Signal]
@@ -29,8 +29,7 @@ public partial class Player : CharacterBody3D {
     }
 
     public override void _Process(double delta) {
-        // only notify when the player has moved significantly
-        // primary subscriber to this is the Ocean for recentering
+        // update lagging Player position for the Ocean
         if (GlobalPosition.DistanceSquaredTo(_lastSignificantPosition) > PositionChangedSignificanceEpsilon) {
             EmitSignal(SignalName.PositionChangedSignificantly, GlobalPosition);
             _lastSignificantPosition = GlobalPosition;
@@ -42,30 +41,26 @@ public partial class Player : CharacterBody3D {
     }
 
     private void ApplyMovement(double delta) {
-        float yawChange = 0;
-        bool turnLeft = Input.IsActionPressed("turn_left");
-        bool turnRight = Input.IsActionPressed("turn_right");
-        if (turnLeft && !turnRight) {
-            yawChange = _turnRadiansPerSecond;
-        }
-        if (turnRight && !turnLeft) {
-            yawChange = -_turnRadiansPerSecond;
-        }
-        GlobalRotation = new Vector3(GlobalRotation.X, GlobalRotation.Y + yawChange * (float)delta, GlobalRotation.Z);
-
-        Vector3 targetVelocity = Vector3.Zero;
         if (Input.IsActionPressed("move_forward")) {
-            targetVelocity += GlobalTransform.Basis.Z * EngineMetersPerSecond;
+            ApplyCentralForce(GlobalTransform.Basis.Z * EngineForce);
         }
         else if (Input.IsActionPressed("move_backward")) {
-            targetVelocity += GlobalTransform.Basis.Z * EngineMetersPerSecond;
+            ApplyCentralForce(GlobalTransform.Basis.Z * -1 * EngineForce);
         }
-        //targetVelocity.Y = 0;
-        Velocity = targetVelocity * (float)delta;
-        MoveAndSlide();
+        if (Input.IsActionPressed("turn_left")) {
+            ApplyTorque(Vector3.Up * TurnForce);
+        }
+        else if (Input.IsActionPressed("turn_right")) {
+            ApplyTorque(Vector3.Down * TurnForce);
+        }
+    }
 
-        Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(GlobalPosition.X, GlobalPosition.Z));
-        float boatY = _ocean.GlobalPosition.Y + waterDisplacement.Y + _absBounds.Size.Y / 2 - BoatDepth;
+    public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
+        state.LinearVelocity *= 1 - WaterDrag;
+        state.AngularVelocity *= 1 - WaterAngularDrag;
+
+        Vector3 waterPositionDisplacement = _ocean.GetDisplacement(new Vector2(GlobalPosition.X, GlobalPosition.Z));
+        float boatY = _ocean.GlobalPosition.Y + waterPositionDisplacement.Y + _absBounds.Size.Y / 2 - BoatDepth;
         GlobalPosition = new Vector3(GlobalPosition.X, boatY, GlobalPosition.Z);
     }
 }
