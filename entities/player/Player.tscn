@@ -1,9 +1,23 @@
-[gd_scene load_steps=3 format=3 uid="uid://dpabijl3uxatr"]
+[gd_scene load_steps=7 format=3 uid="uid://dpabijl3uxatr"]
 
 [ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_rivqw"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_4dqcm"]
 points = PackedVector3Array(1.23771, 0.599986, 1.7025, 0.123577, 0.786792, 2.47977, 0.123577, 0.619264, 2.4861, 0.122365, 0.166367, 2.47247, 1.22487, 0.187546, 1.69617, 1.23771, 0.599986, -1.70299, -0.123819, 0.786792, 2.47977, 0.123577, 0.786792, -2.48026, -0.123819, 0.619264, 2.4861, -0.122608, 0.166367, 2.47247, 0.111946, -0.246073, 2.36442, 1.1197, -0.224894, 1.64799, 1.22487, 0.187546, -1.69666, 0.122365, 0.166367, -2.47296, 0.123577, 0.619264, -2.4861, -1.23771, 0.599986, 1.7025, -0.123819, 0.786792, -2.48026, -0.112189, -0.246073, 2.36442, -1.22511, 0.187546, 1.69617, 0.0719655, -0.575427, 2.1454, 0.903809, -0.6, 1.5414, 1.1197, -0.224894, -1.64848, 0.111946, -0.246073, -2.36491, -0.122608, 0.166367, -2.47296, -0.123819, 0.619264, -2.4861, -1.23771, 0.599986, -1.70299, -0.0722077, -0.575427, 2.1454, -1.11995, -0.224894, 1.64799, -0.904051, -0.6, 1.5414, -1.22511, 0.187546, -1.69666, 0.0719655, -0.6, 2.06948, 0.903809, -0.6, -1.54189, 0.0719655, -0.575427, -2.14589, -0.112189, -0.246073, -2.36491, -0.0722077, -0.6, 2.06948, -1.11995, -0.224894, -1.64848, -0.904051, -0.6, -1.54189, 0.0719655, -0.6, -2.06996, -0.0722077, -0.575427, -2.14589, -0.0722077, -0.6, -2.06996)
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bam1o"]
+albedo_color = Color(0.109804, 1, 0.376471, 1)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_p2coj"]
+material = SubResource("StandardMaterial3D_bam1o")
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sue0h"]
+albedo_color = Color(1, 0, 0, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_71hcx"]
+material = SubResource("StandardMaterial3D_sue0h")
+radius = 0.25
+height = 0.5
 
 [node name="Player" type="RigidBody3D"]
 collision_mask = 7
@@ -14,3 +28,29 @@ gravity_scale = 0.0
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_4dqcm")
+
+[node name="WaterApproximation" type="Node3D" parent="."]
+
+[node name="WaterPlane" type="MeshInstance3D" parent="WaterApproximation"]
+transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0)
+mesh = SubResource("PlaneMesh_p2coj")
+skeleton = NodePath("../..")
+
+[node name="FrontSphere" type="MeshInstance3D" parent="WaterApproximation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.451793, 0)
+mesh = SubResource("SphereMesh_71hcx")
+
+[node name="BackSphere" type="MeshInstance3D" parent="WaterApproximation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.903587, 0)
+mesh = SubResource("SphereMesh_71hcx")
+skeleton = NodePath("../FrontSphere")
+
+[node name="LeftSphere" type="MeshInstance3D" parent="WaterApproximation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35538, 0)
+mesh = SubResource("SphereMesh_71hcx")
+skeleton = NodePath("../BackSphere")
+
+[node name="RightSphere" type="MeshInstance3D" parent="WaterApproximation"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.80717, 0)
+mesh = SubResource("SphereMesh_71hcx")
+skeleton = NodePath("../LeftSphere")
