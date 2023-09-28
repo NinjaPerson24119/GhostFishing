@@ -1,5 +1,6 @@
-[gd_scene load_steps=7 format=3 uid="uid://dpabijl3uxatr"]
+[gd_scene load_steps=8 format=3 uid="uid://dpabijl3uxatr"]
 
+[ext_resource type="Script" path="res://entities/player/Visual.cs" id="1_ll6dn"]
 [ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_rivqw"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_4dqcm"]
@@ -23,33 +24,32 @@ height = 0.5
 collision_mask = 7
 gravity_scale = 0.0
 
-[node name="Model" parent="." instance=ExtResource("1_rivqw")]
-
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_4dqcm")
 
-[node name="WaterApproximation" type="Node3D" parent="."]
+[node name="Visual" type="Node3D" parent="."]
+script = ExtResource("1_ll6dn")
 
-[node name="WaterPlane" type="MeshInstance3D" parent="WaterApproximation"]
+[node name="WaterApproximation" type="Node3D" parent="Visual"]
+
+[node name="WaterPlane" type="MeshInstance3D" parent="Visual/WaterApproximation"]
 mesh = SubResource("PlaneMesh_p2coj")
-skeleton = NodePath("../..")
+skeleton = NodePath("../../..")
 
-[node name="FrontSphere" type="MeshInstance3D" parent="WaterApproximation"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.451793, 0)
+[node name="FrontSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 
-[node name="BackSphere" type="MeshInstance3D" parent="WaterApproximation"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.903587, 0)
+[node name="BackSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 skeleton = NodePath("../FrontSphere")
 
-[node name="LeftSphere" type="MeshInstance3D" parent="WaterApproximation"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.35538, 0)
+[node name="LeftSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 skeleton = NodePath("../BackSphere")
 
-[node name="RightSphere" type="MeshInstance3D" parent="WaterApproximation"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.80717, 0)
+[node name="RightSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 skeleton = NodePath("../LeftSphere")
+
+[node name="Model" parent="Visual" instance=ExtResource("1_rivqw")]

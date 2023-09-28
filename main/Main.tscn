@@ -68,7 +68,6 @@ MinSubdivisions = 40
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
-BoatDepth = 0.6
 TurnForce = 10.0
 
 [node name="Camera3DWithAttributes" type="Camera3D" parent="Player"]
