@@ -7,6 +7,7 @@ points = PackedVector3Array(1.23771, 0.599986, 1.7025, 0.123577, 0.786792, 2.479
 
 [node name="RigidBody3D" type="RigidBody3D"]
 collision_mask = 7
+center_of_mass_mode = 1
 can_sleep = false
 
 [node name="Model" parent="." instance=ExtResource("1_rivqw")]
@@ -14,3 +15,33 @@ can_sleep = false
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_4dqcm")
+
+[node name="WaterContactPoints" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.0125014, 0)
+
+[node name="Center" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.719, 0)
+
+[node name="Front" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.719, 2)
+
+[node name="Back" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.719, -2)
+
+[node name="Left" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.8, -0.719, 0)
+
+[node name="Right" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -0.8, -0.719, 0)
+
+[node name="LeftHigher" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.2, -0.3, 0)
+
+[node name="RightHigher" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.2, -0.3, 0)
+
+[node name="BackHigher" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, -3.2)
+
+[node name="FrontHigher" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.4, 3.2)

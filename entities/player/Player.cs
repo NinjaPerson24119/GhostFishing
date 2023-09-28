@@ -4,8 +4,6 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export]
-    public float LowerHalfVolumeReduction;
-    [Export]
     float WaterDrag = 0.07f;
     [Export]
     float WaterAngularDrag = 0.05f;
@@ -23,7 +21,7 @@ public partial class Player : RigidBody3D {
     private float _waterDensity = 1000; // kg/m^3
     private Aabb _absBounds;
     private float _horizontalSliceArea;
-    private Marker3D _controlPoint;
+    private Ocean _ocean;
 
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
@@ -33,7 +31,7 @@ public partial class Player : RigidBody3D {
         _horizontalSliceArea = _absBounds.Size.X * _absBounds.Size.Z;
         GD.Print($"Boat Size: {_absBounds.Size}. Horizontal slice area: {_horizontalSliceArea}");
 
-        _controlPoint = GetNode<Marker3D>("ControlPoint");
+        _ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
     }
 
     public override void _PhysicsProcess(double delta) {
@@ -42,17 +40,21 @@ public partial class Player : RigidBody3D {
         int totalPoints = waterContactPoints.GetChildCount();
         foreach (Node3D contactPoint in waterContactPoints.GetChildren()) {
             // TODO: stop ignoring displacement on XZ plane
-            Vector3 waterDisplacement = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean").GetDisplacement(contactPoint.GlobalPosition);
-            Vector3 waterContactPoint = contactPoint.GlobalPosition + waterDisplacement;
-            GD.Print($"Water height = {waterContactPoint.Y}, boat height = {contactPoint.GlobalPosition.Y}");
-            float depth = 0 - contactPoint.GlobalPosition.Y;
+            // this should just call a GetHeight(), and the displacement should be internal to the Ocean
+            Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));
+            Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
+
+            // TODO: simplify for now by only considering Y
+            //GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
+            float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
+
             if (depth > 0) {
                 submergedPoints++;
                 // Archimedes Principle: F = ρgV
-                float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _absBounds.Size.Y);
-                GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
+                float volumeDisplaced = EstimateVolumeDisplaced(depth);
+                //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
                 float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
-                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * (float)delta * distributedForce, contactPoint.GlobalPosition - GlobalPosition);
+                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
                 break;
             }
         }
@@ -60,18 +62,12 @@ public partial class Player : RigidBody3D {
         PollControls();
     }
 
-    public void EstimateVolumeDisplaced(float depth) {
-        // clip the depth to the height of the boat
-        depth = Mathf.Min(depth, _absBounds.Size.Y);
+    public float EstimateVolumeDisplaced(float depth) {
+        // TODO: this does not consider the shape of the boat
+        // TODO: this does not consider the orientation of the boat
 
-        float halfHeight = _absBounds.Size.Y / 2;
-
-        // estimate lower half of boat with a percentage reduce because of hull curvature
-        float lowerHalfHeight = Mathf.Min(depth, halfHeight);
-        float lowerHalfVolume = _horizontalSliceArea * lowerHalfHeight * _lowerHalfVolumeReduction;
-
-        float upperHalfHeight = Mathf.Max(depth - halfHeight, 0);
-        float volumeDisplaced = _horizontalSliceArea * Mathf.Min(height, _absBounds.Size.Y);
+        // estimate as a rectangular prism
+        return _horizontalSliceArea * Mathf.Min(depth, _absBounds.Size.Y);
     }
 
     public override void _Process(double delta) {
@@ -85,13 +81,12 @@ public partial class Player : RigidBody3D {
 
     private void PollControls() {
         if (submerged) {
-            GD.Print("Submerged");
-            Vector3 towardsFront = (GlobalPosition - _controlPoint.GlobalPosition).Normalized();
+            //GD.Print("Submerged");
             if (Input.IsActionPressed("move_forward")) {
-                ApplyForce(towardsFront * EngineForce, _controlPoint.GlobalPosition);
+                ApplyCentralForce(GlobalTransform.Basis.Z * EngineForce);
             }
             else if (Input.IsActionPressed("move_backward")) {
-                ApplyCentralForce(towardsFront * -1 * EngineForce);
+                ApplyCentralForce(GlobalTransform.Basis.Z * -1 * EngineForce);
             }
             if (Input.IsActionPressed("turn_left")) {
                 ApplyTorque(Vector3.Up * TurnForce);
