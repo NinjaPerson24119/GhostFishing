@@ -67,11 +67,12 @@ MinSubdivisions = 40
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
-mass = 500.0
+mass = 150.0
 script = ExtResource("3_t71xa")
 BuoyancyDamping = 0.9
-EngineForce = 100.0
-TurnForce = 50.0
+BuoyancyForce = 1300.0
+EngineForce = 2000.0
+TurnForce = 2000.0
 
 [node name="Camera3DWithAttributes" type="Camera3D" parent="Player"]
 transform = Transform3D(-1, -2.99003e-08, 8.21506e-08, 0, 0.939693, 0.34202, -8.74228e-08, 0.34202, -0.939693, 0, 4.19049, -5.50209)

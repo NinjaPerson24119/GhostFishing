@@ -4,6 +4,8 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export]
+    public float BuoyancyForce = 1000f;
+    [Export]
     float WaterDrag = 0.07f;
     [Export]
     float WaterAngularDrag = 0.05f;
@@ -54,7 +56,8 @@ public partial class Player : RigidBody3D {
                 float volumeDisplaced = EstimateVolumeDisplaced(depth);
                 //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
                 float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
-                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
+                //ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
+                ApplyForce(Vector3.Up * depth * BuoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
                 break;
             }
         }
@@ -113,6 +116,7 @@ public partial class Player : RigidBody3D {
         AngularVelocity = Vector3.Zero;
         Ocean ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
         GlobalPosition = new Vector3(GlobalPosition.X, ocean.GlobalPosition.Y + 1f, GlobalPosition.Z);
-        Rotation = Vector3.Zero;
+        float yaw = Rotation.Y;
+        Rotation = new Vector3(0, yaw, 0);
     }
 }
