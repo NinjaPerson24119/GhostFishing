@@ -81,9 +81,6 @@ public partial class DebugMode : Node {
         if (inputEvent.IsActionPressed("debug_pause")) {
             GameClock.TogglePause();
         }
-        if (inputEvent.IsActionPressed("debug_reset_boat")) {
-            GetNode<Player>("/root/Main/Player").ResetAboveWater();
-        }
     }
 
     private void ToggleDebugDrawEnum(Viewport.DebugDrawEnum debugDrawEnum) {
