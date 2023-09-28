@@ -293,27 +293,27 @@ public partial class Ocean : Node3D {
 		return $"WaterTile_{indices.X},{indices.Y}";
 	}
 
-	private Vector3 AlignPositionToOceanOriginCorner(Vector3 position) {
+	private Vector2 AlignPositionToOceanOriginCorner(Vector2 globalXZ) {
 		// note that the ocean is centered on the origin tile
 		// e.g. the bounds for being in the origin tile are (-tileSize/2, tileSize/2)
-		Vector3 alignedPosition = position + new Vector3(TileSize / 2, 0, TileSize / 2);
+		Vector2 alignedPosition = globalXZ + new Vector2(TileSize / 2, TileSize / 2);
 		return alignedPosition;
 	}
 
 	// returns the tile indices relative to the ocean origin
-	private Vector2 GetTileIndices(Vector3 worldPosition) {
-		Vector3 relativeToOcean = worldPosition - GlobalPosition;
-		Vector3 shiftedPosition = AlignPositionToOceanOriginCorner(relativeToOcean);
-		return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Z / TileSize));
+	private Vector2 GetTileIndices(Vector2 globalXZ) {
+		Vector2 relativeToOcean = new Vector2(globalXZ.X - GlobalPosition.X, globalXZ.Y - GlobalPosition.Z);
+		Vector2 shiftedPosition = AlignPositionToOceanOriginCorner(relativeToOcean);
+		return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Y / TileSize));
 	}
 
-	public Vector3 GetDisplacement(Vector3 worldPosition) {
+	public Vector3 GetDisplacement(Vector2 globalXZ) {
 		// delegate to water tile which may vary in configuration
-		Vector2 tileIndices = GetTileIndices(worldPosition);
+		Vector2 tileIndices = GetTileIndices(globalXZ);
 		string tileName = GetTileName(tileIndices);
 		try {
 			WaterTile waterTile = GetNode<WaterTile>(tileName);
-			return waterTile.GetDisplacement(worldPosition);
+			return waterTile.GetDisplacement(globalXZ);
 		}
 		catch (Exception) {
 			GD.PrintErr($"Failed to GetHeight(). Couldn't find water tile {tileName}");
@@ -325,8 +325,8 @@ public partial class Ocean : Node3D {
 	public void OnOriginChanged(Vector3 origin) {
 		// returns the tile indices relative to the world origin
 		Vector2 GlobalTileIndices(Vector3 position) {
-			Vector3 shiftedPosition = AlignPositionToOceanOriginCorner(position);
-			return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Z / TileSize));
+			Vector2 shiftedPosition = AlignPositionToOceanOriginCorner(new Vector2(position.X, position.Z));
+			return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Y / TileSize));
 		}
 		// determine which global tile the origin is in
 		Vector2 newOriginTileIndices = GlobalTileIndices(origin);
@@ -338,7 +338,7 @@ public partial class Ocean : Node3D {
 			Position = new Vector3(_originTileIndices.X * TileSize, Position.Y, _originTileIndices.Y * TileSize);
 
 			// verify that the origin tile is now (0,0)
-			Vector2 indicesRelativeToOrigin = GetTileIndices(origin);
+			Vector2 indicesRelativeToOrigin = GetTileIndices(new Vector2(origin.X, origin.Z));
 			DebugTools.Assert(indicesRelativeToOrigin == new Vector2(0, 0), $"Ocean origin tile is not (0,0) after recentering. Got {indicesRelativeToOrigin}");
 		}
 	}

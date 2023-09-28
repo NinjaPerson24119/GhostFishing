@@ -22,7 +22,7 @@ public partial class WaterTileCPU : MeshInstance3D {
             // scale them across the desired tile size
             vertex = vertex * 50;
 
-            var displacement = _ocean.GetDisplacement(vertex);
+            var displacement = _ocean.GetDisplacement(new Vector2(vertex.X, vertex.Z));
             vertex += displacement;
             mdt.SetVertex(i, vertex);
         }
