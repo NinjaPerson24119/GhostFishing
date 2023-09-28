@@ -32,7 +32,6 @@ shape = SubResource("ConvexPolygonShape3D_4dqcm")
 [node name="WaterApproximation" type="Node3D" parent="."]
 
 [node name="WaterPlane" type="MeshInstance3D" parent="WaterApproximation"]
-transform = Transform3D(2, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0)
 mesh = SubResource("PlaneMesh_p2coj")
 skeleton = NodePath("../..")
 
