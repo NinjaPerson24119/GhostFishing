@@ -4,6 +4,8 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export]
+    public float LowerHalfVolumeReduction;
+    [Export]
     float WaterDrag = 0.07f;
     [Export]
     float WaterAngularDrag = 0.05f;
@@ -50,13 +52,26 @@ public partial class Player : RigidBody3D {
                 float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _absBounds.Size.Y);
                 GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
                 float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
-                float distributedForce = buoyancyForce * Mathf.Clamp(depth / _absBounds.Size.Y, 0, 1);
-                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * (float)delta * distributedForce, contactPoint.GlobalPosition);
+                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * (float)delta * distributedForce, contactPoint.GlobalPosition - GlobalPosition);
                 break;
             }
         }
         submerged = submergedPoints > 0;
         PollControls();
+    }
+
+    public void EstimateVolumeDisplaced(float depth) {
+        // clip the depth to the height of the boat
+        depth = Mathf.Min(depth, _absBounds.Size.Y);
+
+        float halfHeight = _absBounds.Size.Y / 2;
+
+        // estimate lower half of boat with a percentage reduce because of hull curvature
+        float lowerHalfHeight = Mathf.Min(depth, halfHeight);
+        float lowerHalfVolume = _horizontalSliceArea * lowerHalfHeight * _lowerHalfVolumeReduction;
+
+        float upperHalfHeight = Mathf.Max(depth - halfHeight, 0);
+        float volumeDisplaced = _horizontalSliceArea * Mathf.Min(height, _absBounds.Size.Y);
     }
 
     public override void _Process(double delta) {
