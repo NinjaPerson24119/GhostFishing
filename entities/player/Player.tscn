@@ -75,6 +75,7 @@ spot_range = 25.0
 spot_angle_attenuation = 0.3
 
 [node name="BoundingBox" type="MeshInstance3D" parent="."]
+visible = false
 mesh = SubResource("BoxMesh_cwted")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]

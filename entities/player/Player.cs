@@ -1,8 +1,6 @@
 using Godot;
 
 public partial class Player : RigidBody3D {
-    [Export]
-    public float BuoyancyForce = 0.3f;
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export(PropertyHint.Range, "0,1")]
@@ -10,7 +8,7 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1")]
     float WaterAngularDrag = 0.05f;
     [Export]
-    float EngineAcceleration = 0.1f;
+    float EngineAcceleration = 0.05f;
     [Export]
     float TurnAcceleration = 0.03f;
 
@@ -25,12 +23,9 @@ public partial class Player : RigidBody3D {
 
     private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
     private float _waterDensity = 1000; // kg/m^3
-    private Aabb _absBounds;
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
-
-    // bounding boxes in Godot are dumb so write our own
-    private Vector3 Size = new Vector3(2.5f, 1f, 5f);
+    private Vector3 _size = new Vector3(2.5f, 0.5f, 1f);
 
     const int averageWindowSize = 100;
     private MovingAverage _pitchAverage = new MovingAverage(averageWindowSize);
@@ -41,14 +36,12 @@ public partial class Player : RigidBody3D {
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
     public override void _Ready() {
-        MeshInstance3D boatMesh = GetNode<Node3D>("Model").GetNode<MeshInstance3D>("Boat");
-        _absBounds = GetNode<Node3D>("Model").GetNode<MeshInstance3D>("Boat").GetAabb().Abs();
         _ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
 
-        _horizontalSliceArea = Size.X * Size.Y; //_absBounds.Size.X * _absBounds.Size.Z;
-        GD.Print($"Boat Size: {_absBounds.Size}. Horizontal slice area: {_horizontalSliceArea}");
+        _horizontalSliceArea = _size.X * _size.Y;
+        GD.Print($"Boat Size: {_size}. Horizontal slice area: {_horizontalSliceArea}");
 
-        (GetNode<MeshInstance3D>("BoundingBox").Mesh as BoxMesh).Size = _absBounds.Size;
+        (GetNode<MeshInstance3D>("BoundingBox").Mesh as BoxMesh).Size = _size;
     }
 
     public override void _Process(double delta) {
@@ -59,29 +52,21 @@ public partial class Player : RigidBody3D {
         }
     }
 
-    public override void _PhysicsProcess(double delta) {
-
-    }
-
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
         ApplyForcesFromControls();
 
         Vector3 displacement = _ocean.GetDisplacement(new Vector2(GlobalPosition.X, GlobalPosition.Z));
         float waterHeight = _ocean.GlobalPosition.Y + displacement.Y;
-        _depthInWater = waterHeight - GlobalPosition.Y + Size.Y / 2;
+        _depthInWater = waterHeight - GlobalPosition.Y + _size.Y / 2;
 
         if (_depthInWater > 0) {
-            float volumeDisplaced = _horizontalSliceArea * Mathf.Min(_depthInWater, Size.Y);
-            GD.Print($"Volume displaced: {volumeDisplaced}, depth: {_depthInWater}, horizontal slice area: {_horizontalSliceArea}, boat height: {Size.Y}");
+            float volumeDisplaced = _horizontalSliceArea * Mathf.Min(_depthInWater, _size.Y);
+            GD.Print($"Volume displaced: {volumeDisplaced}, depth: {_depthInWater}, horizontal slice area: {_horizontalSliceArea}, boat height: {_size.Y}");
 
             // Archimedes' principle
             float buoyancyForce = _waterDensity * _gravity * volumeDisplaced * (1 - BuoyancyDamping);
-            GD.Print($"Buoyancy force: {buoyancyForce}");
+            GD.Print($"Buoyancy force: {_waterDensity * _gravity * volumeDisplaced}");
             ApplyCentralForce(Vector3.Up * buoyancyForce);
-            //ConstantForce = Vector3.Up * buoyancyForce;
-        }
-        else {
-            //ConstantForce = Vector3.Zero;
         }
 
         ApplyWaterDrag(state);
@@ -100,7 +85,7 @@ public partial class Player : RigidBody3D {
         //GlobalPosition = new Vector3(GlobalPosition.X, displacementY, GlobalPosition.Z);
 
         // keep the boat at the surface of the water
-        //float boatY = _ocean.GlobalPosition.Y + _absBounds.Size.Y / 2 - DepthInWater;
+        //float boatY = _ocean.GlobalPosition.Y + _size.Y / 2 - DepthInWater;
         //GlobalPosition = new Vector3(GlobalPosition.X, boatY, GlobalPosition.Z);
     }
 
@@ -126,7 +111,7 @@ public partial class Player : RigidBody3D {
     }
 
     public void ApplyWaterDrag(PhysicsDirectBodyState3D state) {
-        float submergedProportion = _depthInWater / _absBounds.Size.Y;
+        float submergedProportion = _depthInWater / _size.Y;
         state.LinearVelocity *= 1 - WaterDrag * submergedProportion;
         state.AngularVelocity *= 1 - WaterAngularDrag * submergedProportion;
     }
@@ -134,8 +119,8 @@ public partial class Player : RigidBody3D {
     // estimates augmentations to the transform, based on the ocean waves
     public (float pitch, float roll, float displacementY) EstimateWaterAugmentations() {
         // get the points around the boat AABB in cross shape (+)
-        float halfWidth = _absBounds.Size.X / 2;
-        float halfLength = _absBounds.Size.Z / 2;
+        float halfWidth = _size.X / 2;
+        float halfLength = _size.Z / 2;
         Vector3 front = new Vector3(0, 0, -halfLength);
         Vector3 back = new Vector3(0, 0, halfLength);
         Vector3 left = new Vector3(-halfWidth, 0, 0);
