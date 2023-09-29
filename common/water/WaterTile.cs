@@ -221,9 +221,10 @@ public partial class WaterTile : MeshInstance3D {
         // calculate noise portion of displacement
         Vector3 normal = gerstner.Normal(globalXZ.X, globalXZ.Y, (float)RealClock.RealTime);
 
+        // ignore how shader smooths noise at tile edges. always compute full noise
         int uvX = (int)Mathf.Wrap(globalXZ.X / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
         int uvY = (int)Mathf.Wrap(globalXZ.Y / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
-        float noiseHeight = 0; //_surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
+        float noiseHeight = _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
 
         return gerstnerDisplacement + normal * noiseHeight * _surfaceHeightScale;
     }

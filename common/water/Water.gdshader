@@ -110,7 +110,7 @@ void fragment() {
 	NORMAL_MAP = normal_blend;
 
 	// set alpha so Godot knows to render the water as transparent
-	ALPHA = 0.8;
+	ALPHA = 0.9;
 
 	// Outline the edges of the water tile black
 	if (debug_visuals && (UV.x < 0.01 || UV.x > 0.99 || UV.y < 0.01 || UV.y > 0.99)) {

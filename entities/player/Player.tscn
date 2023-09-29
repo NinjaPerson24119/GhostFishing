@@ -1,6 +1,5 @@
 [gd_scene load_steps=8 format=3 uid="uid://dpabijl3uxatr"]
 
-[ext_resource type="Script" path="res://entities/player/Visual.cs" id="1_ll6dn"]
 [ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_rivqw"]
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_4dqcm"]
@@ -20,6 +19,8 @@ material = SubResource("StandardMaterial3D_sue0h")
 radius = 0.25
 height = 0.5
 
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_iurfu"]
+
 [node name="Player" type="RigidBody3D"]
 collision_mask = 7
 axis_lock_linear_y = true
@@ -29,29 +30,43 @@ gravity_scale = 0.0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_4dqcm")
 
-[node name="Visual" type="Node3D" parent="."]
-script = ExtResource("1_ll6dn")
-
-[node name="WaterApproximation" type="Node3D" parent="Visual"]
+[node name="WaterApproximation" type="Node3D" parent="."]
 visible = false
 
-[node name="WaterPlane" type="MeshInstance3D" parent="Visual/WaterApproximation"]
+[node name="WaterPlane" type="MeshInstance3D" parent="WaterApproximation"]
 mesh = SubResource("PlaneMesh_p2coj")
-skeleton = NodePath("../../..")
+skeleton = NodePath("../..")
 
-[node name="FrontSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
+[node name="FrontSphere" type="MeshInstance3D" parent="WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 
-[node name="BackSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
+[node name="BackSphere" type="MeshInstance3D" parent="WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 skeleton = NodePath("../FrontSphere")
 
-[node name="LeftSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
+[node name="LeftSphere" type="MeshInstance3D" parent="WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 skeleton = NodePath("../BackSphere")
 
-[node name="RightSphere" type="MeshInstance3D" parent="Visual/WaterApproximation"]
+[node name="RightSphere" type="MeshInstance3D" parent="WaterApproximation"]
 mesh = SubResource("SphereMesh_71hcx")
 skeleton = NodePath("../LeftSphere")
 
-[node name="Model" parent="Visual" instance=ExtResource("1_rivqw")]
+[node name="Model" parent="." instance=ExtResource("1_rivqw")]
+transform = Transform3D(-1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, 0, 0)
+
+[node name="Camera3DWithAttributes" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 4.19, 5.502)
+attributes = SubResource("CameraAttributesPractical_iurfu")
+fov = 100.0
+near = 1.0
+far = 1000.0
+
+[node name="SpotLight3D" type="SpotLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.997916, -0.0645323, 0, 0.0645323, 0.997916, 0, 0.992, -3.786)
+light_energy = 8.0
+light_volumetric_fog_energy = 0.012
+light_bake_mode = 0
+shadow_enabled = true
+spot_range = 25.0
+spot_angle_attenuation = 0.3
