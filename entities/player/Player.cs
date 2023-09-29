@@ -1,14 +1,16 @@
 using Godot;
 
 public partial class Player : RigidBody3D {
-    [Export]
-    public float BuoyancyForce = 5f;
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export(PropertyHint.Range, "0,1")]
-    float WaterDrag = 0.07f;
+    float ConstantLinearDrag = 0.07f;
     [Export(PropertyHint.Range, "0,1")]
-    float WaterAngularDrag = 0.05f;
+    float ConstantAngularDrag = 0.05f;
+    [Export(PropertyHint.Range, "0,1")]
+    float WaterLinearDrag = 0.03f;
+    [Export(PropertyHint.Range, "0,1")]
+    float WaterAngularDrag = 0.01f;
     [Export]
     float EngineAcceleration = 0.05f;
     [Export]
@@ -104,6 +106,7 @@ public partial class Player : RigidBody3D {
             _depthInWater = cumulativeDepth / submergedPoints;
         }
 
+        ApplyConstantDrag(state);
         ApplyWaterDrag(state);
 
         var aug = EstimateWaterAugmentations();
@@ -149,9 +152,19 @@ public partial class Player : RigidBody3D {
         }
     }
 
+    public void ApplyConstantDrag(PhysicsDirectBodyState3D state) {
+        state.AngularVelocity *= 1 - ConstantAngularDrag;
+        state.LinearVelocity *= 1 - ConstantLinearDrag;
+    }
+
     public void ApplyWaterDrag(PhysicsDirectBodyState3D state) {
-        state.LinearVelocity *= 1 - WaterDrag;
-        state.AngularVelocity *= 1 - WaterAngularDrag;
+        if (_depthInWater <= 0) {
+            return;
+        }
+        float submergedProportion = _depthInWater / _size.Y;
+        DebugTools.Assert(submergedProportion >= 0 && submergedProportion <= 1, $"submergedProportion ({submergedProportion}) must be between 0 and 1");
+        state.AngularVelocity *= 1 - WaterAngularDrag * submergedProportion;
+        state.LinearVelocity *= 1 - WaterLinearDrag * submergedProportion;
     }
 
     // estimates augmentations to the transform, based on the ocean waves
