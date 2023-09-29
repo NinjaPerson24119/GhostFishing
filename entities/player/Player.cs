@@ -71,30 +71,31 @@ public partial class Player : RigidBody3D {
         }
         */
 
-        Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
-        float cumulativeDepth = 0;
-        int submergedPoints = 0;
-        foreach (Marker3D contactPoint in waterContactPoints.GetChildren()) {
-            // TODO: stop ignoring displacement on XZ plane
-            // this should just call a GetHeight(), and the displacement should be internal to the Ocean
-            Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));
-            Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
+        /*
+            Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
+            float cumulativeDepth = 0;
+            int submergedPoints = 0;
+            foreach (Marker3D contactPoint in waterContactPoints.GetChildren()) {
+                // TODO: stop ignoring displacement on XZ plane
+                // this should just call a GetHeight(), and the displacement should be internal to the Ocean
+                Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));
+                Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
 
-            // TODO: simplify for now by only considering Y
-            GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
-            float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
+                // TODO: simplify for now by only considering Y
+                GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
+                float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
 
-            if (depth > 0) {
-                submergedPoints++;
-                // Archimedes Principle: F = ρgV
-                float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
-                //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
-                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
-                //ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
+                if (depth > 0) {
+                    submergedPoints++;
+                    // Archimedes Principle: F = ρgV
+                    float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
+                    //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
+                    float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
+                    //ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
+                }
             }
-        }
-        _depthInWater = cumulativeDepth / submergedPoints;
-
+            _depthInWater = cumulativeDepth / submergedPoints;
+    */
         ApplyWaterDrag(state);
 
         var aug = EstimateWaterAugmentations();
@@ -198,10 +199,11 @@ public partial class Player : RigidBody3D {
         AngularVelocity = Vector3.Zero;
 
         Transform3D transform = new Transform3D();
+        // ignore the linter, you must set the basis and origin
         transform.Basis = Basis.Identity;
         transform.Origin = Vector3.Zero;
+        transform = transform.Rotated(Vector3.Up, Rotation.Y);
         transform = transform.Translated(new Vector3(GlobalPosition.X, _ocean.GlobalPosition.Y + 1f, GlobalPosition.Z));
-        transform = transform.Rotated(Vector3.Up, 2);
         Transform = transform;
     }
 }
