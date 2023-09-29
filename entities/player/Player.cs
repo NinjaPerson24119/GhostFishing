@@ -31,11 +31,6 @@ public partial class Player : RigidBody3D {
     private float _depthInWater = 1f;
     private Vector3 _size = new Vector3(1f, 0.5f, 2.5f);
 
-    const int averageWindowSize = 100;
-    private MovingAverage _pitchAverage = new MovingAverage(averageWindowSize);
-    private MovingAverage _rollAverage = new MovingAverage(averageWindowSize);
-    private MovingAverage _displacementYAverage = new MovingAverage(averageWindowSize);
-
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
@@ -60,22 +55,6 @@ public partial class Player : RigidBody3D {
         Transform = Transform.Orthonormalized();
         ApplyForcesFromControls();
 
-        /*
-        Vector3 displacement = _ocean.GetDisplacement(new Vector2(GlobalPosition.X, GlobalPosition.Z));
-        float waterHeight = _ocean.GlobalPosition.Y + displacement.Y;
-        _depthInWater = waterHeight - GlobalPosition.Y + _size.Y / 2;
-
-        if (_depthInWater > 0) {
-            float volumeDisplaced = _horizontalSliceArea * Mathf.Min(_depthInWater, _size.Y);
-            GD.Print($"Volume displaced: {volumeDisplaced}, depth: {_depthInWater}, horizontal slice area: {_horizontalSliceArea}, boat height: {_size.Y}");
-
-            // Archimedes' principle
-            float buoyancyForce = _waterDensity * _gravity * volumeDisplaced * (1 - BuoyancyDamping);
-            GD.Print($"Buoyancy force: {_waterDensity * _gravity * volumeDisplaced}");
-            ApplyCentralForce(Vector3.Up * buoyancyForce);
-        }
-        */
-
         Node3D waterContactPoints = GetNode<Node3D>("Model/WaterContactPoints");
         float cumulativeDepth = 0;
         int submergedPoints = 0;
@@ -99,7 +78,6 @@ public partial class Player : RigidBody3D {
                 //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
                 float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
                 ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
-                //ApplyCentralForce(Vector3.Up * BuoyancyForce * depth);
             }
         }
         if (submergedPoints > 0) {
@@ -108,23 +86,6 @@ public partial class Player : RigidBody3D {
 
         ApplyConstantDrag(state);
         ApplyWaterDrag(state);
-
-        var aug = EstimateWaterAugmentations();
-        _pitchAverage.AddValue(aug.pitch);
-        _rollAverage.AddValue(aug.roll);
-        _displacementYAverage.AddValue(aug.displacementY);
-
-        float pitch = (float)_pitchAverage.GetValue();
-        float roll = (float)_rollAverage.GetValue();
-        //float displacementY = (float)_displacementYAverage.GetValue();
-        //GD.Print($"pitch: {Mathf.RadToDeg(pitch)}, roll: {Mathf.RadToDeg(roll)}, displacementY: ?");
-
-        //GlobalRotation = new Vector3(pitch, GlobalRotation.Y, roll);
-        //GlobalPosition = new Vector3(GlobalPosition.X, displacementY, GlobalPosition.Z);
-
-        // keep the boat at the surface of the water
-        //float boatY = _ocean.GlobalPosition.Y + _size.Y / 2 - DepthInWater;
-        //GlobalPosition = new Vector3(GlobalPosition.X, boatY, GlobalPosition.Z);
     }
 
     private void ApplyForcesFromControls() {
@@ -167,53 +128,6 @@ public partial class Player : RigidBody3D {
         state.LinearVelocity *= 1 - WaterLinearDrag * submergedProportion;
     }
 
-    // estimates augmentations to the transform, based on the ocean waves
-    public (float pitch, float roll, float displacementY) EstimateWaterAugmentations() {
-        // get the points around the boat AABB in cross shape (+)
-        float halfWidth = _size.X / 2;
-        float halfLength = _size.Z / 2;
-        Vector3 front = new Vector3(0, 0, -halfLength);
-        Vector3 back = new Vector3(0, 0, halfLength);
-        Vector3 left = new Vector3(-halfWidth, 0, 0);
-        Vector3 right = new Vector3(halfWidth, 0, 0);
-
-        // adjust the points to the ocean surface
-        float averageDisplacementY = 0;
-        Vector3 GlobalPositionXZ = new Vector3(GlobalPosition.X, 0, GlobalPosition.Z);
-        Vector3[] pointsToDisplace = { front, back, left, right };
-        for (int i = 0; i < pointsToDisplace.Length; i++) {
-            Vector3 globalPositionToDisplace = pointsToDisplace[i].Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-            Vector3 displacement = _ocean.GetDisplacement(new Vector2(globalPositionToDisplace.X, globalPositionToDisplace.Z));
-            //GD.Print($"displacement: {displacement}");
-            pointsToDisplace[i].Y += displacement.Y;
-            averageDisplacementY += displacement.Y;
-        }
-        averageDisplacementY /= pointsToDisplace.Length;
-        front = pointsToDisplace[0];
-        back = pointsToDisplace[1];
-        left = pointsToDisplace[2];
-        right = pointsToDisplace[3];
-
-        // compute angles to the waves
-        float angleFront = Mathf.Acos(front.Normalized().Dot(Vector3.Forward));
-        float angleBack = Mathf.Acos(back.Normalized().Dot(Vector3.Back));
-        float angleLeft = Mathf.Acos(left.Normalized().Dot(Vector3.Left));
-        float angleRight = Mathf.Acos(right.Normalized().Dot(Vector3.Right));
-        //GD.Print($"angleFront: {Mathf.RadToDeg(angleFront)}, angleBack: {Mathf.RadToDeg(angleBack)}, angleLeft: {Mathf.RadToDeg(angleLeft)}, angleRight: {Mathf.RadToDeg(angleRight)}");
-
-        float pitch = (angleFront + angleBack) / 2;
-        float roll = (angleLeft + angleRight) / 2;
-
-
-        //GD.Print($"pitch: {Mathf.RadToDeg(pitch)}, roll: {Mathf.RadToDeg(roll)}");
-        GetNode<MeshInstance3D>("Model/WaterApproximation/FrontSphere").GlobalPosition = front.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-        GetNode<MeshInstance3D>("Model/WaterApproximation/BackSphere").GlobalPosition = back.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-        GetNode<MeshInstance3D>("Model/WaterApproximation/LeftSphere").GlobalPosition = left.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-        GetNode<MeshInstance3D>("Model/WaterApproximation/RightSphere").GlobalPosition = right.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-
-        return (pitch, roll, averageDisplacementY);
-    }
-
     public void ResetAboveWater() {
         CallDeferred(nameof(DeferredResetAboveWater));
     }
@@ -223,7 +137,7 @@ public partial class Player : RigidBody3D {
         AngularVelocity = Vector3.Zero;
 
         Transform3D transform = new Transform3D();
-        // ignore the linter, you must set the basis and origin
+        // ignore the linter. you must set the basis and origin
         transform.Basis = Basis.Identity;
         transform.Origin = Vector3.Zero;
         transform = transform.Rotated(Vector3.Up, Rotation.Y);

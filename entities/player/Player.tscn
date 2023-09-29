@@ -1,22 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://dpabijl3uxatr"]
+[gd_scene load_steps=6 format=3 uid="uid://dpabijl3uxatr"]
 
 [ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_rivqw"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_0o55t"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bam1o"]
-albedo_color = Color(0.109804, 1, 0.376471, 1)
-
-[sub_resource type="PlaneMesh" id="PlaneMesh_p2coj"]
-material = SubResource("StandardMaterial3D_bam1o")
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_sue0h"]
-albedo_color = Color(1, 0, 0, 1)
-
-[sub_resource type="SphereMesh" id="SphereMesh_71hcx"]
-material = SubResource("StandardMaterial3D_sue0h")
-radius = 0.25
-height = 0.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_02knu"]
 transparency = 1
@@ -71,29 +57,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
 
 [node name="Center5" type="Marker3D" parent="Model/WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)
-
-[node name="WaterApproximation" type="Node3D" parent="Model"]
-transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0, 0, 0)
-visible = false
-
-[node name="WaterPlane" type="MeshInstance3D" parent="Model/WaterApproximation"]
-mesh = SubResource("PlaneMesh_p2coj")
-skeleton = NodePath("../../..")
-
-[node name="FrontSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-
-[node name="BackSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-skeleton = NodePath("../FrontSphere")
-
-[node name="LeftSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-skeleton = NodePath("../BackSphere")
-
-[node name="RightSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-skeleton = NodePath("../LeftSphere")
 
 [node name="BoundingBox" type="MeshInstance3D" parent="."]
 visible = false
