@@ -187,7 +187,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _surfaceHeightScale = 0.25f;
+	private float _surfaceHeightScale = 0.5f;
 
 	[Export]
 	public float SurfaceTimeScale {
@@ -199,7 +199,7 @@ public partial class Ocean : Node3D {
 			QueueRespawnWaterTiles();
 		}
 	}
-	private float _surfaceTimeScale = 0.01f;
+	private float _surfaceTimeScale = 0.02f;
 
 	[ExportGroup("Debugging")]
 	[Export]

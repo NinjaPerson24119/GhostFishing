@@ -25,7 +25,7 @@ public partial class DebugMode : Node {
 
     public override void _Ready() {
         RenderingServer.SetDebugGenerateWireframes(true);
-        GetNode<Label>("DebugIndicator").Visible = false;
+        GetNode<Label>("DebugIndicator").Visible = debugMode;
     }
 
     public override void _Process(double delta) {
@@ -80,6 +80,9 @@ public partial class DebugMode : Node {
         }
         if (inputEvent.IsActionPressed("debug_pause")) {
             GameClock.TogglePause();
+        }
+        if (inputEvent.IsActionPressed("debug_reset_boat")) {
+            GetNode<Player>("/root/Main/Player").ResetAboveWater();
         }
     }
 

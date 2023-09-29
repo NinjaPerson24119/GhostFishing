@@ -16,7 +16,6 @@ public struct Gerstner {
     // returned vector is in (X,Y,Z), the shader expects (X,Z,Y)
     public Vector3 Displacement(float x, float z, float t) {
         Vector3 result = Vector3.Zero;
-        GD.Print($"waves: {_waveSet.waves.Count}");
         for (int i = 0; i < _waveSet.waves.Count; i++) {
             float theta = ThetaI(i, x, z, t);
             Wave w = _waveSet.waves[i];
