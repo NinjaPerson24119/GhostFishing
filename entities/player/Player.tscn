@@ -2,6 +2,8 @@
 
 [ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_rivqw"]
 
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_0o55t"]
+
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_bam1o"]
 albedo_color = Color(0.109804, 1, 0.376471, 1)
 
@@ -16,8 +18,6 @@ material = SubResource("StandardMaterial3D_sue0h")
 radius = 0.25
 height = 0.5
 
-[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_iurfu"]
-
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_02knu"]
 transparency = 1
 albedo_color = Color(1, 0.717647, 1, 0.392157)
@@ -31,42 +31,22 @@ points = PackedVector3Array(1.23771, 0.599986, 1.7025, 0.123577, 0.786792, 2.479
 [node name="Player" type="RigidBody3D"]
 collision_mask = 7
 mass = 150.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.5, 0)
 can_sleep = false
 
-[node name="WaterApproximation" type="Node3D" parent="."]
-visible = false
-
-[node name="WaterPlane" type="MeshInstance3D" parent="WaterApproximation"]
-mesh = SubResource("PlaneMesh_p2coj")
-skeleton = NodePath("../..")
-
-[node name="FrontSphere" type="MeshInstance3D" parent="WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-
-[node name="BackSphere" type="MeshInstance3D" parent="WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-skeleton = NodePath("../FrontSphere")
-
-[node name="LeftSphere" type="MeshInstance3D" parent="WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-skeleton = NodePath("../BackSphere")
-
-[node name="RightSphere" type="MeshInstance3D" parent="WaterApproximation"]
-mesh = SubResource("SphereMesh_71hcx")
-skeleton = NodePath("../LeftSphere")
-
 [node name="Model" parent="." instance=ExtResource("1_rivqw")]
-transform = Transform3D(-1, 0, -1.50996e-07, 0, 1, 0, 1.50996e-07, 0, -1, 0, 0, 0)
+transform = Transform3D(-0.5, 0, -7.54979e-08, 0, 0.5, 0, 7.54979e-08, 0, -0.5, 0, 0, 0)
 
-[node name="Camera3DWithAttributes" type="Camera3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.939693, 0.34202, 0, -0.34202, 0.939693, 0, 4.19, 5.502)
-attributes = SubResource("CameraAttributesPractical_iurfu")
+[node name="Camera3DWithAttributes2" type="Camera3D" parent="Model"]
+transform = Transform3D(-1, -5.16436e-08, 1.4189e-07, 0, 0.939693, 0.34202, -1.50996e-07, 0.34202, -0.939693, 8.30779e-07, 4.19, -5.502)
+attributes = SubResource("CameraAttributesPractical_0o55t")
 fov = 100.0
 near = 1.0
 far = 1000.0
 
-[node name="SpotLight3D" type="SpotLight3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 0.997916, -0.0645323, 0, 0.0645323, 0.997916, 0, 0.992, -3.786)
+[node name="SpotLight3D2" type="SpotLight3D" parent="Model"]
+transform = Transform3D(-1, 9.7441e-09, 1.50681e-07, 0, 0.997916, -0.0645323, -1.50996e-07, -0.0645323, -0.997916, -5.7167e-07, 0.992, 3.786)
 light_energy = 8.0
 light_volumetric_fog_energy = 0.012
 light_bake_mode = 0
@@ -74,27 +54,51 @@ shadow_enabled = true
 spot_range = 25.0
 spot_angle_attenuation = 0.3
 
+[node name="WaterContactPoints" type="Node3D" parent="Model"]
+transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0, 0, 0)
+
+[node name="Center" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.640059, 0)
+
+[node name="Center2" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -3)
+
+[node name="Center3" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 3)
+
+[node name="Center4" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
+
+[node name="Center5" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)
+
+[node name="WaterApproximation" type="Node3D" parent="Model"]
+transform = Transform3D(-1, 0, 1.50996e-07, 0, 1, 0, -1.50996e-07, 0, -1, 0, 0, 0)
+visible = false
+
+[node name="WaterPlane" type="MeshInstance3D" parent="Model/WaterApproximation"]
+mesh = SubResource("PlaneMesh_p2coj")
+skeleton = NodePath("../../..")
+
+[node name="FrontSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
+mesh = SubResource("SphereMesh_71hcx")
+
+[node name="BackSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
+mesh = SubResource("SphereMesh_71hcx")
+skeleton = NodePath("../FrontSphere")
+
+[node name="LeftSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
+mesh = SubResource("SphereMesh_71hcx")
+skeleton = NodePath("../BackSphere")
+
+[node name="RightSphere" type="MeshInstance3D" parent="Model/WaterApproximation"]
+mesh = SubResource("SphereMesh_71hcx")
+skeleton = NodePath("../LeftSphere")
+
 [node name="BoundingBox" type="MeshInstance3D" parent="."]
 visible = false
 mesh = SubResource("BoxMesh_cwted")
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.746, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_4dqcm")
-
-[node name="WaterContactPoints" type="Node3D" parent="."]
-
-[node name="Center" type="Marker3D" parent="WaterContactPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.640059, 0)
-
-[node name="Center2" type="Marker3D" parent="WaterContactPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -2)
-
-[node name="Center3" type="Marker3D" parent="WaterContactPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 2)
-
-[node name="Center4" type="Marker3D" parent="WaterContactPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
-
-[node name="Center5" type="Marker3D" parent="WaterContactPoints"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)

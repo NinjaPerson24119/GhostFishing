@@ -1,6 +1,8 @@
 using Godot;
 
 public partial class Player : RigidBody3D {
+    [Export]
+    public float BuoyancyForce = 5f;
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export(PropertyHint.Range, "0,1")]
@@ -25,7 +27,7 @@ public partial class Player : RigidBody3D {
     private float _waterDensity = 1000; // kg/m^3
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
-    private Vector3 _size = new Vector3(2.5f, 0.5f, 1f);
+    private Vector3 _size = new Vector3(1f, 0.5f, 2.5f);
 
     const int averageWindowSize = 100;
     private MovingAverage _pitchAverage = new MovingAverage(averageWindowSize);
@@ -53,6 +55,7 @@ public partial class Player : RigidBody3D {
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
+        Transform = Transform.Orthonormalized();
         ApplyForcesFromControls();
 
         /*
@@ -71,31 +74,36 @@ public partial class Player : RigidBody3D {
         }
         */
 
-        /*
-            Node3D waterContactPoints = GetNode<Node3D>("WaterContactPoints");
-            float cumulativeDepth = 0;
-            int submergedPoints = 0;
-            foreach (Marker3D contactPoint in waterContactPoints.GetChildren()) {
-                // TODO: stop ignoring displacement on XZ plane
-                // this should just call a GetHeight(), and the displacement should be internal to the Ocean
-                Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));
-                Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
+        Node3D waterContactPoints = GetNode<Node3D>("Model/WaterContactPoints");
+        float cumulativeDepth = 0;
+        int submergedPoints = 0;
+        // Marker3D
+        var children = waterContactPoints.GetChildren();
+        for (int i = 0; i < children.Count; i++) {
+            Marker3D contactPoint = children[i] as Marker3D;
+            // TODO: stop ignoring displacement on XZ plane
+            // this should just call a GetHeight(), and the displacement should be internal to the Ocean
+            Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));
+            Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
 
-                // TODO: simplify for now by only considering Y
-                GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
-                float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
+            // TODO: simplify for now by only considering Y
+            GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
+            float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
 
-                if (depth > 0) {
-                    submergedPoints++;
-                    // Archimedes Principle: F = ρgV
-                    float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
-                    //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
-                    float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
-                    //ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
-                }
+            if (depth > 0) {
+                submergedPoints++;
+                // Archimedes Principle: F = ρgV
+                float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
+                //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
+                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
+                ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
+                //ApplyCentralForce(Vector3.Up * BuoyancyForce * depth);
             }
+        }
+        if (submergedPoints > 0) {
             _depthInWater = cumulativeDepth / submergedPoints;
-    */
+        }
+
         ApplyWaterDrag(state);
 
         var aug = EstimateWaterAugmentations();
@@ -117,6 +125,10 @@ public partial class Player : RigidBody3D {
     }
 
     private void ApplyForcesFromControls() {
+        if (_depthInWater < 0) {
+            return;
+        }
+
         bool moveForward = Input.IsActionPressed("move_forward");
         bool moveBackward = Input.IsActionPressed("move_backward");
         Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
@@ -138,9 +150,8 @@ public partial class Player : RigidBody3D {
     }
 
     public void ApplyWaterDrag(PhysicsDirectBodyState3D state) {
-        float submergedProportion = _depthInWater / _size.Y;
-        state.LinearVelocity *= 1 - Mathf.Clamp(WaterDrag * submergedProportion, 0, 1);
-        state.AngularVelocity *= 1 - Mathf.Clamp(WaterAngularDrag * submergedProportion, 0, 1);
+        state.LinearVelocity *= 1 - WaterDrag;
+        state.AngularVelocity *= 1 - WaterAngularDrag;
     }
 
     // estimates augmentations to the transform, based on the ocean waves
@@ -182,10 +193,10 @@ public partial class Player : RigidBody3D {
 
 
         //GD.Print($"pitch: {Mathf.RadToDeg(pitch)}, roll: {Mathf.RadToDeg(roll)}");
-        GetNode<MeshInstance3D>("WaterApproximation/FrontSphere").GlobalPosition = front.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-        GetNode<MeshInstance3D>("WaterApproximation/BackSphere").GlobalPosition = back.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-        GetNode<MeshInstance3D>("WaterApproximation/LeftSphere").GlobalPosition = left.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
-        GetNode<MeshInstance3D>("WaterApproximation/RightSphere").GlobalPosition = right.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
+        GetNode<MeshInstance3D>("Model/WaterApproximation/FrontSphere").GlobalPosition = front.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
+        GetNode<MeshInstance3D>("Model/WaterApproximation/BackSphere").GlobalPosition = back.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
+        GetNode<MeshInstance3D>("Model/WaterApproximation/LeftSphere").GlobalPosition = left.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
+        GetNode<MeshInstance3D>("Model/WaterApproximation/RightSphere").GlobalPosition = right.Rotated(Vector3.Up, GlobalRotation.Y) + GlobalPositionXZ;
 
         return (pitch, roll, averageDisplacementY);
     }
