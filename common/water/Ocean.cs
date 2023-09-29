@@ -165,6 +165,42 @@ public partial class Ocean : Node3D {
 	}
 	private float _damping = 0.5f;
 
+	[Export]
+	public float SurfaceNoiseScale {
+		get {
+			return _surfaceNoiseScale;
+		}
+		set {
+			_surfaceNoiseScale = value;
+			QueueReconfigureWaterTiles();
+		}
+	}
+	private float _surfaceNoiseScale = 10f;
+
+	[Export]
+	public float SurfaceHeightScale {
+		get {
+			return _surfaceHeightScale;
+		}
+		set {
+			_surfaceHeightScale = value;
+			QueueRespawnWaterTiles();
+		}
+	}
+	private float _surfaceHeightScale = 0.25f;
+
+	[Export]
+	public float SurfaceTimeScale {
+		get {
+			return _surfaceTimeScale;
+		}
+		set {
+			_surfaceTimeScale = value;
+			QueueRespawnWaterTiles();
+		}
+	}
+	private float _surfaceTimeScale = 0.01f;
+
 	[ExportGroup("Debugging")]
 	[Export]
 	public bool WaterTileDebugLogs {
@@ -173,7 +209,7 @@ public partial class Ocean : Node3D {
 		}
 		set {
 			_waterTileDebugLogs = value;
-			QueueReconfigureWaterTiles();
+			QueueRespawnWaterTiles();
 		}
 	}
 	private bool _waterTileDebugLogs = false;
@@ -271,9 +307,9 @@ public partial class Ocean : Node3D {
 			WavesConfig = WavesConfig,
 			WaterTileDebugLogs = WaterTileDebugLogs,
 			WaterDepth = WaterDepth,
-			SurfaceNoiseScale = 10f,
-			SurfaceHeightScale = 0.2f,
-			SurfaceTimeScale = 0.025f,
+			SurfaceNoiseScale = SurfaceNoiseScale,
+			SurfaceHeightScale = SurfaceHeightScale,
+			SurfaceTimeScale = SurfaceTimeScale,
 			NoDisplacement = false,
 		};
 		return waterTile;
