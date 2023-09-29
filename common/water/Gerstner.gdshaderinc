@@ -1,7 +1,7 @@
 // defines functions computing points on the surface of a gerstner wave
 
 // skip waves with k = 0.0
-const int max_waves = 30;
+const int max_waves = 12;
 
 uniform float gerstner_k[max_waves]; // wave magnitude
 uniform float gerstner_k_x[max_waves]; // wave direction x

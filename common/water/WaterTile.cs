@@ -40,18 +40,6 @@ public partial class WaterTile : MeshInstance3D {
     }
     private bool _noDisplacement = false;
 
-    [Export]
-    public int ActiveWaves {
-        get {
-            return _activeWaves;
-        }
-        set {
-            _activeWaves = value;
-            QueueReconfigureShaders();
-        }
-    }
-    private int _activeWaves = maxWaves;
-
     [ExportGroup("Surface Perturbation")]
     [Export]
     public float SurfaceNoiseScale {
@@ -99,7 +87,7 @@ public partial class WaterTile : MeshInstance3D {
 
     // this must match the shader, do not adjust it to change the number of active waves
     // this represents the maximum supported number of waves in the shader
-    private const int maxWaves = 30;
+    private const int maxWaves = 12;
     private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
 
     public override void _Ready() {
@@ -184,7 +172,6 @@ public partial class WaterTile : MeshInstance3D {
             // default k == 0 tells the shader to ignore the wave
             DebugTools.Assert(WavesConfig.waves.Count <= maxWaves, $"Too many waves configured. Max supported is {maxWaves}");
             int wavesToRender = Mathf.Min(WavesConfig.waves.Count, maxWaves);
-            wavesToRender = Mathf.Min(wavesToRender, ActiveWaves);
             for (int i = 0; i < wavesToRender; i++) {
                 Wave w = WavesConfig.waves[i];
                 amplitude[i] = w.amplitude;
@@ -236,7 +223,7 @@ public partial class WaterTile : MeshInstance3D {
 
         int uvX = (int)Mathf.Wrap(globalXZ.X / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
         int uvY = (int)Mathf.Wrap(globalXZ.Y / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
-        float noiseHeight = _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
+        float noiseHeight = 0; //_surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
 
         return gerstnerDisplacement + normal * noiseHeight * _surfaceHeightScale;
     }

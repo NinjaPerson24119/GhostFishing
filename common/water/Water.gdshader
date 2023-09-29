@@ -61,9 +61,16 @@ void vertex() {
 		// apply slight noise to waves
 		// use direction of normal so it looks natural and we don't have to recompute the normal
 		// don't apply around the tile edges or they won't connect properly
-		if (UV.x > 0.01 && UV.x < 0.99 && UV.y > 0.01 && UV.y < 0.99) {
+		
+		const float d = 0.03;
+		if (UV.x > d && UV.x < 1.0-d && UV.y > d && UV.y < 1.0-d) {
 			height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).x;
 			VERTEX += NORMAL * height * height_scale;
+		}
+		if (UV.x > 1.0-d || UV.y > 1.0-d) {
+			VERTEX.y -= 0.001;
+		} else {
+			
 		}
 	}
 }
