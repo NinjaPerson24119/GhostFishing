@@ -3,18 +3,23 @@ using Godot;
 public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
+
     [Export(PropertyHint.Range, "0,1")]
-    public float ConstantLinearDrag = 0.07f;
+    public float AirDragCoefficient = 0.07f;
     [Export(PropertyHint.Range, "0,1")]
-    public float ConstantAngularDrag = 0.05f;
+    public float AirMomentCoefficient = 0.05f;
     [Export(PropertyHint.Range, "0,1")]
-    public float WaterLinearDrag = 0.03f;
+    public float WaterDragCoefficient = 0.03f;
     [Export(PropertyHint.Range, "0,1")]
-    public float WaterAngularDrag = 0.01f;
+    public float WaterMomentCoefficient = 0.01f;
+    [Export(PropertyHint.Range, "0,0.99")]
+    public float SubmergedProportionOffset = 0.5f;
+
     [Export]
     public float EngineAcceleration = 0.05f;
     [Export]
     public float TurnAcceleration = 0.03f;
+
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
@@ -28,6 +33,7 @@ public partial class Player : RigidBody3D {
 
     private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
     private float _waterDensity = 1000; // kg/m^3
+    private float _airDensity = 1.225f; // kg/m^3
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
     private Vector3 _size = new Vector3(1f, 0.5f, 2.5f);
@@ -77,6 +83,7 @@ public partial class Player : RigidBody3D {
 
             if (depth > 0) {
                 submergedPoints++;
+                cumulativeDepth += depth;
                 // Archimedes Principle: F = ρgV
                 float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
                 if (DebugLogs) {
@@ -87,15 +94,18 @@ public partial class Player : RigidBody3D {
             }
         }
         if (submergedPoints > 0) {
+            GD.Print("Setting depth in water");
             _depthInWater = cumulativeDepth / submergedPoints;
         }
+        else {
+            _depthInWater = 0;
+        }
 
-        ApplyConstantDrag(state);
-        ApplyWaterDrag(state);
+        ApplyDrag(state);
     }
 
     private void ApplyForcesFromControls() {
-        if (_depthInWater < 0) {
+        if (_depthInWater <= 0) {
             return;
         }
 
@@ -119,19 +129,31 @@ public partial class Player : RigidBody3D {
         }
     }
 
-    public void ApplyConstantDrag(PhysicsDirectBodyState3D state) {
-        state.AngularVelocity *= 1 - ConstantAngularDrag;
-        state.LinearVelocity *= 1 - ConstantLinearDrag;
-    }
-
-    public void ApplyWaterDrag(PhysicsDirectBodyState3D state) {
-        if (_depthInWater <= 0) {
-            return;
+    public void ApplyDrag(PhysicsDirectBodyState3D state) {
+        float proportionInWater = 0;
+        GD.Print($"depth in water: {_depthInWater}");
+        if (_depthInWater > 0) {
+            proportionInWater = Mathf.Clamp(_depthInWater / _size.Y + SubmergedProportionOffset, 0.001f, 1);
+            GD.Print($"submerged proportion: {proportionInWater}");
+            DebugTools.Assert(proportionInWater > 0 && proportionInWater <= 1, $"submergedProportion ({proportionInWater}) must be in (0, 1]");
         }
-        float submergedProportion = _depthInWater / _size.Y;
-        DebugTools.Assert(submergedProportion >= 0 && submergedProportion <= 1, $"submergedProportion ({submergedProportion}) must be between 0 and 1");
-        state.AngularVelocity *= 1 - WaterAngularDrag * submergedProportion;
-        state.LinearVelocity *= 1 - WaterLinearDrag * submergedProportion;
+
+        float forwardArea = _size.X * _size.Z;
+        float linearVelocityLengthSquare = (float)state.LinearVelocity.LengthSquared();
+        float AirLinearDrag = 0.5f * _airDensity * forwardArea * AirDragCoefficient * linearVelocityLengthSquare;
+        float WaterLinearDrag = 0.5f * _waterDensity * forwardArea * WaterDragCoefficient * linearVelocityLengthSquare;
+
+        float sideArea = _size.Y * _size.Z;
+        float angularVelocityLengthSquare = (float)state.AngularVelocity.LengthSquared();
+        float AirAngularDrag = 0.5f * _airDensity * sideArea * AirDragCoefficient * angularVelocityLengthSquare;
+        float WaterAngularDrag = 0.5f * _waterDensity * sideArea * WaterDragCoefficient * angularVelocityLengthSquare;
+
+        float linearDrag = proportionInWater * WaterLinearDrag + (1 - proportionInWater) * AirLinearDrag;
+        float angularDrag = proportionInWater * WaterAngularDrag + (1 - proportionInWater) * AirAngularDrag;
+
+        GD.Print($"linear drag: {linearDrag}, angular drag: {angularDrag}");
+        state.AngularVelocity *= 1 - angularDrag * state.Step;
+        state.LinearVelocity *= 1 - linearDrag * state.Step;
     }
 
     public void ResetAboveWater() {
