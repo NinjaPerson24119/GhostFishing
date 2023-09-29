@@ -81,3 +81,20 @@ mesh = SubResource("BoxMesh_cwted")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1.49205, 0, 0, 0)
 shape = SubResource("ConvexPolygonShape3D_4dqcm")
+
+[node name="WaterContactPoints" type="Node3D" parent="."]
+
+[node name="Center" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.640059, 0)
+
+[node name="Center2" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -2)
+
+[node name="Center3" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 2)
+
+[node name="Center4" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
+
+[node name="Center5" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)
