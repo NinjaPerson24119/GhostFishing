@@ -58,6 +58,12 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
 [node name="Center5" type="Marker3D" parent="Model/WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)
 
+[node name="Center6" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 1.5)
+
+[node name="Center7" type="Marker3D" parent="Model/WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -1.5)
+
 [node name="BoundingBox" type="MeshInstance3D" parent="."]
 visible = false
 mesh = SubResource("BoxMesh_cwted")

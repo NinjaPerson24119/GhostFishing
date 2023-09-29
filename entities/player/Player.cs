@@ -4,21 +4,27 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
 
+    [Export(PropertyHint.Range, "0,100")]
+    public float ConstantLinearDrag = 0.1f;
+    [Export(PropertyHint.Range, "0,100")]
+    public float ConstantAngularDrag = 0.1f;
     [Export(PropertyHint.Range, "0,1")]
-    public float AirDragCoefficient = 0.07f;
+    public float AirDragCoefficient = 0.5f;
     [Export(PropertyHint.Range, "0,1")]
-    public float AirMomentCoefficient = 0.05f;
+    public float AirMomentCoefficient = 0.08f;
     [Export(PropertyHint.Range, "0,1")]
-    public float WaterDragCoefficient = 0.03f;
+    public float WaterDragCoefficient = 0.3f;
     [Export(PropertyHint.Range, "0,1")]
-    public float WaterMomentCoefficient = 0.01f;
+    public float WaterMomentCoefficient = 0.08f;
     [Export(PropertyHint.Range, "0,0.99")]
     public float SubmergedProportionOffset = 0.5f;
 
+    // m/s^2
     [Export]
-    public float EngineAcceleration = 0.05f;
+    public float EngineAcceleration = 0.005f;
+    // rad/s^2
     [Export]
-    public float TurnAcceleration = 0.03f;
+    public float TurnAcceleration = Mathf.DegToRad(1f);
 
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
@@ -68,6 +74,7 @@ public partial class Player : RigidBody3D {
         float cumulativeDepth = 0;
         int submergedPoints = 0;
         var children = waterContactPoints.GetChildren();
+        float totalBuoyantForce = 0;
         for (int i = 0; i < children.Count; i++) {
             Marker3D contactPoint = children[i] as Marker3D;
             // TODO: stop ignoring displacement on XZ plane
@@ -85,14 +92,17 @@ public partial class Player : RigidBody3D {
                 submergedPoints++;
                 cumulativeDepth += depth;
                 // Archimedes Principle: F = ρgV
-                float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
+                float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y);
                 if (DebugLogs) {
                     GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_size.Y}");
                 }
-                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
+                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced / children.Count;
+                totalBuoyantForce += buoyancyForce;
                 ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
             }
         }
+
+        // set depth in water to average of contact points
         if (submergedPoints > 0) {
             GD.Print("Setting depth in water");
             _depthInWater = cumulativeDepth / submergedPoints;
@@ -101,7 +111,15 @@ public partial class Player : RigidBody3D {
             _depthInWater = 0;
         }
 
-        ApplyDrag(state);
+        // verify buoyant force distribution against expected maximum
+        float expectedVolumeDisplaced = _horizontalSliceArea * Mathf.Min(_depthInWater, _size.Y);
+        float expectedBuoyantForce = _waterDensity * _gravity * expectedVolumeDisplaced;
+        GD.Print($"Expected buoyant force: {expectedBuoyantForce}, actual buoyant force: {totalBuoyantForce}, ({totalBuoyantForce / expectedBuoyantForce})");
+
+        ApplyPhysicalDrag(state);
+
+        // a constant drag helps the physics to feel less "floaty"
+        ApplyConstantDrag(state);
     }
 
     private void ApplyForcesFromControls() {
@@ -129,7 +147,7 @@ public partial class Player : RigidBody3D {
         }
     }
 
-    public void ApplyDrag(PhysicsDirectBodyState3D state) {
+    public void ApplyPhysicalDrag(PhysicsDirectBodyState3D state) {
         float proportionInWater = 0;
         GD.Print($"depth in water: {_depthInWater}");
         if (_depthInWater > 0) {
@@ -152,8 +170,13 @@ public partial class Player : RigidBody3D {
         float angularDrag = proportionInWater * WaterAngularDrag + (1 - proportionInWater) * AirAngularDrag;
 
         GD.Print($"linear drag: {linearDrag}, angular drag: {angularDrag}");
-        state.AngularVelocity *= 1 - angularDrag * state.Step;
-        state.LinearVelocity *= 1 - linearDrag * state.Step;
+        ApplyCentralForce(-state.LinearVelocity * linearDrag * state.Step);
+        ApplyTorque(-state.AngularVelocity * angularDrag * state.Step);
+    }
+
+    public void ApplyConstantDrag(PhysicsDirectBodyState3D state) {
+        state.LinearVelocity *= 1 - Mathf.Clamp(ConstantLinearDrag * state.Step, 0, 1);
+        state.AngularVelocity *= 1 - Mathf.Clamp(ConstantAngularDrag * state.Step, 0, 1);
     }
 
     public void ResetAboveWater() {

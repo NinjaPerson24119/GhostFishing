@@ -36,3 +36,25 @@ This means it's harder to move the boat when it's underwater, and easier when it
 Archimedes Principle is applied at Marker3D points distributed in a + shape around the boat. The boat is pushed up by the sum of the buoyancy forces at each point.
 
 The weight and dimensions of the boat must be physically accurate for this to work.
+
+### Drag Coefficients
+
+Ask ChatGPT
+
+write me tables for the linear and angular drag coefficients in both air and water, for a few kinds of boats
+
+Boat Variety	Linear Drag Coefficient (Cd)	Angular Drag Coefficient (Cm)
+High-Performance Racing Boat	0.02 - 0.05	0.02 - 0.05
+Recreational Powerboat	0.25 - 0.45	0.02 - 0.06
+Sailboat (varies with design)	0.20 - 0.35	0.01 - 0.04
+Fishing Boat	0.30 - 0.50	0.03 - 0.08
+Kayak (varies with design)	0.20 - 0.40	0.01 - 0.03
+Linear and Angular Drag Coefficients for Boats in Water:
+
+Boat Variety	Linear Drag Coefficient (Cd)	Angular Drag Coefficient (Cm)
+High-Performance Racing Boat	0.005 - 0.02	0.02 - 0.05
+Recreational Powerboat	0.1 - 0.3	0.02 - 0.06
+Sailboat (varies with design)	0.05 - 0.15	0.01 - 0.03
+Fishing Boat	0.15 - 0.30	0.03 - 0.08
+Kayak (varies with design)	0.1 - 0.25	0.01 - 0.02
+
