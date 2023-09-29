@@ -66,6 +66,7 @@ void vertex() {
 		if (UV.x > d && UV.x < 1.0-d && UV.y > d && UV.y < 1.0-d) {
 			VERTEX += NORMAL * height * height_scale;
 		} else {
+			// reduce the noise gradually or we'll get an obvious line
 			float gradualNoiseReduction = d;
 			gradualNoiseReduction = min(gradualNoiseReduction, 1.0 - UV.x);
 			gradualNoiseReduction = min(gradualNoiseReduction, UV.x);
