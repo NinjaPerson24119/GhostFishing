@@ -22,6 +22,7 @@ height = 0.5
 
 [node name="Player" type="RigidBody3D"]
 collision_mask = 7
+axis_lock_linear_y = true
 gravity_scale = 0.0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="."]
@@ -32,6 +33,7 @@ shape = SubResource("ConvexPolygonShape3D_4dqcm")
 script = ExtResource("1_ll6dn")
 
 [node name="WaterApproximation" type="Node3D" parent="Visual"]
+visible = false
 
 [node name="WaterPlane" type="MeshInstance3D" parent="Visual/WaterApproximation"]
 mesh = SubResource("PlaneMesh_p2coj")

@@ -40,25 +40,27 @@ public partial class Player : RigidBody3D {
     }
 
     private void ApplyMovement(double delta) {
-        if (Input.IsActionPressed("move_forward")) {
+        bool moveForward = Input.IsActionPressed("move_forward");
+        bool moveBackward = Input.IsActionPressed("move_backward");
+        if (moveForward && !moveBackward) {
             ApplyCentralForce(GlobalTransform.Basis.Z * EngineForce);
         }
-        else if (Input.IsActionPressed("move_backward")) {
+        if (moveBackward && !moveForward) {
             ApplyCentralForce(GlobalTransform.Basis.Z * -1 * EngineForce);
         }
-        if (Input.IsActionPressed("turn_left")) {
+
+        bool turnLeft = Input.IsActionPressed("turn_left");
+        bool turnRight = Input.IsActionPressed("turn_right");
+        if (turnLeft && !turnRight) {
             ApplyTorque(Vector3.Up * TurnForce);
         }
-        else if (Input.IsActionPressed("turn_right")) {
+        if (turnRight && !turnLeft) {
             ApplyTorque(Vector3.Down * TurnForce);
         }
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
-        // we need to zero out the Y component of the velocity because we don't physics to move the boat up and down
-        float waterDragFactor = 1 - WaterDrag;
-        state.LinearVelocity = new Vector3(state.LinearVelocity.X * waterDragFactor, 0, state.LinearVelocity.Z * waterDragFactor);
-
+        state.LinearVelocity *= 1 - WaterDrag;
         state.AngularVelocity *= 1 - WaterAngularDrag;
 
         // keep the boat at the surface of the water
