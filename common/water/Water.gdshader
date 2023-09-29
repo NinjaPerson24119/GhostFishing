@@ -61,16 +61,18 @@ void vertex() {
 		// apply slight noise to waves
 		// use direction of normal so it looks natural and we don't have to recompute the normal
 		// don't apply around the tile edges or they won't connect properly
-		
-		const float d = 0.03;
+		const float d = 0.05;
+		height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).x;
 		if (UV.x > d && UV.x < 1.0-d && UV.y > d && UV.y < 1.0-d) {
-			height = texture(wave, VERTEX.xz / noise_scale + wave_time * time_scale).x;
 			VERTEX += NORMAL * height * height_scale;
-		}
-		if (UV.x > 1.0-d || UV.y > 1.0-d) {
-			VERTEX.y -= 0.001;
 		} else {
-			
+			float gradualNoiseReduction = d;
+			gradualNoiseReduction = min(gradualNoiseReduction, 1.0 - UV.x);
+			gradualNoiseReduction = min(gradualNoiseReduction, UV.x);
+			gradualNoiseReduction = min(gradualNoiseReduction, 1.0 - UV.y);
+			gradualNoiseReduction = min(gradualNoiseReduction, UV.y);
+			gradualNoiseReduction = smoothstep(0.0, d, gradualNoiseReduction);
+			VERTEX += NORMAL * height * height_scale * gradualNoiseReduction;
 		}
 	}
 }
