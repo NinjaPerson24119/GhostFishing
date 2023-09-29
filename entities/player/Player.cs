@@ -4,21 +4,22 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
     [Export(PropertyHint.Range, "0,1")]
-    float ConstantLinearDrag = 0.07f;
+    public float ConstantLinearDrag = 0.07f;
     [Export(PropertyHint.Range, "0,1")]
-    float ConstantAngularDrag = 0.05f;
+    public float ConstantAngularDrag = 0.05f;
     [Export(PropertyHint.Range, "0,1")]
-    float WaterLinearDrag = 0.03f;
+    public float WaterLinearDrag = 0.03f;
     [Export(PropertyHint.Range, "0,1")]
-    float WaterAngularDrag = 0.01f;
+    public float WaterAngularDrag = 0.01f;
     [Export]
-    float EngineAcceleration = 0.05f;
+    public float EngineAcceleration = 0.05f;
     [Export]
-    float TurnAcceleration = 0.03f;
-
+    public float TurnAcceleration = 0.03f;
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
+    [Export]
+    public bool DebugLogs = false;
 
     private float EngineForce => Mass * EngineAcceleration;
     private float TurnForce => Mass * TurnAcceleration;
@@ -38,7 +39,9 @@ public partial class Player : RigidBody3D {
         _ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
 
         _horizontalSliceArea = _size.X * _size.Y;
-        GD.Print($"Boat Size: {_size}. Horizontal slice area: {_horizontalSliceArea}");
+        if (DebugLogs) {
+            GD.Print($"Boat Size: {_size}. Horizontal slice area: {_horizontalSliceArea}");
+        }
 
         (GetNode<MeshInstance3D>("BoundingBox").Mesh as BoxMesh).Size = _size;
     }
@@ -58,7 +61,6 @@ public partial class Player : RigidBody3D {
         Node3D waterContactPoints = GetNode<Node3D>("Model/WaterContactPoints");
         float cumulativeDepth = 0;
         int submergedPoints = 0;
-        // Marker3D
         var children = waterContactPoints.GetChildren();
         for (int i = 0; i < children.Count; i++) {
             Marker3D contactPoint = children[i] as Marker3D;
@@ -68,14 +70,18 @@ public partial class Player : RigidBody3D {
             Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
 
             // TODO: simplify for now by only considering Y
-            GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
+            if (DebugLogs) {
+                GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
+            }
             float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
 
             if (depth > 0) {
                 submergedPoints++;
                 // Archimedes Principle: F = ρgV
                 float volumeDisplaced = _horizontalSliceArea * Mathf.Min(depth, _size.Y); ;
-                //GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_absBounds.Size.Y}");
+                if (DebugLogs) {
+                    GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {_horizontalSliceArea}, boat height: {_size.Y}");
+                }
                 float buoyancyForce = _waterDensity * _gravity * volumeDisplaced;
                 ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
             }

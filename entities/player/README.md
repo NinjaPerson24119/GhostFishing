@@ -34,3 +34,5 @@ This means it's harder to move the boat when it's underwater, and easier when it
 ### Buoyancy
 
 Archimedes Principle is applied at Marker3D points distributed in a + shape around the boat. The boat is pushed up by the sum of the buoyancy forces at each point.
+
+The weight and dimensions of the boat must be physically accurate for this to work.
