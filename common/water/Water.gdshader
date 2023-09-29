@@ -38,7 +38,6 @@ uniform bool debug_visuals;
 uniform bool no_displacement;
 
 varying float height;
-varying vec3 world_pos;
 
 float fresnel(float amount, vec3 normal, vec3 view) {
 	return pow((1.0 - clamp(dot(normalize(normal), normalize(view)), 0.0, 1.0)), amount);
@@ -97,7 +96,7 @@ void fragment() {
 	vec2 time = (wave_time * wave_direction) * time_scale;
 	vec2 time2 = (wave_time * wave_direction2) * time_scale;
 
-	vec3 normal_blend = mix(texture(texture_normal,world_pos.xz + time).rgb, texture(texture_normal2,world_pos.xz + time2).rgb, 0.5);
+	vec3 normal_blend = mix(texture(texture_normal,VERTEX.xz + time).rgb, texture(texture_normal2,VERTEX.xz + time2).rgb, 0.5);
 
 	float fresnel = fresnel(5.0, NORMAL, VIEW);
 	vec3 surface_color = mix(albedo, albedo2, fresnel);
