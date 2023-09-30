@@ -1,27 +1,46 @@
 using Godot;
 
 public partial class Main : Node {
+    private Player _player;
+    private Ocean _ocean;
+    private Controller _controller;
+    private PlayerMenu _playerMenu;
+    private PauseMenu _pauseMenu;
+    private TimeDisplay _timeDisplay;
+
     public override void _Ready() {
+        InjectDependencies();
         SetupSignals();
         AssignDefaults();
     }
 
+    private void InjectDependencies() {
+        _player = DependencyInjector.Ref().GetPlayer();
+        _ocean = DependencyInjector.Ref().GetOcean();
+        _controller = DependencyInjector.Ref().GetController();
+        _playerMenu = DependencyInjector.Ref().GetPlayerMenu();
+        _pauseMenu = DependencyInjector.Ref().GetPauseMenu();
+        _timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
+    }
+
     private void SetupSignals() {
-        GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += GetNode<Ocean>("Ocean").ConfigureTileDebugVisuals;
+        GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += _ocean.ConfigureTileDebugVisuals;
+        GameClock.ConnectGameSecondsChanged(_timeDisplay.Update);
 
-        Player player = DependencyInjector.Ref().GetPlayer();
-        Ocean ocean = DependencyInjector.Ref().GetOcean();
-        Controller controller = DependencyInjector.Ref().GetController();
+        _player.PositionChangedSignificantly += _ocean.OnOriginChanged;
 
-        player.PositionChangedSignificantly += ocean.OnOriginChanged;
-        controller.ControlsContextChanged += player.OnControlsContextChanged;
+        // Attach controller to player and UI
+        _controller.ControlsContextChanged += _player.OnControlsContextChanged;
+        _controller.ControlsContextChanged += _playerMenu.OnControlsContextChanged;
+        _controller.ControlsContextChanged += _pauseMenu.OnControlsContextChanged;
 
-        DependencyInjector.Ref().GetPlayerMenu().CloseMenu += controller.OnMenuClosed;
-        DependencyInjector.Ref().GetPauseMenu().CloseMenu += controller.OnMenuClosed;
-        controller.OpenInventory += DependencyInjector.Ref().GetPlayerMenu().OnOpenInventory;
+        _controller.ToggleViewInventory += _playerMenu.OnToggle;
+        _controller.ToggleViewPauseMenu += _pauseMenu.OnToggle;
 
-        TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
-        GameClock.ConnectGameSecondsChanged(timeDisplay.Update);
+        _playerMenu.CloseMenu += _controller.OnMenuClosed;
+        _pauseMenu.CloseMenu += _controller.OnMenuClosed;
+
+        _controller.ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_PLAYER;
     }
 
     private void AssignDefaults() {

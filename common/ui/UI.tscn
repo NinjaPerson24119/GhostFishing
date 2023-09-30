@@ -16,7 +16,9 @@ grow_vertical = 2
 layout_mode = 1
 
 [node name="PlayerMenu" parent="." instance=ExtResource("4_cxhqe")]
+visible = false
 layout_mode = 1
 
 [node name="PauseMenu" parent="." instance=ExtResource("3_yi7o1")]
+visible = false
 layout_mode = 1

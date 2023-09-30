@@ -13,20 +13,26 @@ public partial class Controller : Node {
         }
         set {
             _controlsContext = value;
-            EmitSignal(nameof(ControlsContextChangedEventHandler), (int)_controlsContext);
+            EmitSignal(SignalName.ControlsContextChanged, (int)_controlsContext);
         }
     }
-    private ControlsContextType _controlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_PLAYER;
+    private ControlsContextType _controlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_INVALID;
 
     [Signal]
     public delegate void ControlsContextChangedEventHandler(ControlsContextType controlsContext);
     [Signal]
-    public delegate void OpenInventoryEventHandler();
+    public delegate void ToggleViewPauseMenuEventHandler();
+    [Signal]
+    public delegate void ToggleViewInventoryEventHandler();
 
     public override void _Input(InputEvent inputEvent) {
+        if (inputEvent.IsActionPressed("pause")) {
+            ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_MENU;
+            EmitSignal(SignalName.ToggleViewPauseMenu);
+        }
         if (inputEvent.IsActionPressed("open_inventory")) {
             ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_MENU;
-            EmitSignal(nameof(OpenInventoryEventHandler));
+            EmitSignal(SignalName.ToggleViewInventory);
         }
     }
 

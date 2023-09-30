@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://entities/player/Player.tscn" id="2_teuhj"]
 [ext_resource type="Script" path="res://common/controller/Controller.cs" id="3_pm5ys"]
 [ext_resource type="Script" path="res://entities/player/Player.cs" id="3_t71xa"]
-[ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/UITree.tscn" id="4_4fdpc"]
+[ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/UI.tscn" id="4_4fdpc"]
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
 [ext_resource type="PackedScene" uid="uid://brrd5dfqqljyv" path="res://common/sky/Sky.tscn" id="7_5ixg0"]
