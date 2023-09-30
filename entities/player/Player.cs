@@ -104,7 +104,6 @@ public partial class Player : RigidBody3D {
 
         // set depth in water to average of contact points
         if (submergedPoints > 0) {
-            GD.Print("Setting depth in water");
             _depthInWater = cumulativeDepth / submergedPoints;
         }
         else {
@@ -114,7 +113,9 @@ public partial class Player : RigidBody3D {
         // verify buoyant force distribution against expected maximum
         float expectedVolumeDisplaced = _horizontalSliceArea * Mathf.Min(_depthInWater, _size.Y);
         float expectedBuoyantForce = _waterDensity * _gravity * expectedVolumeDisplaced;
-        GD.Print($"Expected buoyant force: {expectedBuoyantForce}, actual buoyant force: {totalBuoyantForce}, ({totalBuoyantForce / expectedBuoyantForce})");
+        if (DebugLogs) {
+            GD.Print($"Expected buoyant force: {expectedBuoyantForce}, actual buoyant force: {totalBuoyantForce}, ({totalBuoyantForce / expectedBuoyantForce})");
+        }
 
         ApplyPhysicalDrag(state);
 
@@ -149,10 +150,14 @@ public partial class Player : RigidBody3D {
 
     public void ApplyPhysicalDrag(PhysicsDirectBodyState3D state) {
         float proportionInWater = 0;
-        GD.Print($"depth in water: {_depthInWater}");
+        if (DebugLogs) {
+            GD.Print($"depth in water: {_depthInWater}");
+        }
         if (_depthInWater > 0) {
             proportionInWater = Mathf.Clamp(_depthInWater / _size.Y + SubmergedProportionOffset, 0.001f, 1);
-            GD.Print($"submerged proportion: {proportionInWater}");
+            if (DebugLogs) {
+                GD.Print($"submerged proportion: {proportionInWater}");
+            }
             DebugTools.Assert(proportionInWater > 0 && proportionInWater <= 1, $"submergedProportion ({proportionInWater}) must be in (0, 1]");
         }
 
@@ -169,7 +174,9 @@ public partial class Player : RigidBody3D {
         float linearDrag = proportionInWater * WaterLinearDrag + (1 - proportionInWater) * AirLinearDrag;
         float angularDrag = proportionInWater * WaterAngularDrag + (1 - proportionInWater) * AirAngularDrag;
 
-        GD.Print($"linear drag: {linearDrag}, angular drag: {angularDrag}");
+        if (DebugLogs) {
+            GD.Print($"linear drag: {linearDrag}, angular drag: {angularDrag}");
+        }
         ApplyCentralForce(-state.LinearVelocity * linearDrag * state.Step);
         ApplyTorque(-state.AngularVelocity * angularDrag * state.Step);
     }
@@ -179,11 +186,27 @@ public partial class Player : RigidBody3D {
         state.AngularVelocity *= 1 - Mathf.Clamp(ConstantAngularDrag * state.Step, 0, 1);
     }
 
-    public void ResetAboveWater() {
-        CallDeferred(nameof(DeferredResetAboveWater));
+    public void ResetAboveWater(bool relocate = false, Vector2 globalXZ = default, float globalRotationY = 0f) {
+        if (relocate) {
+            CallDeferred(nameof(DeferredResetAboveWater), true, globalXZ, globalRotationY);
+        }
+        else {
+            CallDeferred(nameof(DeferredResetAboveWater));
+        }
     }
 
-    public void DeferredResetAboveWater() {
+    private void DeferredResetAboveWater(bool relocate = false, Vector2 globalXZ = default, float globalRotationY = 0f) {
+        float yaw = GlobalRotation.Y;
+        if (relocate) {
+            yaw = globalRotationY;
+        }
+
+        Vector3 translation = new Vector3(GlobalPosition.X, _ocean.GlobalPosition.Y + 1f, GlobalPosition.Y);
+        if (relocate) {
+            translation.X = globalXZ.X;
+            translation.Z = globalXZ.Y;
+        }
+
         LinearVelocity = Vector3.Zero;
         AngularVelocity = Vector3.Zero;
 
@@ -191,8 +214,8 @@ public partial class Player : RigidBody3D {
         // ignore the linter. you must set the basis and origin
         transform.Basis = Basis.Identity;
         transform.Origin = Vector3.Zero;
-        transform = transform.Rotated(Vector3.Up, Rotation.Y);
-        transform = transform.Translated(new Vector3(GlobalPosition.X, _ocean.GlobalPosition.Y + 1f, GlobalPosition.Z));
+        transform = transform.Rotated(Vector3.Up, yaw);
+        transform = transform.Translated(translation);
         Transform = transform;
     }
 }

@@ -19,3 +19,5 @@ Hit `` backtick ` `` to enable debug mode.
 | 4     | Toggle ocean debug view showing tile dividing lines. Ocean does not render on most debug modes because of its custom shader. |
 | r     | Reset the boat                                                                                                               |
 | space | Pause time                                                                                                                   |
+| F1    | Save state                                                                                                                   |
+| F2    | Load state                                                                                                                   |

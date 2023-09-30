@@ -13,10 +13,18 @@ public partial class GameClock : Node {
     private double _gameSecondsPerRealSecond = 60 * 60f;
     public static double GameSecondsPerRealSecond { get => _singleton._gameSecondsPerRealSecond; }
 
+    // consumers should not make any assumptions about continuity of this value between runs of the game
+    // it may be reset or looped to the start of the day
     [Export]
-    // start game with sun rising
     private double _gameSeconds = 10 * SecondsPerHour;
-    public static double GameSeconds { get => _singleton._gameSeconds; }
+    public static double GameSeconds {
+        get => _singleton._gameSeconds;
+        set {
+            _singleton._gameSeconds = value;
+            _singleton.EmitSignal(SignalName._gameSecondsChanged, _singleton._gameSeconds);
+            GD.Print($"GameSeconds has been manually updated to {value}");
+        }
+    }
 
     // DEBUG
     private bool _paused = true;

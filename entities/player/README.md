@@ -24,12 +24,13 @@ This approach gives all the physics we want, for the least effort.
 However, this makes the boat extremely difficult to control.
 The accumulated force sort of just tosses the boat around.
 
-This is solved through `ConstantDrag` and `WaterDrag`.
+We apply drag forces using the drag coefficients in water and air. These are weighted by how submerged the boat is.
+This works generally well, but can make the boat feel "floaty".
+I could probably solve this by fine tuning the drag coefficients and the weight of the boat.
 
-We apply `ConstantDrag` always. This prevents the boat from spinning crazily when it's in the air. It also makes the boat feel heavier, which is good.
-
-We apply `WaterDrag` when the boat is in the water. This drag is on top of the `ConstantDrag`. It is proportional to how submerged the boat is.
-This means it's harder to move the boat when it's underwater, and easier when it's on the surface.
+Instead, I apply a `ConstantDrag` that just reduces the velocity by a constant factor each frame.
+This helps smooth out the movement, and makes the boat feel heavier.
+I don't really want realistic physics when in midair, for example, so this is a good compromise to dampen excessive force.
 
 ### Buoyancy
 
@@ -39,9 +40,10 @@ The weight and dimensions of the boat must be physically accurate for this to wo
 
 ### Drag Coefficients
 
-Ask ChatGPT
-
+Ask ChatGPT:
+```
 write me tables for the linear and angular drag coefficients in both air and water, for a few kinds of boats
+```
 
 Boat Variety	Linear Drag Coefficient (Cd)	Angular Drag Coefficient (Cm)
 High-Performance Racing Boat	0.02 - 0.05	0.02 - 0.05
