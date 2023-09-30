@@ -17,8 +17,15 @@ public partial class AssetManager : Node {
     }
 
     private T LoadJSONFromFile<T>(string filePath) {
-        string jsonString = File.ReadAllText(filePath);
-        return JsonSerializer.Deserialize<T>(jsonString);
+        try {
+            string globalizedPath = ProjectSettings.GlobalizePath(filePath);
+            string jsonString = File.ReadAllText(globalizedPath);
+            return JsonSerializer.Deserialize<T>(jsonString);
+        }
+        catch (FileNotFoundException) {
+            GD.PrintErr("File not found: " + filePath);
+            return default(T);
+        }
     }
 
     private void LoadAssets() {

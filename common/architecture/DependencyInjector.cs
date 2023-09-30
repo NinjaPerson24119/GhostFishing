@@ -10,14 +10,29 @@ public partial class DependencyInjector : Node {
         return _singleton;
     }
 
-    const string PlayerNodePath = "/root/Main/Player";
-    const string OceanNodePath = "/root/Main/Ocean";
-
-    public static Player GetPlayer() {
-        return _singleton.GetNode<Player>(PlayerNodePath);
+    public Player GetPlayer() {
+        return GetNode<Player>("/root/Main/Player");
     }
 
-    public static Ocean GetOcean() {
-        return _singleton.GetNode<Ocean>(OceanNodePath);
+    public Ocean GetOcean() {
+        return GetNode<Ocean>("/root/Main/Ocean");
     }
+
+    public TimeDisplay GetTimeDisplay() {
+        return GetNode<TimeDisplay>("/root/Main/UI/HUD/TimeDisplay");
+    }
+
+    public Controller GetController() {
+        return GetNode<Controller>("/root/Main/Controller");
+    }
+
+    public PauseMenu GetPauseMenu() {
+        return GetNode<PauseMenu>("/root/Main/UI/PauseMenu");
+    }
+
+    public PlayerMenu GetPlayerMenu() {
+        return GetNode<PlayerMenu>("/root/Main/UI/PlayerMenu");
+    }
+
+    // do not provide other singletons. they provide themselves.
 }

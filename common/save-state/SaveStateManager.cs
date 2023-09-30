@@ -25,15 +25,15 @@ public partial class SaveStateManager : Node {
 
     void CaptureState() {
         _saveState = new SaveState() {
-            CommonState = new CommonState() {
+            CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
-            PlayerState = new PlayerState[noPlayers],
+            PlayerSaveState = new PlayerSaveState[noPlayers],
         };
 
         for (int i = 0; i < noPlayers; i++) {
             Player player = GetNode<Player>(playerNodePath);
-            _saveState.PlayerState[i] = new PlayerState() {
+            _saveState.PlayerSaveState[i] = new PlayerSaveState() {
                 GlobalPositionX = player.GlobalPosition.X,
                 GlobalPositionZ = player.GlobalPosition.Z,
                 GlobalRotationY = player.GlobalRotation.Y,
@@ -43,7 +43,7 @@ public partial class SaveStateManager : Node {
 
     void Save() {
         CaptureState();
-        GD.Print(_saveState.PlayerState[0].GlobalPositionX);
+        GD.Print(_saveState.PlayerSaveState[0].GlobalPositionX);
         string jsonString = JsonSerializer.Serialize<SaveState>(_saveState, new JsonSerializerOptions() {
             WriteIndented = true,
         });
@@ -52,9 +52,9 @@ public partial class SaveStateManager : Node {
     }
 
     void SetState() {
-        GameClock.GameSeconds = _saveState.CommonState.GameSeconds;
+        GameClock.GameSeconds = _saveState.CommonSaveState.GameSeconds;
         for (int i = 0; i < noPlayers; i++) {
-            PlayerState playerState = _saveState.PlayerState[i];
+            PlayerSaveState playerState = _saveState.PlayerSaveState[i];
             Player player = GetNode<Player>(playerNodePath);
             player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
         }

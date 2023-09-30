@@ -27,6 +27,8 @@ public partial class Player : RigidBody3D {
     public float TurnAcceleration = Mathf.DegToRad(2f);
 
     [Export]
+    public bool DisableControls = false;
+    [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
     [Export]
@@ -68,8 +70,42 @@ public partial class Player : RigidBody3D {
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
         Transform = Transform.Orthonormalized();
-        ApplyForcesFromControls();
 
+        ApplyForcesFromControls();
+        ApplyBuoyancy();
+        ApplyPhysicalDrag(state);
+        ApplyConstantDrag(state);
+    }
+
+    private void ApplyForcesFromControls() {
+        if (DisableControls) {
+            return;
+        }
+        if (_depthInWater <= 0) {
+            return;
+        }
+
+        bool moveForward = Input.IsActionPressed("move_forward");
+        bool moveBackward = Input.IsActionPressed("move_backward");
+        Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
+        if (moveForward && !moveBackward) {
+            ApplyCentralForce(towardsFrontOfBoat * EngineForce * Mass);
+        }
+        if (moveBackward && !moveForward) {
+            ApplyCentralForce(towardsFrontOfBoat * -1 * EngineForce * Mass);
+        }
+
+        bool turnLeft = Input.IsActionPressed("turn_left");
+        bool turnRight = Input.IsActionPressed("turn_right");
+        if (turnLeft && !turnRight) {
+            ApplyTorque(Vector3.Up * TurnForce * Mass);
+        }
+        if (turnRight && !turnLeft) {
+            ApplyTorque(Vector3.Down * TurnForce * Mass);
+        }
+    }
+
+    private void ApplyBuoyancy() {
         Node3D waterContactPoints = GetNode<Node3D>("Model/WaterContactPoints");
         float cumulativeDepth = 0;
         int submergedPoints = 0;
@@ -115,36 +151,6 @@ public partial class Player : RigidBody3D {
         float expectedBuoyantForce = _waterDensity * _gravity * expectedVolumeDisplaced;
         if (DebugLogs) {
             GD.Print($"Expected buoyant force: {expectedBuoyantForce}, actual buoyant force: {totalBuoyantForce}, ({totalBuoyantForce / expectedBuoyantForce})");
-        }
-
-        ApplyPhysicalDrag(state);
-
-        // a constant drag helps the physics to feel less "floaty"
-        ApplyConstantDrag(state);
-    }
-
-    private void ApplyForcesFromControls() {
-        if (_depthInWater <= 0) {
-            return;
-        }
-
-        bool moveForward = Input.IsActionPressed("move_forward");
-        bool moveBackward = Input.IsActionPressed("move_backward");
-        Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
-        if (moveForward && !moveBackward) {
-            ApplyCentralForce(towardsFrontOfBoat * EngineForce * Mass);
-        }
-        if (moveBackward && !moveForward) {
-            ApplyCentralForce(towardsFrontOfBoat * -1 * EngineForce * Mass);
-        }
-
-        bool turnLeft = Input.IsActionPressed("turn_left");
-        bool turnRight = Input.IsActionPressed("turn_right");
-        if (turnLeft && !turnRight) {
-            ApplyTorque(Vector3.Up * TurnForce * Mass);
-        }
-        if (turnRight && !turnLeft) {
-            ApplyTorque(Vector3.Down * TurnForce * Mass);
         }
     }
 
@@ -217,5 +223,9 @@ public partial class Player : RigidBody3D {
         transform = transform.Rotated(Vector3.Up, yaw);
         transform = transform.Translated(translation);
         Transform = transform;
+    }
+
+    public void OnControlsContextChanged(ControlsContextType controlsContext) {
+        DisableControls = controlsContext != ControlsContextType.CONTROLS_CONTEXT_TYPE_PLAYER;
     }
 }

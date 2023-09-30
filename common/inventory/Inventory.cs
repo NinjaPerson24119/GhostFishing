@@ -2,16 +2,16 @@ public class Inventory {
     public int Width { get; set; }
     public int Height { get; set; }
     // slots that cannot ever be used (e.g. if the inventory isn't a perfect rectangle)
-    public bool[] UnusableMask { get; set; }
-    public InventoryItem[] items { get; set; }
+    public bool[] UsableMask { get; set; }
+    public InventoryItem[] Items { get; set; }
 
     // slots that are currently occupied
     private bool[] filledMask;
 
-    public Inventory(int width, int height, bool[] unusableMask, InventoryItem[] items = null) {
+    public Inventory(int width, int height, bool[] usableMask, InventoryItem[] items = null) {
         Width = width;
         Height = height;
-        UnusableMask = unusableMask;
+        UsableMask = usableMask;
         if (items != null) {
             foreach (InventoryItem item in items) {
                 if (item.Spatial == null) {
@@ -32,7 +32,7 @@ public class Inventory {
         for (int i = 0; i < item.Spatial.Width; i++) {
             for (int j = 0; j < item.Spatial.Height; j++) {
                 int indexConsidered = (y + j) * Width + (x + i);
-                if (UnusableMask[indexConsidered]) {
+                if (!UsableMask[indexConsidered]) {
                     return false;
                 }
                 if (filledMask[indexConsidered]) {
@@ -45,11 +45,11 @@ public class Inventory {
 
     public bool[] GenerateFilledMask() {
         bool[] filledMask = new bool[Width * Height];
-        foreach (InventoryItem item in items) {
+        foreach (InventoryItem item in Items) {
             for (int i = 0; i < item.Spatial.Width; i++) {
                 for (int j = 0; j < item.Spatial.Height; j++) {
                     int indexConsidered = (item.Spatial.Y + j) * Width + (item.Spatial.X + i);
-                    DebugTools.Assert(!UnusableMask[indexConsidered]);
+                    DebugTools.Assert(UsableMask[indexConsidered]);
                     DebugTools.Assert(!filledMask[indexConsidered]);
                     filledMask[indexConsidered] = true;
                 }
