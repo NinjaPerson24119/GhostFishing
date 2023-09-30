@@ -63,15 +63,13 @@ spot_range = 100.0
 script = ExtResource("5_mnq5h")
 MinSubdivisions = 40
 TileOverlap = 0.0
-Intensity = 10.0
+NoWaves = 6
+Intensity = 2.0
+Damping = 0.7
 
 [node name="Player" parent="." instance=ExtResource("2_teuhj")]
 transform = Transform3D(-1, 0, -1.50996e-07, 0, 1, 0, 1.50996e-07, 0, -1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
-ConstantLinearDrag = 1.5
-ConstantAngularDrag = 1.5
-EngineAcceleration = 0.06
-TurnAcceleration = 0.034
 
 [node name="WaterTileCPU" type="MeshInstance3D" parent="."]
 process_mode = 4

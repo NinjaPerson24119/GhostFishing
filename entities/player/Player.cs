@@ -5,9 +5,9 @@ public partial class Player : RigidBody3D {
     public float BuoyancyDamping = 0f;
 
     [Export(PropertyHint.Range, "0,100")]
-    public float ConstantLinearDrag = 0.1f;
+    public float ConstantLinearDrag = 0.5f;
     [Export(PropertyHint.Range, "0,100")]
-    public float ConstantAngularDrag = 0.1f;
+    public float ConstantAngularDrag = 1f;
     [Export(PropertyHint.Range, "0,1")]
     public float AirDragCoefficient = 0.5f;
     [Export(PropertyHint.Range, "0,1")]
@@ -21,10 +21,10 @@ public partial class Player : RigidBody3D {
 
     // m/s^2
     [Export]
-    public float EngineAcceleration = 0.005f;
+    public float EngineAcceleration = 0.06f;
     // rad/s^2
     [Export]
-    public float TurnAcceleration = Mathf.DegToRad(1f);
+    public float TurnAcceleration = Mathf.DegToRad(2f);
 
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);

@@ -3,6 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_rivqw"]
 
 [sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_0o55t"]
+dof_blur_far_distance = 500.0
+dof_blur_amount = 0.01
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_02knu"]
 transparency = 1
