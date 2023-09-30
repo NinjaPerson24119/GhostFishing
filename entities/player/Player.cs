@@ -226,6 +226,6 @@ public partial class Player : RigidBody3D {
     }
 
     public void OnControlsContextChanged(ControlsContextType controlsContext) {
-        DisableControls = controlsContext != ControlsContextType.CONTROLS_CONTEXT_TYPE_PLAYER;
+        DisableControls = controlsContext != ControlsContextType.Player;
     }
 }

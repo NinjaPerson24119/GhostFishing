@@ -12,8 +12,7 @@ grow_vertical = 2
 script = ExtResource("1_yyegy")
 
 [node name="Label" type="Label" parent="."]
-offset_left = 11.0
-offset_top = 7.0
-offset_right = 181.0
-offset_bottom = 33.0
+layout_mode = 1
+offset_right = 191.0
+offset_bottom = 26.0
 text = "Pause Menu Placeholder"

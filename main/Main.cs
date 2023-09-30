@@ -40,7 +40,7 @@ public partial class Main : Node {
         _playerMenu.CloseMenu += _controller.OnMenuClosed;
         _pauseMenu.CloseMenu += _controller.OnMenuClosed;
 
-        _controller.ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_PLAYER;
+        _controller.ControlsContext = ControlsContextType.Player;
     }
 
     private void AssignDefaults() {

@@ -22,9 +22,7 @@ grow_vertical = 2
 script = ExtResource("2_gkiuy")
 
 [node name="Label" type="Label" parent="InventoryUI"]
-layout_mode = 0
-offset_left = 11.0
-offset_top = 7.0
-offset_right = 181.0
-offset_bottom = 33.0
+layout_mode = 1
+offset_right = 170.0
+offset_bottom = 26.0
 text = "Inventory Placeholder"

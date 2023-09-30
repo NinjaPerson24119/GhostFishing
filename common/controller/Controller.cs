@@ -1,9 +1,9 @@
 using Godot;
 
 public enum ControlsContextType {
-    CONTROLS_CONTEXT_TYPE_INVALID = 0,
-    CONTROLS_CONTEXT_TYPE_MENU = 1,
-    CONTROLS_CONTEXT_TYPE_PLAYER = 2,
+    Invalid = 0,
+    Menu = 1,
+    Player = 2,
 }
 
 public partial class Controller : Node {
@@ -16,7 +16,7 @@ public partial class Controller : Node {
             EmitSignal(SignalName.ControlsContextChanged, (int)_controlsContext);
         }
     }
-    private ControlsContextType _controlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_INVALID;
+    private ControlsContextType _controlsContext = ControlsContextType.Invalid;
 
     [Signal]
     public delegate void ControlsContextChangedEventHandler(ControlsContextType controlsContext);
@@ -27,18 +27,16 @@ public partial class Controller : Node {
 
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent.IsActionPressed("pause")) {
-            ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_MENU;
+            ControlsContext = ControlsContextType.Menu;
             EmitSignal(SignalName.ToggleViewPauseMenu);
         }
         if (inputEvent.IsActionPressed("open_inventory")) {
-            ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_MENU;
+            ControlsContext = ControlsContextType.Menu;
             EmitSignal(SignalName.ToggleViewInventory);
         }
     }
 
     public void OnMenuClosed() {
-        ControlsContext = ControlsContextType.CONTROLS_CONTEXT_TYPE_PLAYER;
-        // DEBUG
-        GD.Print("Menu closed");
+        ControlsContext = ControlsContextType.Player;
     }
 }
