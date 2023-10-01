@@ -31,7 +31,7 @@ public partial class DebugMode : Node {
     public override void _Process(double delta) {
         string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
         if (GameClock.Paused) {
-            text += "\nPAUSED";
+            text += "\nPAUSED GAME TIME";
         }
         GetNode<Label>("DebugIndicator").Text = text;
     }
