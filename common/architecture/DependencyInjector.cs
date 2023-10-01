@@ -27,7 +27,7 @@ public partial class DependencyInjector : Node {
     }
 
     public PauseMenu GetPauseMenu() {
-        return GetNode<PauseMenu>("/root/Main/Pausable/UI/PauseMenu");
+        return GetNode<PauseMenu>("/root/Main/PauseMenu");
     }
 
     public PlayerMenu GetPlayerMenu() {

@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://ci5gksbe5005i"]
+[gd_scene load_steps=4 format=3 uid="uid://ci5gksbe5005i"]
 
 [ext_resource type="PackedScene" uid="uid://d3od5e8fu5ime" path="res://common/ui/hud/HUD.tscn" id="1_imxhk"]
 [ext_resource type="Script" path="res://common/ui/UI.cs" id="1_mr446"]
-[ext_resource type="PackedScene" uid="uid://btubjkxhs3o87" path="res://common/ui/pause-menu/PauseMenu.tscn" id="3_yi7o1"]
 [ext_resource type="PackedScene" uid="uid://bevgtpu6amfkd" path="res://common/ui/player-menu/PlayerMenu.tscn" id="4_cxhqe"]
 
 [node name="UI" type="Control"]
@@ -24,9 +23,4 @@ layout_mode = 1
 [node name="PlayerMenu" parent="." instance=ExtResource("4_cxhqe")]
 visible = false
 z_index = 1
-layout_mode = 1
-
-[node name="PauseMenu" parent="." instance=ExtResource("3_yi7o1")]
-visible = false
-z_index = 2
 layout_mode = 1
