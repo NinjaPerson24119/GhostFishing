@@ -14,7 +14,7 @@ Hit `` backtick ` `` to enable debug mode.
 --------------------
 | Key     | Action                                                                                                                       |
 | ------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Exit    | Shift + Esc                                                                                                                  |
+| Exit    | Tab                                                                                                                          |
 | 1       | Toggle wireframe view                                                                                                        |
 | 2       | Toggle normals view                                                                                                          |
 | 3       | Toggle overdraw view                                                                                                         |

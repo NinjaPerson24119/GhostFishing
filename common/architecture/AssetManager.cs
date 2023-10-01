@@ -9,6 +9,8 @@ public partial class AssetManager : Node {
         return _singleton;
     }
 
+    
+
     public Inventory DefaultInventory;
 
     public AssetManager() {
