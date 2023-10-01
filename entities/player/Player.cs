@@ -201,6 +201,11 @@ public partial class Player : RigidBody3D {
         }
     }
 
+    // CallDeferred doesn't seem to understand default arguments, so we need to overload
+    private void DeferredResetAboveWater() {
+        DeferredResetAboveWater(false);
+    }
+
     private void DeferredResetAboveWater(bool relocate = false, Vector2 globalXZ = default, float globalRotationY = 0f) {
         float yaw = GlobalRotation.Y;
         if (relocate) {
