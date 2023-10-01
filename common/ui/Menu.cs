@@ -18,7 +18,6 @@ public partial class Menu : Control {
         }
         foreach (string action in _closeActions) {
             if (inputEvent.IsActionPressed(action)) {
-                GD.Print("Requested Close");
                 RequestedClose = true;
                 break;
             }

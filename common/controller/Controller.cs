@@ -42,11 +42,9 @@ public partial class Controller : Node {
         if (ControlsContext != ControlsContextType.Player) {
             return;
         }
-        GD.Print("Try Open");
         if (inputEvent.IsActionPressed("open_inventory")) {
             ControlsContext = ControlsContextType.PlayerMenu;
             DependencyInjector.Ref().GetPlayerMenu().Open();
-            GD.Print("Open Inventory");
             return;
         }
     }
@@ -59,7 +57,6 @@ public partial class Controller : Node {
             ControlsContext = ControlsContextType.PauseMenu;
             DependencyInjector.Ref().GetPlayerMenu().Disabled = true;
             DependencyInjector.Ref().GetPauseMenu().Open();
-            GD.Print("Open Pause Menu");
             return;
         }
     }
