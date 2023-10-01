@@ -1,6 +1,7 @@
 # Ghost Fishing
 
-Horror themed fishing game built in Godot
+Angry Octopus Technologies Inc. presents Ghost Fishing, a game about fishing for fish and not for trash.
+Vacuums are included, but you'll need your own batteries.
 
 ## Controls
 
