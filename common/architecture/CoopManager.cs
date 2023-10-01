@@ -3,6 +3,11 @@ using Godot;
 public partial class CoopManager : Node {
     static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
     private static CoopManager _singleton { get => _singletonTracker.Ref(); }
+
+    public CoopManager() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         _singletonTracker.Ready(this);
     }

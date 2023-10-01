@@ -10,6 +10,10 @@ public partial class SaveStateManager : Node {
 
     private int _noPlayers;
 
+    public SaveStateManager() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         _singletonTracker.Ready(this);
         _noPlayers = CoopManager.Ref().NoPlayers;

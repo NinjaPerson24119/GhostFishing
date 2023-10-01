@@ -11,6 +11,10 @@ public partial class AssetManager : Node {
 
     public Inventory DefaultInventory;
 
+    public AssetManager() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         _singletonTracker.Ready(this);
         LoadAssets();

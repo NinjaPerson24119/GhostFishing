@@ -23,6 +23,10 @@ public partial class DebugMode : Node {
         {"debug_overdraw", Viewport.DebugDrawEnum.Overdraw},
     };
 
+    public DebugMode() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         RenderingServer.SetDebugGenerateWireframes(true);
         GetNode<Label>("DebugIndicator").Visible = debugMode;

@@ -16,6 +16,10 @@ public partial class PersistentState : Node {
     // TODO: expose safe way to access player states within viewports
     private PlayerState[] _playerStates;
 
+    public PersistentState() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         _singletonTracker.Ready(this);
 

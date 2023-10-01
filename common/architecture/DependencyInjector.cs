@@ -3,9 +3,15 @@ using Godot;
 public partial class DependencyInjector : Node {
     static SingletonTracker<DependencyInjector> _singletonTracker = new SingletonTracker<DependencyInjector>();
     private static DependencyInjector _singleton { get => _singletonTracker.Ref(); }
+
+    public DependencyInjector() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         _singletonTracker.Ready(this);
     }
+
     public static DependencyInjector Ref() {
         return _singleton;
     }
