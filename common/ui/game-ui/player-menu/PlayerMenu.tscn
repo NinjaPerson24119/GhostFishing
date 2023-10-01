@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bevgtpu6amfkd"]
 
-[ext_resource type="Script" path="res://common/ui/player-menu/PlayerMenu.cs" id="1_6osc1"]
-[ext_resource type="Script" path="res://common/ui/player-menu/InventoryUI.cs" id="2_gkiuy"]
+[ext_resource type="Script" path="res://common/ui/game-ui/player-menu/PlayerMenu.cs" id="1_6osc1"]
+[ext_resource type="Script" path="res://common/ui/game-ui/player-menu/InventoryUI.cs" id="2_gkiuy"]
 
 [node name="PlayerMenu" type="Control"]
 layout_mode = 3

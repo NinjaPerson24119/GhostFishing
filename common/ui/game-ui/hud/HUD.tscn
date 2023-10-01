@@ -1,6 +1,6 @@
 [gd_scene load_steps=2 format=3 uid="uid://d3od5e8fu5ime"]
 
-[ext_resource type="Script" path="res://common/ui/hud/TimeDisplay.cs" id="1_5h4ol"]
+[ext_resource type="Script" path="res://common/ui/game-ui/hud/TimeDisplay.cs" id="1_5h4ol"]
 
 [node name="HUD" type="Control"]
 layout_mode = 3
