@@ -5,8 +5,8 @@
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://entities/player/Player.tscn" id="2_teuhj"]
 [ext_resource type="Script" path="res://common/controller/Controller.cs" id="3_pm5ys"]
 [ext_resource type="Script" path="res://entities/player/Player.cs" id="3_t71xa"]
-[ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/GameUI.tscn" id="4_4fdpc"]
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
+[ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/game-ui/GameUI.tscn" id="5_8atem"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
 [ext_resource type="PackedScene" uid="uid://brrd5dfqqljyv" path="res://common/sky/Sky.tscn" id="7_5ixg0"]
 [ext_resource type="Script" path="res://common/water/WaterTileCPU.cs" id="9_sht6q"]
@@ -26,6 +26,7 @@ subdivide_width = 50
 subdivide_depth = 50
 
 [node name="Main" type="Node"]
+process_mode = 3
 script = ExtResource("1_ihgdy")
 
 [node name="Controller" type="Node" parent="."]
@@ -36,12 +37,12 @@ visible = false
 z_as_relative = false
 
 [node name="Pausable" type="Node" parent="."]
+process_mode = 1
 
 [node name="GameClock" type="Node" parent="Pausable"]
 script = ExtResource("2_cg76b")
 
-[node name="GameUI" parent="Pausable" instance=ExtResource("4_4fdpc")]
-script = null
+[node name="GameUI" parent="Pausable" instance=ExtResource("5_8atem")]
 
 [node name="Sky" parent="Pausable" instance=ExtResource("7_5ixg0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.3415, 17.4548, 0)
