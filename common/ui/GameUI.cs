@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class UI : Control {
+public partial class GameUI : Control {
     [Export]
     public int PaddingPx = 16;
 

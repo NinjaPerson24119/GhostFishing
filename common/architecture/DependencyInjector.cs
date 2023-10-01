@@ -19,7 +19,7 @@ public partial class DependencyInjector : Node {
     }
 
     public TimeDisplay GetTimeDisplay() {
-        return GetNode<TimeDisplay>("/root/Main/Pausable/UI/HUD/TimeDisplay");
+        return GetNode<TimeDisplay>("/root/Main/Pausable/GameUI/HUD/TimeDisplay");
     }
 
     public Controller GetController() {
@@ -31,7 +31,7 @@ public partial class DependencyInjector : Node {
     }
 
     public PlayerMenu GetPlayerMenu() {
-        return GetNode<PlayerMenu>("/root/Main/Pausable/UI/PlayerMenu");
+        return GetNode<PlayerMenu>("/root/Main/Pausable/GameUI/PlayerMenu");
     }
 
     // do not provide other singletons. they provide themselves.
