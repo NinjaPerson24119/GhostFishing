@@ -4,14 +4,16 @@ using Godot;
 
 public partial class SaveStateManager : Node {
     static SingletonTracker<SaveStateManager> _singletonTracker = new SingletonTracker<SaveStateManager>();
-    public override void _Ready() {
-        _singletonTracker.Ready(this);
-    }
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
     private SaveState _saveState;
 
-    const int noPlayers = 1;
+    private int _noPlayers;
+
+    public override void _Ready() {
+        _singletonTracker.Ready(this);
+        _noPlayers = CoopManager.Ref().NoPlayers;
+    }
 
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent.IsActionPressed("save_game")) {
@@ -27,10 +29,10 @@ public partial class SaveStateManager : Node {
             CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
-            PlayerSaveState = new PlayerSaveState[noPlayers],
+            PlayerSaveState = new PlayerSaveState[_noPlayers],
         };
 
-        for (int i = 0; i < noPlayers; i++) {
+        for (int i = 0; i < _noPlayers; i++) {
             Player player = DependencyInjector.Ref().GetPlayer();
             _saveState.PlayerSaveState[i] = new PlayerSaveState() {
                 GlobalPositionX = player.GlobalPosition.X,
@@ -52,7 +54,7 @@ public partial class SaveStateManager : Node {
 
     void SetState() {
         GameClock.GameSeconds = _saveState.CommonSaveState.GameSeconds;
-        for (int i = 0; i < noPlayers; i++) {
+        for (int i = 0; i < _noPlayers; i++) {
             PlayerSaveState playerState = _saveState.PlayerSaveState[i];
             Player player = DependencyInjector.Ref().GetPlayer();
             player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);

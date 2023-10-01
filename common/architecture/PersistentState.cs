@@ -19,6 +19,7 @@ public partial class PersistentState : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
 
+        // TODO: make reactive
         int noPlayers = CoopManager.Ref().NoPlayers;
         _playerStates = new PlayerState[noPlayers];
         for (int i = 0; i < noPlayers; i++) {
