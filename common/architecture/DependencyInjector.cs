@@ -11,15 +11,15 @@ public partial class DependencyInjector : Node {
     }
 
     public Player GetPlayer() {
-        return GetNode<Player>("/root/Main/Player");
+        return GetNode<Player>("/root/Main/Pausable/Player");
     }
 
     public Ocean GetOcean() {
-        return GetNode<Ocean>("/root/Main/Ocean");
+        return GetNode<Ocean>("/root/Main/Pausable/Ocean");
     }
 
     public TimeDisplay GetTimeDisplay() {
-        return GetNode<TimeDisplay>("/root/Main/UI/HUD/TimeDisplay");
+        return GetNode<TimeDisplay>("/root/Main/Pausable/UI/HUD/TimeDisplay");
     }
 
     public Controller GetController() {
@@ -27,11 +27,11 @@ public partial class DependencyInjector : Node {
     }
 
     public PauseMenu GetPauseMenu() {
-        return GetNode<PauseMenu>("/root/Main/UI/PauseMenu");
+        return GetNode<PauseMenu>("/root/Main/Pausable/UI/PauseMenu");
     }
 
     public PlayerMenu GetPlayerMenu() {
-        return GetNode<PlayerMenu>("/root/Main/UI/PlayerMenu");
+        return GetNode<PlayerMenu>("/root/Main/Pausable/UI/PlayerMenu");
     }
 
     // do not provide other singletons. they provide themselves.

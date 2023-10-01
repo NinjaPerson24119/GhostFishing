@@ -12,7 +12,6 @@ public partial class SaveStateManager : Node {
     private SaveState _saveState;
 
     const int noPlayers = 1;
-    const string playerNodePath = "/root/Main/Player";
 
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent.IsActionPressed("save_game")) {
@@ -32,7 +31,7 @@ public partial class SaveStateManager : Node {
         };
 
         for (int i = 0; i < noPlayers; i++) {
-            Player player = GetNode<Player>(playerNodePath);
+            Player player = DependencyInjector.Ref().GetPlayer();
             _saveState.PlayerSaveState[i] = new PlayerSaveState() {
                 GlobalPositionX = player.GlobalPosition.X,
                 GlobalPositionZ = player.GlobalPosition.Z,
@@ -55,7 +54,7 @@ public partial class SaveStateManager : Node {
         GameClock.GameSeconds = _saveState.CommonSaveState.GameSeconds;
         for (int i = 0; i < noPlayers; i++) {
             PlayerSaveState playerState = _saveState.PlayerSaveState[i];
-            Player player = GetNode<Player>(playerNodePath);
+            Player player = DependencyInjector.Ref().GetPlayer();
             player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
         }
     }

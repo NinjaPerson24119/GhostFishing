@@ -50,7 +50,7 @@ public partial class Player : RigidBody3D {
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
     public override void _Ready() {
-        _ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
+        _ocean = DependencyInjector.Ref().GetOcean();
 
         _horizontalSliceArea = _size.X * _size.Y;
         if (DebugLogs) {
