@@ -5,10 +5,17 @@ public partial class RealClock : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
     }
+    private static RealClock _singleton { get => _singletonTracker.Ref(); }
+    public static RealClock Ref() {
+        return _singleton;
+    }
+    public bool Paused = false;
 
     // real time elapsed since the game started
-    public static double RealTime { get; private set; } = 0.0;
+    public double RealTime { get; private set; } = 0.0;
     public override void _Process(double delta) {
-        RealTime += delta;
+        if (!Paused) {
+            RealTime += delta;
+        }
     }
 }
