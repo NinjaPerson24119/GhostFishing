@@ -25,7 +25,7 @@ public partial class Menu : Control {
     }
 
     public void Open() {
-        if (RequestedClose) {
+        if (RequestedClose || IsOpen) {
             return;
         }
         Visible = true;

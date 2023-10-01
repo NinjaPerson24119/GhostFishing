@@ -45,7 +45,7 @@ public partial class GameClock : Node {
     }
 
     public override void _Process(double delta) {
-        // do not rely on RealClock.RealTime because updating the timescale could cause us to time travel to the past
+        // do not rely on RealClock's RealTime because updating the timescale could cause us to time travel to the past
         if (!_singleton._paused) {
             _gameSeconds += delta * _gameSecondsPerRealSecond;
         }

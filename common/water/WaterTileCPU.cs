@@ -6,7 +6,7 @@ public partial class WaterTileCPU : MeshInstance3D {
     private WaterTile _waterTile;
 
     public override void _Ready() {
-        _ocean = GetNode<Ocean>("/root/Main/Ocean");
+        _ocean = DependencyInjector.Ref().GetOcean();
         _planeMesh = Mesh as PlaneMesh;
     }
 

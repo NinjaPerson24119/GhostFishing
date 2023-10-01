@@ -90,7 +90,11 @@ public partial class WaterTile : MeshInstance3D {
     private const int maxWaves = 12;
     private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
 
+    private RealClock _realClock;
+
     public override void _Ready() {
+        _realClock = RealClock.Ref();
+
         if (WavesConfig == null) {
             GD.Print("Generating default wave set because none was provided.");
             WaveSetConfig config = WaveSet.BuildConfig(10, Mathf.Pi, WaterDepth);
@@ -101,7 +105,7 @@ public partial class WaterTile : MeshInstance3D {
     }
 
     public override void _Process(double delta) {
-        _material.SetShaderParameter("wave_time", RealClock.RealTime);
+        _material.SetShaderParameter("wave_time", _realClock.RealTime);
 
         if (_queueReconfigureShaders) {
             ConfigureShader();
@@ -216,14 +220,14 @@ public partial class WaterTile : MeshInstance3D {
 
         // calculate Gerstner portion of displacement
         Gerstner gerstner = new Gerstner(WavesConfig);
-        Vector3 gerstnerDisplacement = gerstner.Displacement(globalXZ.X, globalXZ.Y, (float)RealClock.RealTime);
+        Vector3 gerstnerDisplacement = gerstner.Displacement(globalXZ.X, globalXZ.Y, (float)_realClock.RealTime);
 
         // calculate noise portion of displacement
-        Vector3 normal = gerstner.Normal(globalXZ.X, globalXZ.Y, (float)RealClock.RealTime);
+        Vector3 normal = gerstner.Normal(globalXZ.X, globalXZ.Y, (float)_realClock.RealTime);
 
         // ignore how shader smooths noise at tile edges. always compute full noise
-        int uvX = (int)Mathf.Wrap(globalXZ.X / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
-        int uvY = (int)Mathf.Wrap(globalXZ.Y / _surfaceNoiseScale + RealClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
+        int uvX = (int)Mathf.Wrap(globalXZ.X / _surfaceNoiseScale + _realClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
+        int uvY = (int)Mathf.Wrap(globalXZ.Y / _surfaceNoiseScale + _realClock.RealTime * _surfaceTimeScale, 0.0, 1.0);
         float noiseHeight = _surfaceNoise.GetPixel(uvX * _surfaceNoise.GetWidth(), uvY * _surfaceNoise.GetHeight()).R;
 
         return gerstnerDisplacement + normal * noiseHeight * _surfaceHeightScale;

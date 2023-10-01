@@ -50,7 +50,7 @@ public partial class Player : RigidBody3D {
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
     public override void _Ready() {
-        _ocean = GetTree().Root.GetNode<Ocean>("/root/Main/Ocean");
+        _ocean = DependencyInjector.Ref().GetOcean();
 
         _horizontalSliceArea = _size.X * _size.Y;
         if (DebugLogs) {
@@ -199,6 +199,11 @@ public partial class Player : RigidBody3D {
         else {
             CallDeferred(nameof(DeferredResetAboveWater));
         }
+    }
+
+    // CallDeferred doesn't seem to understand default arguments, so we need to overload
+    private void DeferredResetAboveWater() {
+        DeferredResetAboveWater(false);
     }
 
     private void DeferredResetAboveWater(bool relocate = false, Vector2 globalXZ = default, float globalRotationY = 0f) {

@@ -23,6 +23,10 @@ public partial class DebugMode : Node {
         {"debug_overdraw", Viewport.DebugDrawEnum.Overdraw},
     };
 
+    public DebugMode() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
+
     public override void _Ready() {
         RenderingServer.SetDebugGenerateWireframes(true);
         GetNode<Label>("DebugIndicator").Visible = debugMode;
@@ -31,7 +35,7 @@ public partial class DebugMode : Node {
     public override void _Process(double delta) {
         string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
         if (GameClock.Paused) {
-            text += "\nPAUSED";
+            text += "\nPAUSED GAME TIME";
         }
         GetNode<Label>("DebugIndicator").Text = text;
     }
@@ -82,7 +86,7 @@ public partial class DebugMode : Node {
             GameClock.TogglePause();
         }
         if (inputEvent.IsActionPressed("debug_reset_boat")) {
-            GetNode<Player>("/root/Main/Player").ResetAboveWater();
+            DependencyInjector.Ref().GetPlayer().ResetAboveWater();
         }
     }
 
