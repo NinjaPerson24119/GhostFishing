@@ -20,10 +20,10 @@ public partial class Controller : Node {
         get => _controlsContext;
         set {
             if (value == ControlsContextType.PauseMenu) {
-                PauseGame();
+                SetPaused(true);
             }
             if (_controlsContext == ControlsContextType.PauseMenu && value != ControlsContextType.PauseMenu) {
-                UnpauseGame();
+                SetPaused(false);
             }
             _controlsContext = value;
             EmitSignal(SignalName.SetPlayerControlsDisabled, value != ControlsContextType.Player);
@@ -92,13 +92,8 @@ public partial class Controller : Node {
         }
     }
 
-    public void PauseGame() {
-        RealClock.Ref().Paused = true;
-        GetTree().Paused = true;
-    }
-
-    public void UnpauseGame() {
-        RealClock.Ref().Paused = false;
-        GetTree().Paused = false;
+    public void SetPaused(bool paused) {
+        RealClock.Ref().Paused = paused;
+        FreezeUtil.FreezeScene(DependencyInjector.Ref().GetPausable(), paused);
     }
 }

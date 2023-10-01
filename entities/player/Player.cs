@@ -69,6 +69,7 @@ public partial class Player : RigidBody3D {
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
+        GD.Print("Integrate forces");
         Transform = Transform.Orthonormalized();
 
         ApplyForcesFromControls();
