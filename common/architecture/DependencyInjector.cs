@@ -34,9 +34,5 @@ public partial class DependencyInjector : Node {
         return GetNode<PlayerMenu>("/root/Main/Pausable/GameUI/PlayerMenu");
     }
 
-    public Node GetPausable() {
-        return GetNode<Node>("/root/Main/Pausable");
-    }
-
     // do not provide other singletons. they provide themselves.
 }
