@@ -225,7 +225,7 @@ public partial class Player : RigidBody3D {
         Transform = transform;
     }
 
-    public void OnControlsContextChanged(ControlsContextType controlsContext) {
-        DisableControls = controlsContext != ControlsContextType.Player;
+    public void SetControlsDisabled(bool controlsDisabled) {
+        DisableControls = controlsDisabled;
     }
 }

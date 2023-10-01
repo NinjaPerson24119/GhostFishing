@@ -2,19 +2,38 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class Menu : Control {
-    public List<string> OpenActions { get; private set; } = new List<string>();
-    public List<string> CloseActions { get; private set; } = new List<string> { "cancel" };
+    protected List<string> _closeActions = new List<string> { "cancel" };
 
-    public bool IsOpen() {
-        return Visible;
+    public bool IsOpen {
+        get {
+            return Visible;
+        }
+    }
+    public bool RequestedClose { get; private set; } = false;
+    public bool Disabled = false;
+
+    public override void _Input(InputEvent inputEvent) {
+        if (Disabled || RequestedClose || !IsOpen) {
+            return;
+        }
+        foreach (string action in _closeActions) {
+            if (inputEvent.IsActionPressed(action)) {
+                GD.Print("Requested Close");
+                RequestedClose = true;
+                break;
+            }
+        }
     }
 
     public void Open() {
-        GD.Print("Open");
+        if (RequestedClose) {
+            return;
+        }
         Visible = true;
     }
 
     public void Close() {
         Visible = false;
+        RequestedClose = false;
     }
 }
