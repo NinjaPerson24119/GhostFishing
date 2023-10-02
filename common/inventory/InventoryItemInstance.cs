@@ -1,3 +1,8 @@
+public class InventoryItemInstanceQuestDetailsDTO {
+    public string QuestID { get; set; }
+    public string UniqueID { get; set; }
+}
+
 public class InventoryItemInstanceQuestDetails {
     public string QuestID { get; set; }
     public string UniqueID { get; set; }
@@ -8,6 +13,15 @@ public class InventoryItemInstanceQuestDetails {
     public string Stringify() {
         return $"QuestID: {QuestID}\nUniqueID: {UniqueID}";
     }
+}
+
+public class InventoryItemInstanceDTO {
+    public string DefinitionID { get; set; }
+    public int X { get; set; }
+    public int Y { get; set; }
+    public InventoryItemRotation Rotation { get; set; }
+    public InventoryItemInstanceQuestDetailsDTO QuestDetails { get; set; }
+    public InventoryItemFlagsDTO FlagOverrides { get; set; }
 }
 
 public class InventoryItemInstance : IValidatedGameAsset {

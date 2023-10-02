@@ -1,3 +1,8 @@
+public class QuestDTO {
+    public string Name { get; set; }
+    public string Description { get; set; }
+}
+
 public class Quest : IValidatedGameAsset {
     string Name { get; set; }
     string Description { get; set; }

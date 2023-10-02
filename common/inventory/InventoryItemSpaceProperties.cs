@@ -7,6 +7,12 @@ public enum InventoryItemRotation {
     Clockwise270 = 3,
 }
 
+public class InventoryItemSpacePropertiesDTO {
+    public int Width { get; set; }
+    public int Height { get; set; }
+    public bool[] FilledMask { get; set; }
+}
+
 public class InventoryItemSpaceProperties : IValidatedGameAsset {
     public int Width { get; set; }
     public int Height { get; set; }

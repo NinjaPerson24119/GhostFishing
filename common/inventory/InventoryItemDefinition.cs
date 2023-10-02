@@ -1,3 +1,10 @@
+public class InventoryItemFlagsDTO {
+    public bool CanPutInStorage { get; set; } = true;
+    public bool CanBeMovedByPlayer { get; set; } = true;
+    public bool CanDelete { get; set; } = true;
+    public bool RestrictPlayerTeleport { get; set; } = false;
+}
+
 public class InventoryItemFlags {
     public bool CanPutInStorage { get; set; } = true;
     public bool CanBeMovedByPlayer { get; set; } = true;
@@ -13,6 +20,12 @@ public class InventoryItemFlags {
     }
 }
 
+public class InventoryItemCategoryDTO {
+    public string Name { get; set; }
+    public string IconImagePath { get; set; }
+    public string BackgroundColor { get; set; }
+}
+
 public class InventoryItemCategory : IValidatedGameAsset {
     public string Name { get; set; }
     public string IconImagePath { get; set; }
@@ -25,6 +38,18 @@ public class InventoryItemCategory : IValidatedGameAsset {
     public string Stringify() {
         return $"Name: {Name}\nIconImagePath: {IconImagePath}\nBackgroundColor: {BackgroundColor}";
     }
+}
+
+public class InventoryItemDefinitionDTO {
+    public string Name { get; set; }
+    public string Description { get; set; }
+    public int CurrencyValue { get; set; }
+    public string ImagePath { get; set; }
+    public string SilhouetteImagePath { get; set; }
+    public InventoryItemSpacePropertiesDTO Space { get; set; }
+    public InventoryItemFlagsDTO Flags { get; set; }
+    public InventoryItemCategoryDTO Category { get; set; }
+    public string BackgroundColorOverride { get; set; }
 }
 
 public class InventoryItemDefinition : IValidatedGameAsset {

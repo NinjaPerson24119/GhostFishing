@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using Godot;
 
-/*
 public class InventoryDTO {
     public string Name { get; set; }
     public int Width { get; set; }
@@ -13,7 +12,6 @@ public class InventoryDTO {
     public bool Disabled { get; set; }
     public bool[] UsableMask { get; set; }
 }
-*/
 
 public class Inventory : IValidatedGameAsset {
     public string Name { get; set; }
