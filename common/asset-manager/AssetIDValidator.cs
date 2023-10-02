@@ -1,4 +1,4 @@
-public class AssetIDValidator {
+public static class AssetIDValidator {
     public static bool ValidateInventoryID(string id) {
         return id.StartsWith("INVENTORY-");
     }

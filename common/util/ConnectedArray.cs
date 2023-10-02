@@ -1,4 +1,4 @@
-public class ConnectedArray {
+public static class ConnectedArray {
     // checks if an array defining a space is connected
     public static bool IsArrayConnected(int width, int height, bool[] array) {
         for (int x = 0; x < width; x++) {
