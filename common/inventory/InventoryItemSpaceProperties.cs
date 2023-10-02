@@ -61,22 +61,8 @@ public class InventoryItemSpaceProperties : IValidatedGameAsset {
         if (_filledMaskClockwise0.Length != Width * Height) {
             return false;
         }
-        return ValidateFilledMaskConnected();
-    }
-
-    public bool ValidateFilledMaskConnected() {
-        for (int x = 0; x < Width; x++) {
-            for (int y = 0; y < Width; y++) {
-                if (GetFilledMask(InventoryItemRotation.None)[y * Width + x]) {
-                    bool left = x > 0 && _filledMaskClockwise0[y * Width + x - 1];
-                    bool right = x < Width - 1 && _filledMaskClockwise0[y * Width + x + 1];
-                    bool up = y > 0 && _filledMaskClockwise0[(y - 1) * Width + x];
-                    bool down = y < Height - 1 && _filledMaskClockwise0[(y + 1) * Width + x];
-                    if (!left && !right && !up && !down) {
-                        return false;
-                    }
-                }
-            }
+        if (!ConnectedArray.IsArrayConnected(Width, Height, _filledMaskClockwise0)) {
+            return false;
         }
         return true;
     }

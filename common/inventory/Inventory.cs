@@ -144,6 +144,9 @@ public class Inventory : IValidatedGameAsset {
         if (SerializedUsableMask.Length != Width * Height) {
             return false;
         }
+        if (!ConnectedArray.IsArrayConnected(Width, Height, SerializedUsableMask)) {
+            return false;
+        }
         return true;
     }
 
