@@ -17,14 +17,15 @@ public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1")]
     public float WaterMomentCoefficient = 0.08f;
     [Export(PropertyHint.Range, "0,0.99")]
-    public float SubmergedProportionOffset = 0.5f;
+    public float SubmergedProportionOffset = 0.7f;
 
-    // m/s^2
+    // F = ma, for a in m/s^2
+    // 150kg, just want this to be constant
     [Export]
-    public float EngineAcceleration = 0.06f;
+    public float EngineForce = 0.06f * 150;
     // rad/s^2
     [Export]
-    public float TurnAcceleration = Mathf.DegToRad(2f);
+    public float TurnForce = Mathf.DegToRad(2f) * 150;
 
     [Export]
     public bool DisableControls = false;
@@ -33,9 +34,6 @@ public partial class Player : RigidBody3D {
     private Vector3 _lastSignificantPosition = Vector3.Zero;
     [Export]
     public bool DebugLogs = false;
-
-    private float EngineForce => Mass * EngineAcceleration;
-    private float TurnForce => Mass * TurnAcceleration;
 
     private Ocean _ocean;
 
@@ -57,8 +55,7 @@ public partial class Player : RigidBody3D {
         //Mass = 150f;
 
         // simple boat
-        _size = new Vector3(2f, 4f, 2f);
-        Mass = 300f;
+        _size = new Vector3(2f, 3f, 2f);
 
         _horizontalSliceArea = _size.X * _size.Y;
         if (DebugLogs) {
@@ -113,7 +110,7 @@ public partial class Player : RigidBody3D {
     }
 
     private void ApplyBuoyancy() {
-        Node3D waterContactPoints = GetNode<Node3D>("Boat/Model/WaterContactPoints");
+        Node3D waterContactPoints = GetNode<Node3D>("Boat/WaterContactPoints");
         float cumulativeDepth = 0;
         int submergedPoints = 0;
         var children = waterContactPoints.GetChildren();

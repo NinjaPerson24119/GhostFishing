@@ -7,10 +7,10 @@
 
 [node name="Model" parent="." instance=ExtResource("1_27isi")]
 
-[node name="SpotlightMesh" parent="Model" instance=ExtResource("1_h5v6a")]
+[node name="SpotlightMesh" parent="." instance=ExtResource("1_h5v6a")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.886748, -3.68618)
 
-[node name="SpotLight3D2" type="SpotLight3D" parent="Model/SpotlightMesh"]
+[node name="SpotLight3D2" type="SpotLight3D" parent="SpotlightMesh"]
 light_energy = 8.0
 light_volumetric_fog_energy = 0.012
 light_bake_mode = 0

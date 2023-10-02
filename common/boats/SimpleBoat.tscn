@@ -7,10 +7,12 @@
 
 [node name="Model" parent="." instance=ExtResource("1_y05rb")]
 
-[node name="SpotlightMesh" parent="Model" instance=ExtResource("2_un3uk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.509181, -2.16122)
+[node name="BottomMarker" type="Marker3D" parent="Model"]
 
-[node name="SpotLight3D2" type="SpotLight3D" parent="Model/SpotlightMesh"]
+[node name="SpotlightMesh" parent="." instance=ExtResource("2_un3uk")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.503813, -2.1844)
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="SpotlightMesh"]
 transform = Transform3D(1, -1.28388e-14, -1.98537e-13, 0, 0.997916, -0.0645323, 1.98952e-13, 0.0645323, 0.997916, 0, 0, -0.0988569)
 light_energy = 8.0
 light_volumetric_fog_energy = 0.012
@@ -19,29 +21,26 @@ shadow_enabled = true
 spot_range = 25.0
 spot_angle_attenuation = 0.3
 
-[node name="WaterContactPoints" type="Node3D" parent="Model"]
-transform = Transform3D(0.5, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0.0901841, 0)
+[node name="WaterContactPoints" type="Node3D" parent="."]
+transform = Transform3D(0.5, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0.0673565, 0)
 
-[node name="Center" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.640059, 0)
 
-[node name="Center2" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center2" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -3)
 
-[node name="Center3" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center3" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 3)
 
-[node name="Center4" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center4" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
 
-[node name="Center5" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center5" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)
 
-[node name="Center6" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center6" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 1.5)
 
-[node name="Center7" type="Marker3D" parent="Model/WaterContactPoints"]
+[node name="Center7" type="Marker3D" parent="WaterContactPoints"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -1.5)
-
-[node name="BottomMarker" type="Marker3D" parent="Model"]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.555951, 0)
