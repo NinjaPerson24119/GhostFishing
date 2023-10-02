@@ -1,6 +1,6 @@
-public class InventoryItemInstanceQuestDetails : IValidatedGameAsset {
-    public string QuestID;
-    public string UniqueID;
+public class InventoryItemInstanceQuestDetails {
+    public string QuestID { get; set; }
+    public string UniqueID { get; set; }
     public bool Validate() {
         return QuestID.Length == 0 || UniqueID.Length == 0;
     }

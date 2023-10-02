@@ -3,5 +3,6 @@
     <TargetFramework>net6.0</TargetFramework>
     <EnableDynamicLoading>true</EnableDynamicLoading>
     <RootNamespace>GhostFishing</RootNamespace>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 </Project>
