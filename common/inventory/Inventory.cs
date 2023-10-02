@@ -1,4 +1,22 @@
+using System.Text.Json.Serialization;
+using System.Collections.Generic;
+using Godot;
+
+/*
+public class InventoryDTO {
+    public string Name { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
+    public List<InventoryItemInstanceDTO> Items { get; set; }
+    public string BackgroundImagePath { get; set; }
+    public bool ShouldClearOnClose { get; set; }
+    public bool Disabled { get; set; }
+    public bool[] UsableMask { get; set; }
+}
+*/
+
 public class Inventory {
+    public string Name { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     // slots that cannot ever be used (e.g. if the inventory isn't a perfect rectangle)

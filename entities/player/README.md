@@ -60,3 +60,11 @@ Sailboat (varies with design)	0.05 - 0.15	0.01 - 0.03
 Fishing Boat	0.15 - 0.30	0.03 - 0.08
 Kayak (varies with design)	0.1 - 0.25	0.01 - 0.02
 
+### Boat Parameters
+
+- Row Boat
+  - 150kg, (1, 0.5, 2.5)m
+  - 0.5 submersion factor
+- Trawler
+  - 2500kg, (2, 3, 2)m
+  - 0.7 submersion factor

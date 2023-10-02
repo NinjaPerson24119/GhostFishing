@@ -1,0 +1,43 @@
+[gd_scene load_steps=3 format=3 uid="uid://7tc4srebhwrn"]
+
+[ext_resource type="PackedScene" uid="uid://b3v5rardx48dp" path="res://common/boats/RowBoat.blend" id="1_27isi"]
+[ext_resource type="PackedScene" uid="uid://s7i1n5ympgo7" path="res://common/boats/Spotlight.blend" id="1_h5v6a"]
+
+[node name="Boat" type="Node3D"]
+
+[node name="Model" parent="." instance=ExtResource("1_27isi")]
+
+[node name="SpotlightMesh" parent="." instance=ExtResource("1_h5v6a")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.886748, -3.68618)
+
+[node name="SpotLight3D2" type="SpotLight3D" parent="SpotlightMesh"]
+light_energy = 8.0
+light_volumetric_fog_energy = 0.012
+light_bake_mode = 0
+shadow_enabled = true
+spot_range = 25.0
+spot_angle_attenuation = 0.3
+
+[node name="WaterContactPoints" type="Node3D" parent="."]
+transform = Transform3D(1, 0, -1.98952e-13, 0, 1, 0, 1.98952e-13, 0, 1, 0, 0, 0)
+
+[node name="Center" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.640059, 0)
+
+[node name="Center2" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -3)
+
+[node name="Center3" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 3)
+
+[node name="Center4" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1, -0.64, 0)
+
+[node name="Center5" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1, -0.64, 0)
+
+[node name="Center6" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, 1.5)
+
+[node name="Center7" type="Marker3D" parent="WaterContactPoints"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.64, -1.5)
