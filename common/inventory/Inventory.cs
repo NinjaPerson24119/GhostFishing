@@ -21,6 +21,17 @@ public class Inventory : IValidatedGameAsset {
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
     public string BackgroundImagePath { get; set; }
+    public bool ShouldClearOnClose { get; set; }
+    public bool Disabled { get; set; }
+    public bool[] UsableMask { get; set; }
+}
+
+public class Inventory : IValidatedGameAsset {
+    public string Name { get; set; }
+    public int Width { get; set; }
+    public int Height { get; set; }
+    public List<InventoryItemInstance> Items { get; set; }
+    public string BackgroundImagePath { get; set; }
     // hint to the game that this inventory should be cleared when closed (e.g. for fishing result / temporary inventories)
     // TODO: this should throw an error somehow if the inventory contains items that cannot be deleted / are quest items
     public bool ShouldClearOnClose { get; set; }
