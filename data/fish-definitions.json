@@ -1,19 +1,17 @@
 {
-    "definitions": [
-        {
-            "UUID": "FISH-22573c01-8e3b-4020-b540-cedb88b7875f",
-            "Name": "Generic Fish",
-            "Description": "A generic fish drawn for testing",
-            "InventorySpatial": {
-                "Width": 2,
-                "Height": 2,
-                "FilledMask": [
-                    true,
-                    true,
-                    true,
-                    false
-                ]
-            }
+    "FISH-22573c01-8e3b-4020-b540-cedb88b7875f": {
+        "Name": "Skeleton Fish",
+        "Description": "A skeleton fish drawn for testing",
+        "ImagePath": "res://artwork/generated/fish/SkeletonFish.png",
+        "InventorySpatial": {
+            "Width": 2,
+            "Height": 2,
+            "FilledMask": [
+                true,
+                true,
+                true,
+                false
+            ]
         }
-    ]
+    }
 }

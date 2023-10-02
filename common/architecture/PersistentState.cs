@@ -32,4 +32,12 @@ public partial class PersistentState : Node {
             };
         }
     }
+
+    public PlayerState GetPlayerState(int playerIndex = 0) {
+        if (playerIndex < 0 || playerIndex >= _playerStates.Length) {
+            GD.PrintErr($"GetPlayerState: invalid player index {playerIndex}");
+            return null;
+        }
+        return _playerStates[playerIndex];
+    }
 }

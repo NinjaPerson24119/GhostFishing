@@ -1,6 +1,11 @@
 using Godot;
 using System.IO;
 using System.Text.Json;
+using System.Collections.Generic;
+
+public class AssetDefinitionArray<T> {
+    public T[] Array { get; set; }
+}
 
 public partial class AssetManager : Node {
     static SingletonTracker<AssetManager> _singletonTracker = new SingletonTracker<AssetManager>();
@@ -9,9 +14,8 @@ public partial class AssetManager : Node {
         return _singleton;
     }
 
-    
-
     public Inventory DefaultInventory;
+    public Dictionary<string, FishDefinition> FishDefinitions;
 
     public AssetManager() {
         ProcessMode = ProcessModeEnum.Always;
@@ -22,7 +26,7 @@ public partial class AssetManager : Node {
         LoadAssets();
     }
 
-    private T LoadJSONFromFile<T>(string filePath) {
+    private T LoadAssetFromJSON<T>(string filePath) {
         try {
             string globalizedPath = ProjectSettings.GlobalizePath(filePath);
             string jsonString = File.ReadAllText(globalizedPath);
@@ -30,11 +34,16 @@ public partial class AssetManager : Node {
         }
         catch (FileNotFoundException) {
             GD.PrintErr("File not found: " + filePath);
-            return default(T);
+            return default;
+        }
+        catch (JsonException) {
+            GD.PrintErr("Error parsing JSON file: " + filePath);
+            return default;
         }
     }
 
     private void LoadAssets() {
-        DefaultInventory = LoadJSONFromFile<Inventory>("res://data/default-inventory.json");
+        DefaultInventory = LoadAssetFromJSON<Inventory>("res://data/default-inventory.json");
+        FishDefinitions = LoadAssetFromJSON<Dictionary<string, FishDefinition>>("res://data/fish-definitions.json");
     }
 }
