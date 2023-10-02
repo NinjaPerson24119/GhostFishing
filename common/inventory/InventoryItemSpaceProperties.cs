@@ -1,5 +1,4 @@
 using System.Text.Json.Serialization;
-using Godot;
 
 public enum InventoryItemRotation {
     None = 0,
@@ -8,13 +7,9 @@ public enum InventoryItemRotation {
     Clockwise270 = 3,
 }
 
-public class InventoryItemSpatial {
-    public int Y { get; set; }
-    public int X { get; set; }
+public class InventoryItemSpaceProperties : IValidatedGameAsset {
     public int Width { get; set; }
     public int Height { get; set; }
-    public InventoryItemRotation Rotation = InventoryItemRotation.None;
-
     [JsonPropertyName("FilledMask")]
     public bool[] SerializedFilledMask {
         get {
@@ -41,8 +36,8 @@ public class InventoryItemSpatial {
     private bool[] _filledMaskClockwise90;
     private bool[] _filledMaskClockwise180;
     private bool[] _filledMaskClockwise270;
-    public bool[] GetFilledMask() {
-        switch (Rotation) {
+    public bool[] GetFilledMask(InventoryItemRotation rotation) {
+        switch (rotation) {
             case InventoryItemRotation.None:
                 return _filledMaskClockwise0;
             case InventoryItemRotation.Clockwise90:
@@ -56,13 +51,43 @@ public class InventoryItemSpatial {
         }
     }
 
-    public override string ToString() {
-        string str = $"X: {X}, Y: {Y}, Width: {Width}, Height: {Height}, Rotation: {Rotation}\n";
+    public bool Validate() {
+        if (Width <= 0 || Height <= 0) {
+            return false;
+        }
+        if (_filledMaskClockwise0 == null) {
+            return false;
+        }
+        if (_filledMaskClockwise0.Length != Width * Height) {
+            return false;
+        }
+        return ValidateFilledMaskConnected();
+    }
+
+    public bool ValidateFilledMaskConnected() {
+        for (int x = 0; x < Width; x++) {
+            for (int y = 0; y < Width; y++) {
+                if (GetFilledMask(InventoryItemRotation.None)[y * Width + x]) {
+                    bool left = x > 0 && _filledMaskClockwise0[y * Width + x - 1];
+                    bool right = x < Width - 1 && _filledMaskClockwise0[y * Width + x + 1];
+                    bool up = y > 0 && _filledMaskClockwise0[(y - 1) * Width + x];
+                    bool down = y < Height - 1 && _filledMaskClockwise0[(y + 1) * Width + x];
+                    if (!left && !right && !up && !down) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    public string Stringify() {
+        string str = $"Width: {Width}, Height: {Height}\n";
         if (SerializedFilledMask != null) {
             str += "FilledMask:\n";
             for (int y = 0; y < Height; ++y) {
                 for (int x = 0; x < Width; ++x) {
-                    str += GetFilledMask()[y * Width + x] ? "1" : "0";
+                    str += GetFilledMask(InventoryItemRotation.None)[y * Width + x] ? "1" : "0";
                 }
                 str += "\n";
             }
@@ -70,9 +95,3 @@ public class InventoryItemSpatial {
         return str;
     }
 }
-
-public class InventoryItem {
-    public string UUID { get; set; }
-    public InventoryItemSpatial Spatial { get; set; }
-}
-

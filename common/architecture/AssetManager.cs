@@ -2,7 +2,11 @@ using Godot;
 using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
-using System.Reflection;
+
+public interface IValidatedGameAsset {
+    bool Validate();
+    string Stringify();
+}
 
 public class AssetDefinitionArray<T> {
     public T[] Array { get; set; }
@@ -16,7 +20,10 @@ public partial class AssetManager : Node {
     }
 
     public Inventory DefaultInventory;
+
+    // TODO: add more asset types
     public Dictionary<string, FishDefinition> FishDefinitions;
+    public Dictionary<string, InventoryItemDefinition> InventoryItemDefinitions;
 
     public AssetManager() {
         ProcessMode = ProcessModeEnum.Always;
@@ -25,6 +32,7 @@ public partial class AssetManager : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
         LoadAssets();
+        DefaultInventory.Initialize();
     }
 
     private T LoadAssetFromJSON<T>(string filePath) {
@@ -48,6 +56,16 @@ public partial class AssetManager : Node {
         FishDefinitions = LoadAssetFromJSON<Dictionary<string, FishDefinition>>("res://data/fish-definitions.json");
         foreach (var kv in FishDefinitions) {
             GD.Print($"Fish ({kv.Key}): {kv.Value}");
+        }
+    }
+
+    public InventoryItemDefinition GetInventoryItemDefinition(string uuid) {
+        try {
+            return InventoryItemDefinitions[uuid];
+        }
+        catch (KeyNotFoundException e) {
+            GD.PrintErr($"Inventory item definition not found: {uuid}");
+            throw e;
         }
     }
 }
