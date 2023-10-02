@@ -44,7 +44,7 @@ public partial class Player : RigidBody3D {
     private float _airDensity = 1.225f; // kg/m^3
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
-    private Vector3 _size = new Vector3(1f, 0.5f, 2.5f);
+    private Vector3 _size;
 
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
@@ -52,11 +52,18 @@ public partial class Player : RigidBody3D {
     public override void _Ready() {
         _ocean = DependencyInjector.Ref().GetOcean();
 
+        // row boat
+        //_size = new Vector3(1f, 0.5f, 2.5f);
+        //Mass = 150f;
+
+        // simple boat
+        _size = new Vector3(2f, 4f, 2f);
+        Mass = 300f;
+
         _horizontalSliceArea = _size.X * _size.Y;
         if (DebugLogs) {
             GD.Print($"Boat Size: {_size}. Horizontal slice area: {_horizontalSliceArea}");
         }
-
         (GetNode<MeshInstance3D>("BoundingBox").Mesh as BoxMesh).Size = _size;
     }
 
@@ -106,7 +113,7 @@ public partial class Player : RigidBody3D {
     }
 
     private void ApplyBuoyancy() {
-        Node3D waterContactPoints = GetNode<Node3D>("Model/WaterContactPoints");
+        Node3D waterContactPoints = GetNode<Node3D>("Boat/Model/WaterContactPoints");
         float cumulativeDepth = 0;
         int submergedPoints = 0;
         var children = waterContactPoints.GetChildren();
