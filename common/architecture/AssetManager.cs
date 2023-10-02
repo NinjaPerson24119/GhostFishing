@@ -2,6 +2,7 @@ using Godot;
 using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
+using System.Reflection;
 
 public class AssetDefinitionArray<T> {
     public T[] Array { get; set; }
@@ -45,5 +46,8 @@ public partial class AssetManager : Node {
     private void LoadAssets() {
         DefaultInventory = LoadAssetFromJSON<Inventory>("res://data/default-inventory.json");
         FishDefinitions = LoadAssetFromJSON<Dictionary<string, FishDefinition>>("res://data/fish-definitions.json");
+        foreach (var kv in FishDefinitions) {
+            GD.Print($"Fish ({kv.Key}): {kv.Value}");
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using Godot;
 
 public enum InventoryItemRotation {
     None = 0,
@@ -15,7 +16,7 @@ public class InventoryItemSpatial {
     public InventoryItemRotation Rotation = InventoryItemRotation.None;
 
     [JsonPropertyName("FilledMask")]
-    private bool[] _filledMask {
+    public bool[] SerializedFilledMask {
         get {
             return _filledMaskClockwise0;
         }
@@ -53,6 +54,20 @@ public class InventoryItemSpatial {
             default:
                 throw new System.ArgumentException("Invalid rotation");
         }
+    }
+
+    public override string ToString() {
+        string str = $"X: {X}, Y: {Y}, Width: {Width}, Height: {Height}, Rotation: {Rotation}\n";
+        if (SerializedFilledMask != null) {
+            str += "FilledMask:\n";
+            for (int y = 0; y < Height; ++y) {
+                for (int x = 0; x < Width; ++x) {
+                    str += GetFilledMask()[y * Width + x] ? "1" : "0";
+                }
+                str += "\n";
+            }
+        }
+        return str;
     }
 }
 

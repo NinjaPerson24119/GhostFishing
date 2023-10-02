@@ -26,3 +26,8 @@ layout_mode = 1
 offset_right = 170.0
 offset_bottom = 26.0
 text = "Inventory Placeholder"
+
+[node name="TextureRect" type="TextureRect" parent="InventoryUI"]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
