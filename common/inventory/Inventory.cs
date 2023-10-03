@@ -8,7 +8,6 @@ public class InventoryDTO : IGameAssetDTO {
     public int Height { get; set; }
     public List<InventoryItemInstanceDTO>? Items { get; set; }
     public string? BackgroundImagePath { get; set; }
-    public bool ShouldClearOnClose { get; set; }
     public bool Disabled { get; set; }
     public bool[]? UsableMask { get; set; }
 
@@ -19,15 +18,15 @@ public class InventoryDTO : IGameAssetDTO {
         if (Width <= 0 || Height <= 0) {
             return false;
         }
-        if (UsableMask == null) {
-            return false;
+        if (UsableMask != null) {
+            if (UsableMask.Length != Width * Height) {
+                return false;
+            }
+            if (!ConnectedArray.IsArrayConnected(Width, Height, UsableMask)) {
+                return false;
+            }
         }
-        if (UsableMask.Length != Width * Height) {
-            return false;
-        }
-        if (!ConnectedArray.IsArrayConnected(Width, Height, UsableMask)) {
-            return false;
-        }
+
         return true;
     }
 
@@ -36,7 +35,6 @@ public class InventoryDTO : IGameAssetDTO {
         if (BackgroundImagePath != null) {
             str += $"BackgroundImagePath: {BackgroundImagePath}\n";
         }
-        str += $"ShouldClearOnClose: {ShouldClearOnClose}\n";
         str += $"Disabled: {Disabled}\n";
         if (UsableMask != null) {
             str += "UsableMask:\n";
@@ -86,9 +84,13 @@ public class Inventory {
         Width = dto.Width;
         Height = dto.Height;
         BackgroundImagePath = dto.BackgroundImagePath;
-        ShouldClearOnClose = dto.ShouldClearOnClose;
         Disabled = dto.Disabled;
-        _usableMask = dto.UsableMask!;
+        if (dto.UsableMask == null) {
+            _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
+        }
+        else {
+            _usableMask = dto.UsableMask;
+        }
         _filledMask = new bool[Width * Height];
 
         Items = new List<InventoryItemInstance>();
@@ -101,11 +103,10 @@ public class Inventory {
         }
     }
 
-    public Inventory(string name, int width, int height, bool shouldClearOnClose) {
+    public Inventory(string name, int width, int height) {
         Name = name;
         Width = width;
         Height = height;
-        ShouldClearOnClose = shouldClearOnClose;
         _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
         _filledMask = Enumerable.Repeat(true, Width * Height).ToArray();
         Items = new List<InventoryItemInstance>();
