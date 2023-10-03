@@ -32,7 +32,6 @@ public partial class AssetManager : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
         LoadAssets();
-        DefaultInventory.Initialize();
     }
 
     private T LoadAssetFromJSON<T>(string filePath) {

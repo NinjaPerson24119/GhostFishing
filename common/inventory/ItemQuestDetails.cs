@@ -1,3 +1,5 @@
+using System;
+
 public class InventoryItemInstanceQuestDetailsDTO : IGameAssetDTO {
     public string? QuestID { get; set; }
     public string? UniqueID { get; set; }
@@ -14,4 +16,12 @@ public class InventoryItemInstanceQuestDetailsDTO : IGameAssetDTO {
 public class InventoryItemInstanceQuestDetails {
     public string QuestID { get; set; }
     public string UniqueID { get; set; }
+
+    public InventoryItemInstanceQuestDetails(InventoryItemInstanceQuestDetailsDTO dto) {
+        if (!dto.Validate()) {
+            throw new ArgumentException("Invalid InventoryItemInstanceQuestDetailsDTO");
+        }
+        QuestID = dto.QuestID!;
+        UniqueID = dto.UniqueID!;
+    }
 }

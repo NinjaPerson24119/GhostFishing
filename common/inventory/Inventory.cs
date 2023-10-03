@@ -1,6 +1,5 @@
-using System.Text.Json.Serialization;
 using System.Collections.Generic;
-using Godot;
+using System;
 
 public class InventoryDTO : IGameAssetDTO {
     public string? Name { get; set; }
@@ -71,26 +70,26 @@ public class Inventory {
     private bool _ignoreTouches = false;
 
     // indicate spaces that are usable (shape might not be a perfect rectangle)
-    [JsonPropertyName("UsableMask")]
-    public bool[] SerializedUsableMask {
-        get {
-            return _usableMask;
-        }
-        set {
-            _usableMask = value;
-        }
-    }
     private bool[] _usableMask;
     // spaces that are currently occupied
     private bool[] _filledMask;
     // TODO: Complete() and add masks for specific categories and item UUIDs
 
-    public Inventory() {
-        Items = new List<InventoryItemInstance>();
-    }
+    public Inventory(InventoryDTO dto) {
+        if (!dto.Validate()) {
+            throw new ArgumentException("Invalid InventoryDTO");
+        }
+        Name = dto.Name!;
+        Width = dto.Width;
+        Height = dto.Height;
+        BackgroundImagePath = dto.BackgroundImagePath!;
+        ShouldClearOnClose = dto.ShouldClearOnClose;
+        Disabled = dto.Disabled;
+        _usableMask = dto.UsableMask!;
+        _filledMask = new bool[Width * Height];
 
-    public void Initialize() {
-        if (Items != null) {
+        Items = new List<InventoryItemInstance>();
+        if (dto.Items != null) {
             _ignoreTouches = true;
             foreach (InventoryItemInstance item in Items) {
                 PlaceItem(item, item.X, item.Y);
@@ -100,18 +99,7 @@ public class Inventory {
     }
 
     public bool CanPlaceItem(InventoryItemInstance item, int x, int y) {
-        InventoryItemDefinition itemDef;
-        try {
-            itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
-        }
-        catch {
-            return false;
-        }
-        if (itemDef.Space == null) {
-            GD.PrintErr($"Inventory item definition {item.DefinitionID} has no space defined");
-            return false;
-        }
-
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
         if (x < 0 || y < 0 || x + itemDef.Space.Width > Width || y + itemDef.Space.Height > Height) {
             return false;
         }
@@ -131,21 +119,9 @@ public class Inventory {
 
     public bool[] GenerateFilledMask() {
         bool[] newFilledMask = new bool[Width * Height];
-        if (Items == null) {
-            return newFilledMask;
-        }
         foreach (InventoryItemInstance item in Items) {
             InventoryItemDefinition itemDef;
-            try {
-                itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
-            }
-            catch {
-                continue;
-            }
-            if (itemDef.Space == null) {
-                GD.PrintErr($"Inventory item definition {item.DefinitionID} has no space defined");
-                continue;
-            }
+            itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
 
             for (int i = 0; i < itemDef.Space.Width; i++) {
                 for (int j = 0; j < itemDef.Space.Height; j++) {
@@ -160,18 +136,6 @@ public class Inventory {
     }
 
     public bool PlaceItem(InventoryItemInstance item, int x, int y) {
-        InventoryItemDefinition itemDef;
-        try {
-            itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
-        }
-        catch {
-            return false;
-        }
-        if (itemDef.Space == null) {
-            GD.PrintErr($"Inventory item definition {item.DefinitionID} has no space defined");
-            return false;
-        }
-
         if (!CanPlaceItem(item, x, y)) {
             return false;
         }

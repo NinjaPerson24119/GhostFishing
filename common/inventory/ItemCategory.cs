@@ -1,3 +1,5 @@
+using System;
+
 public class InventoryItemCategoryDTO : IGameAssetDTO {
     public string? Name { get; set; }
     public string? IconImagePath { get; set; }
@@ -19,4 +21,13 @@ public class InventoryItemCategory {
     public string Name { get; set; }
     public string IconImagePath { get; set; }
     public string BackgroundColor { get; set; }
+
+    public InventoryItemCategory(InventoryItemCategoryDTO dto) {
+        if (!dto.Validate()) {
+            throw new ArgumentException("Invalid InventoryItemCategoryDTO");
+        }
+        Name = dto.Name!;
+        IconImagePath = dto.IconImagePath!;
+        BackgroundColor = dto.BackgroundColor!;
+    }
 }

@@ -1,3 +1,5 @@
+using System;
+
 public class InventoryItemDefinitionDTO : IGameAssetDTO {
     public string? Name { get; set; }
     public string? Description { get; set; }
@@ -23,7 +25,9 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
         if (Space == null || !Space.Validate()) {
             return false;
         }
-        // Flags are optional
+        if (Flags == null || !Flags.Validate()) {
+            return false;
+        }
         if (Category == null || !Category.Validate()) {
             return false;
         }
@@ -55,10 +59,25 @@ public class InventoryItemDefinition {
     public string Description { get; set; }
     public int CurrencyValue { get; set; }
     public string ImagePath { get; set; }
-    public string SilhouetteImagePath { get; set; }
+    public string? SilhouetteImagePath { get; set; }
     public InventoryItemSpaceProperties Space { get; set; }
     public InventoryItemFlags Flags { get; set; }
     public InventoryItemCategory Category { get; set; }
-    public string BackgroundColorOverride { get; set; }
+    public string? BackgroundColorOverride { get; set; }
+
+    public InventoryItemDefinition(InventoryItemDefinitionDTO dto) {
+        if (!dto.Validate()) {
+            throw new ArgumentException("Invalid InventoryItemDefinitionDTO");
+        }
+        Name = dto.Name!;
+        Description = dto.Description!;
+        CurrencyValue = dto.CurrencyValue;
+        ImagePath = dto.ImagePath!;
+        SilhouetteImagePath = dto.SilhouetteImagePath;
+        Space = new InventoryItemSpaceProperties(dto.Space!);
+        Flags = new InventoryItemFlags(dto.Flags!);
+        Category = new InventoryItemCategory(dto.Category!);
+        BackgroundColorOverride = dto.BackgroundColorOverride;
+    }
 }
 

@@ -1,3 +1,5 @@
+using System;
+
 public class QuestDTO : IGameAssetDTO {
     public string? Name { get; set; }
     public string? Description { get; set; }
@@ -12,11 +14,14 @@ public class QuestDTO : IGameAssetDTO {
 }
 
 public class Quest {
-    string Name { get; set; }
-    string Description { get; set; }
+    public string Name { get; set; }
+    public string Description { get; set; }
 
     public Quest(QuestDTO dto) {
-        Name = dto.Name ?? "";
-        Description = dto.Description ?? "";
+        if (!dto.Validate()) {
+            throw new ArgumentException("Invalid QuestDTO");
+        }
+        Name = dto.Name!;
+        Description = dto.Description!;
     }
 }

@@ -1,3 +1,5 @@
+using System;
+
 public enum InventoryItemRotation {
     None = 0,
     Clockwise90 = 1,
@@ -50,40 +52,48 @@ public class InventoryItemSpaceProperties {
         }
         set {
             _filledMaskClockwise0 = value;
-            Matrix<bool> filledMaskMatrix = new Matrix<bool>(Width, Height, value);
-
-            // Clone() is shallow copy, but bool is not a reference type, so it's OK
-            filledMaskMatrix.RotateClockwise90();
-            var clone = filledMaskMatrix.Data.Clone() as bool[];
-            if (clone == null) {
-                throw new System.Exception("Clone() failed");
-            }
-            _filledMaskClockwise90 = clone;
-
-            filledMaskMatrix.RotateClockwise90();
-            clone = filledMaskMatrix.Data.Clone() as bool[];
-            if (clone == null) {
-                throw new System.Exception("Clone() failed");
-            }
-            _filledMaskClockwise180 = clone;
-
-            filledMaskMatrix.RotateClockwise90();
-            clone = filledMaskMatrix.Data.Clone() as bool[];
-            if (clone == null) {
-                throw new System.Exception("Clone() failed");
-            }
-            _filledMaskClockwise270 = clone;
+            ComputeFilledMaskRotations();
         }
     }
-    private bool[] _filledMaskClockwise0 { get; set; }
-    private bool[] _filledMaskClockwise90;
-    private bool[] _filledMaskClockwise180;
-    private bool[] _filledMaskClockwise270;
+    // compiler doesn't follow the indirect initialization so we have assert these aren't null
+    private bool[] _filledMaskClockwise0 = null!;
+    private bool[] _filledMaskClockwise90 = null!;
+    private bool[] _filledMaskClockwise180 = null!;
+    private bool[] _filledMaskClockwise270 = null!;
 
     public InventoryItemSpaceProperties(InventoryItemSpacePropertiesDTO dto) {
+        if (!dto.Validate()) {
+            throw new ArgumentException("Invalid InventoryItemSpacePropertiesDTO");
+        }
         Width = dto.Width;
         Height = dto.Height;
-        _filledMask = dto.FilledMask ?? new bool[Width * Height];
+        _filledMask = dto.FilledMask!;
+    }
+
+    private void ComputeFilledMaskRotations() {
+        Matrix<bool> filledMaskMatrix = new Matrix<bool>(Width, Height, _filledMask);
+
+        // Clone() is shallow copy, but bool is not a reference type, so it's OK
+        filledMaskMatrix.RotateClockwise90();
+        var clone = filledMaskMatrix.Data.Clone() as bool[];
+        if (clone == null) {
+            throw new Exception("Clone() failed");
+        }
+        _filledMaskClockwise90 = clone;
+
+        filledMaskMatrix.RotateClockwise90();
+        clone = filledMaskMatrix.Data.Clone() as bool[];
+        if (clone == null) {
+            throw new Exception("Clone() failed");
+        }
+        _filledMaskClockwise180 = clone;
+
+        filledMaskMatrix.RotateClockwise90();
+        clone = filledMaskMatrix.Data.Clone() as bool[];
+        if (clone == null) {
+            throw new Exception("Clone() failed");
+        }
+        _filledMaskClockwise270 = clone;
     }
 
     public bool[] GetFilledMask(InventoryItemRotation rotation) {
@@ -97,7 +107,7 @@ public class InventoryItemSpaceProperties {
             case InventoryItemRotation.Clockwise270:
                 return _filledMaskClockwise270;
             default:
-                throw new System.ArgumentException("Invalid rotation");
+                throw new ArgumentException("Invalid rotation");
         }
     }
 }
