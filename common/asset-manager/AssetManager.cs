@@ -140,12 +140,6 @@ public partial class AssetManager : Node {
     // TODO: validate referential integrity
     // public void ValidateAssetReferrers() {}
 
-    /*
-    public Inventory GetTemporaryInventory() {
-
-    }
-    */
-
     public PlayerStateView GetPlayerView(int playerIndex) {
         if (playerIndex < 0 || playerIndex >= _playerStateAssetIDs.Length) {
             throw new IndexOutOfRangeException($"Player index {playerIndex} is out of range");

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 
 public class InventoryDTO : IGameAssetDTO {
-    public string? Name { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     public List<InventoryItemInstanceDTO>? Items { get; set; }
@@ -12,9 +11,6 @@ public class InventoryDTO : IGameAssetDTO {
     public bool[]? UsableMask { get; set; }
 
     public bool IsValid() {
-        if (string.IsNullOrEmpty(Name)) {
-            return false;
-        }
         if (Width <= 0 || Height <= 0) {
             return false;
         }
@@ -31,7 +27,7 @@ public class InventoryDTO : IGameAssetDTO {
     }
 
     public string Stringify() {
-        string str = $"Name: {Name}\nWidth: {Width}\nHeight: {Height}\n";
+        string str = $"Width: {Width}\nHeight: {Height}\n";
         if (BackgroundImagePath != null) {
             str += $"BackgroundImagePath: {BackgroundImagePath}\n";
         }
@@ -56,7 +52,6 @@ public class InventoryDTO : IGameAssetDTO {
 }
 
 public class Inventory {
-    public string Name { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
@@ -80,7 +75,6 @@ public class Inventory {
         if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryDTO");
         }
-        Name = dto.Name!;
         Width = dto.Width;
         Height = dto.Height;
         BackgroundImagePath = dto.BackgroundImagePath;
@@ -103,8 +97,7 @@ public class Inventory {
         }
     }
 
-    public Inventory(string name, int width, int height) {
-        Name = name;
+    public Inventory(int width, int height) {
         Width = width;
         Height = height;
         _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
