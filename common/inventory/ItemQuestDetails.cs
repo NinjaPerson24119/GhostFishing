@@ -1,27 +1,27 @@
 using System;
 
 public class InventoryItemInstanceQuestDetailsDTO : IGameAssetDTO {
-    public string? QuestID { get; set; }
+    public string? QuestDefinitionID { get; set; }
     public string? UniqueID { get; set; }
 
     public bool Validate() {
-        return !string.IsNullOrEmpty(QuestID) && !string.IsNullOrEmpty(UniqueID);
+        return !string.IsNullOrEmpty(QuestDefinitionID) && !string.IsNullOrEmpty(UniqueID);
     }
 
     public string Stringify() {
-        return $"QuestID: {QuestID}\nUniqueID: {UniqueID}";
+        return $"QuestDefinitionID: {QuestDefinitionID}\nUniqueID: {UniqueID}";
     }
 }
 
 public class InventoryItemInstanceQuestDetails {
-    public string QuestID { get; set; }
+    public string QuestDefinitionID { get; set; }
     public string UniqueID { get; set; }
 
     public InventoryItemInstanceQuestDetails(InventoryItemInstanceQuestDetailsDTO dto) {
         if (!dto.Validate()) {
             throw new ArgumentException("Invalid InventoryItemInstanceQuestDetailsDTO");
         }
-        QuestID = dto.QuestID!;
+        QuestDefinitionID = dto.QuestDefinitionID!;
         UniqueID = dto.UniqueID!;
     }
 }
