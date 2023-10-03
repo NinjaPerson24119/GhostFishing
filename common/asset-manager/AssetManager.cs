@@ -1,8 +1,8 @@
-using Godot;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
-using System.Collections.Generic;
+using Godot;
 
 public interface IGameAssetDTO {
     bool Validate();
@@ -20,7 +20,7 @@ public partial class AssetManager : Node {
         return _singleton;
     }
 
-    private const string _boatInventoryPath = "res://data/boat-inventory.json";
+    private const string _boatInventoryPath = "res://data/default-boat-inventory.json";
     private const string _fishDefinitionsPath = "res://data/fish.json";
     private const string _itemCategoryDefinitionsPath = "res://data/item-categories.json";
     private const string _questDefinitionsPath = "res://data/quests.json";
@@ -46,6 +46,30 @@ public partial class AssetManager : Node {
         LoadAssets();
     }
 
+    private void LoadAssets() {
+        LoadDefaultBoatInventories();
+
+        // TODO: instantiate temp inventory to size large enough for any pickup
+
+        LoadAssets(
+            InventoryItemDefinitions,
+            _fishDefinitionsPath,
+            (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
+            AssetIDValidator.IsInventoryItemDefinitionID
+        );
+        LoadAssets(
+            InventoryItemCategories,
+            _itemCategoryDefinitionsPath,
+            (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
+            AssetIDValidator.IsInventoryItemCategoryID
+        );
+        LoadAssets(QuestDefinitions,
+            _questDefinitionsPath,
+            (QuestDefinitionDTO dto) => new QuestDefinition(dto),
+            AssetIDValidator.IsQuestID
+        );
+    }
+
     private T? LoadAssetFromJSON<T>(string filePath) {
         try {
             string globalizedPath = ProjectSettings.GlobalizePath(filePath);
@@ -66,24 +90,39 @@ public partial class AssetManager : Node {
         }
     }
 
-    private void LoadAssets() {
-        // load initial boat inventory shape
-        LoadBoatInventories();
-
-        // TODO: instantiate temp inventory to size large enough for any pickup
-
-        LoadItemCategories();
-        LoadQuestDefinitions();
-        LoadFishDefinitions();
+    private delegate T BuildAssetFromDTO<DTO, T>(DTO dto) where DTO : IGameAssetDTO;
+    private delegate bool IsIDOfType(string id);
+    private void LoadAssets<DTO, T>(Dictionary<string, T> assetDict, string filePath, BuildAssetFromDTO<DTO, T> buildAsset, IsIDOfType isIDOfType) where DTO : IGameAssetDTO {
+        Dictionary<string, DTO>? assetDTOs = LoadAssetFromJSON<Dictionary<string, DTO>>(filePath);
+        if (assetDTOs != null) {
+            foreach (var kv in assetDTOs) {
+                T model;
+                try {
+                    model = buildAsset(kv.Value);
+                }
+                catch (Exception e) {
+                    GD.PrintErr($"Error building {typeof(T)} asset from DTO: {e}");
+                    continue;
+                }
+                if (!isIDOfType(kv.Key)) {
+                    GD.PrintErr($"Asset ID {kv.Key} is valid for asset type {typeof(T)}");
+                    continue;
+                }
+                assetDict.Add(kv.Key, model);
+            }
+        }
     }
 
-    public void LoadBoatInventories() {
+    // load initial boat inventories (shape and contents)
+    private void LoadDefaultBoatInventories() {
         InventoryDTO? boatInventory = LoadAssetFromJSON<InventoryDTO>(_boatInventoryPath);
         if (boatInventory != null) {
             try {
-                Inventory model = new Inventory(boatInventory);
-                Inventories.Add(PlayerOneBoatInventoryID, model);
-                Inventories.Add(PlayerTwoBoatInventoryID, model);
+                // take care not to assign both players the same inventory reference
+                Inventory model1 = new Inventory(boatInventory);
+                Inventory model2 = new Inventory(boatInventory);
+                Inventories.Add(PlayerOneBoatInventoryID, model1);
+                Inventories.Add(PlayerTwoBoatInventoryID, model2);
             }
             catch (Exception e) {
                 GD.PrintErr($"Error loading boat inventory from DTO: {e}");
@@ -91,55 +130,10 @@ public partial class AssetManager : Node {
         }
     }
 
-    public void LoadItemCategories() {
-        Dictionary<string, InventoryItemCategoryDTO>? itemCategories = LoadAssetFromJSON<Dictionary<string, InventoryItemCategoryDTO>>(_itemCategoryDefinitionsPath);
-        if (itemCategories != null) {
-            try {
-                foreach (var kv in itemCategories) {
-                    InventoryItemCategory model = new InventoryItemCategory(kv.Value);
-                    InventoryItemCategories.Add(kv.Key, model);
-                }
-            }
-            catch (Exception e) {
-                GD.PrintErr($"Error loading item categories from DTO: {e}");
-            }
-        }
-    }
-
-    public void LoadQuestDefinitions() {
-        Dictionary<string, QuestDefinitionDTO>? questDefinitions = LoadAssetFromJSON<Dictionary<string, QuestDefinitionDTO>>(_questDefinitionsPath);
-        if (questDefinitions != null) {
-            try {
-                foreach (var kv in questDefinitions) {
-                    QuestDefinition model = new QuestDefinition(kv.Value);
-                    QuestDefinitions.Add(kv.Key, model);
-                }
-            }
-            catch (Exception e) {
-                GD.PrintErr($"Error loading quest definitions from DTO: {e}");
-            }
-        }
-    }
-
-    public void LoadFishDefinitions() {
-        Dictionary<string, FishDefinitionDTO>? fishDefinitions = LoadAssetFromJSON<Dictionary<string, FishDefinitionDTO>>(_fishDefinitionsPath);
-        if (fishDefinitions != null) {
-            try {
-                foreach (var kv in fishDefinitions) {
-                    InventoryItemDefinition model = new InventoryItemDefinition(kv.Value);
-                    InventoryItemDefinitions.Add(kv.Key, model);
-                }
-            }
-            catch (Exception e) {
-                GD.PrintErr($"Error loading fish definitions from DTO: {e}");
-            }
-        }
-    }
-
     // TODO: validate referential integrity
     // public void ValidateAssetReferrers() {}
 
-    public InventoryItemDefinition GetInventoryItemDefinition(string uuid) {
+    private InventoryItemDefinition GetInventoryItemDefinition(string uuid) {
         try {
             return InventoryItemDefinitions[uuid];
         }
