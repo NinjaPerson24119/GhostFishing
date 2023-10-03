@@ -46,20 +46,10 @@ public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
 public class InventoryItemSpaceProperties {
     public int Width { get; private set; }
     public int Height { get; private set; }
-    private bool[] _filledMask {
-        get {
-            return _filledMaskClockwise0;
-        }
-        set {
-            _filledMaskClockwise0 = value;
-            ComputeFilledMaskRotations();
-        }
-    }
-    // compiler doesn't follow the indirect initialization so we have assert these aren't null
-    private bool[] _filledMaskClockwise0 = null!;
-    private bool[] _filledMaskClockwise90 = null!;
-    private bool[] _filledMaskClockwise180 = null!;
-    private bool[] _filledMaskClockwise270 = null!;
+    private bool[] _filledMaskClockwise0;
+    private bool[] _filledMaskClockwise90;
+    private bool[] _filledMaskClockwise180;
+    private bool[] _filledMaskClockwise270;
 
     public InventoryItemSpaceProperties(InventoryItemSpacePropertiesDTO dto) {
         if (!dto.Validate()) {
@@ -67,11 +57,10 @@ public class InventoryItemSpaceProperties {
         }
         Width = dto.Width;
         Height = dto.Height;
-        _filledMask = dto.FilledMask!;
-    }
 
-    private void ComputeFilledMaskRotations() {
-        Matrix<bool> filledMaskMatrix = new Matrix<bool>(Width, Height, _filledMask);
+        // compute filled mask rotations
+        _filledMaskClockwise0 = dto.FilledMask!;
+        Matrix<bool> filledMaskMatrix = new Matrix<bool>(Width, Height, dto.FilledMask!);
 
         // Clone() is shallow copy, but bool is not a reference type, so it's OK
         filledMaskMatrix.RotateClockwise90();
