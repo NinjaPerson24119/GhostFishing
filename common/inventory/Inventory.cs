@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class InventoryDTO : IGameAssetDTO {
     public string? Name { get; set; }
@@ -32,7 +33,9 @@ public class InventoryDTO : IGameAssetDTO {
 
     public string Stringify() {
         string str = $"Name: {Name}\nWidth: {Width}\nHeight: {Height}\n";
-        str += $"BackgroundImagePath: {BackgroundImagePath}\n";
+        if (BackgroundImagePath != null) {
+            str += $"BackgroundImagePath: {BackgroundImagePath}\n";
+        }
         str += $"ShouldClearOnClose: {ShouldClearOnClose}\n";
         str += $"Disabled: {Disabled}\n";
         if (UsableMask != null) {
@@ -59,7 +62,7 @@ public class Inventory {
     public int Width { get; set; }
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
-    public string BackgroundImagePath { get; set; }
+    public string? BackgroundImagePath { get; set; }
     // hint to the game that this inventory should be cleared when closed (e.g. for fishing result / temporary inventories)
     // TODO: this should throw an error somehow if the inventory contains items that cannot be deleted / are quest items
     public bool ShouldClearOnClose { get; set; }
@@ -82,7 +85,7 @@ public class Inventory {
         Name = dto.Name!;
         Width = dto.Width;
         Height = dto.Height;
-        BackgroundImagePath = dto.BackgroundImagePath!;
+        BackgroundImagePath = dto.BackgroundImagePath;
         ShouldClearOnClose = dto.ShouldClearOnClose;
         Disabled = dto.Disabled;
         _usableMask = dto.UsableMask!;
@@ -96,6 +99,16 @@ public class Inventory {
             }
             _ignoreTouches = false;
         }
+    }
+
+    public Inventory(string name, int width, int height, bool shouldClearOnClose) {
+        Name = name;
+        Width = width;
+        Height = height;
+        ShouldClearOnClose = shouldClearOnClose;
+        _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
+        _filledMask = Enumerable.Repeat(true, Width * Height).ToArray();
+        Items = new List<InventoryItemInstance>();
     }
 
     public bool CanPlaceItem(InventoryItemInstance item, int x, int y) {
