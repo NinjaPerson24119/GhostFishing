@@ -4,7 +4,7 @@ public class QuestDefinitionDTO : IGameAssetDTO {
     public string? Name { get; set; }
     public string? Description { get; set; }
 
-    public bool Validate() {
+    public bool IsValid() {
         return !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Description);
     }
 
@@ -18,7 +18,7 @@ public class QuestDefinition {
     public string Description { get; set; }
 
     public QuestDefinition(QuestDefinitionDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid QuestDefinitionDTO");
         }
         Name = dto.Name!;

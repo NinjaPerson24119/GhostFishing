@@ -12,7 +12,7 @@ public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     public int Height { get; set; }
     public bool[]? FilledMask { get; set; }
 
-    public bool Validate() {
+    public bool IsValid() {
         if (Width <= 0 || Height <= 0) {
             return false;
         }
@@ -52,7 +52,7 @@ public class InventoryItemSpaceProperties {
     private bool[] _filledMaskClockwise270;
 
     public InventoryItemSpaceProperties(InventoryItemSpacePropertiesDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemSpacePropertiesDTO");
         }
         Width = dto.Width;

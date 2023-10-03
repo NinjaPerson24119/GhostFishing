@@ -6,7 +6,7 @@ public class InventoryItemFlagsDTO : IGameAssetDTO {
     public bool CanDelete { get; set; } = true;
     public bool RestrictPlayerTeleport { get; set; } = false;
 
-    public bool Validate() {
+    public bool IsValid() {
         return true;
     }
 
@@ -26,7 +26,7 @@ public class InventoryItemFlags {
     public bool RestrictPlayerTeleport { get; set; } = false;
 
     public InventoryItemFlags(InventoryItemFlagsDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemFlagsDTO");
         }
         CanPutInStorage = dto.CanPutInStorage;

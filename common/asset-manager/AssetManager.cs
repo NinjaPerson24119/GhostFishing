@@ -5,7 +5,7 @@ using System.Text.Json;
 using Godot;
 
 public interface IGameAssetDTO {
-    bool Validate();
+    bool IsValid();
     string Stringify();
 }
 

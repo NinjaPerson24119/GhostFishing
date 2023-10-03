@@ -11,7 +11,7 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
     public string? CategoryID { get; set; }
     public string? BackgroundColorOverride { get; set; }
 
-    public virtual bool Validate() {
+    public virtual bool IsValid() {
         if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Description)) {
             return false;
         }
@@ -22,10 +22,10 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
             return false;
         }
         // Silhouette is optional
-        if (Space == null || !Space.Validate()) {
+        if (Space == null || !Space.IsValid()) {
             return false;
         }
-        if (Flags == null || !Flags.Validate()) {
+        if (Flags == null || !Flags.IsValid()) {
             return false;
         }
         if (string.IsNullOrEmpty(CategoryID)) {
@@ -64,7 +64,7 @@ public class InventoryItemDefinition {
     public string? BackgroundColorOverride { get; set; }
 
     public InventoryItemDefinition(InventoryItemDefinitionDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemDefinitionDTO");
         }
         Name = dto.Name!;

@@ -1,8 +1,8 @@
 using System;
 
 public class FishDefinitionDTO : InventoryItemDefinitionDTO, IGameAssetDTO {
-    public override bool Validate() {
-        return base.Validate();
+    public override bool IsValid() {
+        return base.IsValid();
     }
 
     public override string Stringify() {
@@ -12,7 +12,7 @@ public class FishDefinitionDTO : InventoryItemDefinitionDTO, IGameAssetDTO {
 
 public class FishDefinition : InventoryItemDefinition {
     public FishDefinition(FishDefinitionDTO dto) : base(dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid FishDefinitionDTO");
         }
     }

@@ -11,7 +11,7 @@ public class InventoryDTO : IGameAssetDTO {
     public bool Disabled { get; set; }
     public bool[]? UsableMask { get; set; }
 
-    public bool Validate() {
+    public bool IsValid() {
         if (string.IsNullOrEmpty(Name)) {
             return false;
         }
@@ -76,7 +76,7 @@ public class Inventory {
     // TODO: Complete() and add masks for specific categories and item UUIDs
 
     public Inventory(InventoryDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryDTO");
         }
         Name = dto.Name!;

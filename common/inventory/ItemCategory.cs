@@ -5,7 +5,7 @@ public class InventoryItemCategoryDTO : IGameAssetDTO {
     public string? IconImagePath { get; set; }
     public string? BackgroundColor { get; set; }
 
-    public bool Validate() {
+    public bool IsValid() {
         if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(IconImagePath) || string.IsNullOrEmpty(BackgroundColor)) {
             return false;
         }
@@ -23,7 +23,7 @@ public class InventoryItemCategory {
     public string BackgroundColor { get; set; }
 
     public InventoryItemCategory(InventoryItemCategoryDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemCategoryDTO");
         }
         Name = dto.Name!;

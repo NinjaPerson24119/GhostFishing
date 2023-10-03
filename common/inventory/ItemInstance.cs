@@ -8,7 +8,7 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
     public InventoryItemInstanceQuestDetailsDTO? QuestDetails { get; set; }
     public InventoryItemFlagsDTO? FlagOverrides { get; set; }
 
-    public bool Validate() {
+    public bool IsValid() {
         if (string.IsNullOrEmpty(DefinitionID)) {
             return false;
         }
@@ -16,7 +16,7 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
             return false;
         }
         if (QuestDetails != null) {
-            if (!QuestDetails.Validate()) {
+            if (!QuestDetails.IsValid()) {
                 return false;
             }
         }
@@ -45,7 +45,7 @@ public class InventoryItemInstance {
     public InventoryItemFlags? FlagOverrides { get; set; }
 
     public InventoryItemInstance(InventoryItemInstanceDTO dto) {
-        if (!dto.Validate()) {
+        if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemInstanceDTO");
         }
         DefinitionID = dto.DefinitionID!;
