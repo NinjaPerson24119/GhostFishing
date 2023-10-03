@@ -8,7 +8,7 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
     public string? SilhouetteImagePath { get; set; }
     public InventoryItemSpacePropertiesDTO? Space { get; set; }
     public InventoryItemFlagsDTO? Flags { get; set; }
-    public InventoryItemCategoryDTO? Category { get; set; }
+    public string? CategoryID { get; set; }
     public string? BackgroundColorOverride { get; set; }
 
     public virtual bool Validate() {
@@ -28,7 +28,7 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
         if (Flags == null || !Flags.Validate()) {
             return false;
         }
-        if (Category == null || !Category.Validate()) {
+        if (string.IsNullOrEmpty(CategoryID)) {
             return false;
         }
         // BackgroundColorOverride is optional
@@ -46,9 +46,7 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
         if (Flags != null) {
             str += $"\nFlags:\n{Flags.Stringify()}";
         }
-        if (Category != null) {
-            str += $"\nCategory:\n{Category.Stringify()}";
-        }
+        str += $"\nCategory:\n{CategoryID}";
         str += $"BackgroundColorOverride: {BackgroundColorOverride}";
         return str;
     }
@@ -62,7 +60,7 @@ public class InventoryItemDefinition {
     public string? SilhouetteImagePath { get; set; }
     public InventoryItemSpaceProperties Space { get; set; }
     public InventoryItemFlags Flags { get; set; }
-    public InventoryItemCategory Category { get; set; }
+    public string CategoryID { get; set; }
     public string? BackgroundColorOverride { get; set; }
 
     public InventoryItemDefinition(InventoryItemDefinitionDTO dto) {
@@ -76,7 +74,7 @@ public class InventoryItemDefinition {
         SilhouetteImagePath = dto.SilhouetteImagePath;
         Space = new InventoryItemSpaceProperties(dto.Space!);
         Flags = new InventoryItemFlags(dto.Flags!);
-        Category = new InventoryItemCategory(dto.Category!);
+        CategoryID = dto.CategoryID!;
         BackgroundColorOverride = dto.BackgroundColorOverride;
     }
 }
