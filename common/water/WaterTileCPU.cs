@@ -1,13 +1,16 @@
 using Godot;
 
 public partial class WaterTileCPU : MeshInstance3D {
-    private Ocean _ocean;
-    private PlaneMesh _planeMesh;
-    private WaterTile _waterTile;
+    private Ocean _ocean = null!;
+    private PlaneMesh _planeMesh = null!;
 
     public override void _Ready() {
         _ocean = DependencyInjector.Ref().GetOcean();
-        _planeMesh = Mesh as PlaneMesh;
+        if (!(Mesh is PlaneMesh)) {
+            GD.PrintErr("WaterTileCPU must have a PlaneMesh");
+            return;
+        }
+        _planeMesh = (PlaneMesh)Mesh;
     }
 
     public override void _Process(double delta) {

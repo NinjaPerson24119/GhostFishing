@@ -11,6 +11,6 @@ public partial class PlayerSaveState {
 }
 
 public partial class SaveState {
-    public CommonSaveState CommonSaveState { get; set; }
-    public PlayerSaveState[] PlayerSaveState { get; set; }
+    public CommonSaveState? CommonSaveState { get; set; }
+    public PlayerSaveState[]? PlayerSaveState { get; set; }
 }

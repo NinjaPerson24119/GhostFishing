@@ -5,7 +5,7 @@ public partial class Sky : Node3D {
 	private const string _moonPathLight = "MoonLight";
 	private const string _worldEnvironmentPath = "WorldEnvironment";
 
-	private Environment environment;
+	private Environment _environment = null!;
 
 	[Export]
 	public float SecondsAtSunriseModuloTime = 8 * GameClock.SecondsPerHour;
@@ -42,7 +42,7 @@ public partial class Sky : Node3D {
 	private Color _moonLightColor = Color.FromString("#c3ffff", Colors.White);
 
 	public override void _Ready() {
-		environment = GetNode<WorldEnvironment>(_worldEnvironmentPath).Environment;
+		_environment = GetNode<WorldEnvironment>(_worldEnvironmentPath).Environment;
 
 		SetLightCycles();
 		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_sunPathLight).Update);
@@ -66,15 +66,15 @@ public partial class Sky : Node3D {
 	// Set sky as constant multiple of sun/moon energy so it doesn't appear disproportionately bright/dark
 	public void OnSunChanged(float cycleProgression, float elevationFactor, float lightEnergy) {
 		if (cycleProgression != -1) {
-			environment.BackgroundColor = _sunLightColor;
-			environment.BackgroundEnergyMultiplier = lightEnergy * 0.1f;
+			_environment.BackgroundColor = _sunLightColor;
+			_environment.BackgroundEnergyMultiplier = lightEnergy * 0.1f;
 		}
 	}
 
 	public void OnMoonChanged(float cycleProgression, float elevationFactor, float lightEnergy) {
 		if (cycleProgression != -1) {
-			environment.BackgroundColor = _sunLightColor;
-			environment.BackgroundEnergyMultiplier = lightEnergy * 0.1f;
+			_environment.BackgroundColor = _sunLightColor;
+			_environment.BackgroundEnergyMultiplier = lightEnergy * 0.1f;
 			//BackgroundEnergyMultiplier = Mathf.Max((1 - elevationFactor) * NightTimeSkyMaxLightEnergy, NightTimeMinLightEnergy);
 		}
 	}

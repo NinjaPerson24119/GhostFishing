@@ -3,7 +3,7 @@ using Godot;
 
 // This class refcounts assets that occur in a spectrum of indices.
 // It receives a builder to build the asset for a given index if it doesn't exist.
-public class RefCountedAssetSpectrum<Index, T> {
+public class RefCountedAssetSpectrum<Index, T> where Index : notnull {
     public delegate T Builder(Index index);
     private Builder _builder;
 
