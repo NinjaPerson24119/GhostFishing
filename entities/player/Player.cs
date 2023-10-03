@@ -5,7 +5,7 @@ public partial class Player : RigidBody3D {
     public float BuoyancyDamping = 0f;
 
     [Export(PropertyHint.Range, "0,100")]
-    public float ConstantLinearDrag = 0.5f;
+    public float ConstantLinearDrag = 0.7f;
     [Export(PropertyHint.Range, "0,100")]
     public float ConstantAngularDrag = 1f;
     [Export(PropertyHint.Range, "0,1")]
