@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
 public class InventoryDTO : IGameAssetDTO {
     public int Width { get; set; }
@@ -71,8 +72,11 @@ public class Inventory {
     // indicate spaces that are usable (shape might not be a perfect rectangle)
     private bool[] _usableMask;
     // spaces that are currently occupied
-    private bool[] _filledMask;
+    // each space contains the index of the item occupying it. -1 if empty
+    private int[] _itemMask;
     // TODO: Complete() and add masks for specific categories and item UUIDs
+    // _locked is used to prevent creating multiple mutators at once
+    private bool _locked;
 
     public Inventory(InventoryDTO dto) {
         if (!dto.IsValid()) {
@@ -88,7 +92,7 @@ public class Inventory {
         else {
             _usableMask = dto.UsableMask;
         }
-        _filledMask = new bool[Width * Height];
+        _itemMask = Enumerable.Repeat(-1, Width * Height).ToArray();
 
         Items = new List<InventoryItemInstance>();
         if (dto.Items != null) {
@@ -104,7 +108,7 @@ public class Inventory {
         Width = width;
         Height = height;
         _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
-        _filledMask = Enumerable.Repeat(true, Width * Height).ToArray();
+        _itemMask = Enumerable.Repeat(-1, Width * Height).ToArray();
         Items = new List<InventoryItemInstance>();
     }
 
@@ -119,7 +123,7 @@ public class Inventory {
                 if (!_usableMask[indexConsidered]) {
                     return false;
                 }
-                if (_filledMask[indexConsidered]) {
+                if (_itemMask[indexConsidered] != -1) {
                     return false;
                 }
             }
@@ -127,34 +131,100 @@ public class Inventory {
         return true;
     }
 
-    public bool[] GenerateFilledMask() {
-        bool[] newFilledMask = new bool[Width * Height];
-        foreach (InventoryItemInstance item in Items) {
+    public void UpdateItemMask() {
+        int[] newItemMask = Enumerable.Repeat(-1, Width * Height).ToArray();
+        for (int i = 0; i < Items.Count; i++) {
             InventoryItemDefinition itemDef;
-            itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+            itemDef = AssetManager.Ref().GetInventoryItemDefinition(Items[i].DefinitionID);
 
-            for (int i = 0; i < itemDef.Space.Width; i++) {
-                for (int j = 0; j < itemDef.Space.Height; j++) {
-                    int indexConsidered = (item.Y + j) * Width + (item.X + i);
+            for (int x = 0; x < itemDef.Space.Width; x++) {
+                for (int y = 0; y < itemDef.Space.Height; y++) {
+                    int indexConsidered = (Items[i].Y + y) * Width + (Items[i].X + x);
                     DebugTools.Assert(_usableMask[indexConsidered]);
-                    DebugTools.Assert(!newFilledMask[indexConsidered]);
-                    newFilledMask[indexConsidered] = true;
+                    DebugTools.Assert(newItemMask[indexConsidered] == -1);
+                    newItemMask[indexConsidered] = i;
                 }
             }
         }
-        return newFilledMask;
+        _itemMask = newItemMask;
     }
 
-    public bool PlaceItem(InventoryItemInstance item, int x, int y) {
+    public InventoryItemInstance? ItemAt(int x, int y) {
+        int index = _itemMask[y * Width + x];
+        if (index == -1) {
+            return null;
+        }
+        return Items[index];
+    }
+
+    private bool PlaceItem(InventoryItemInstance item, int x, int y) {
         if (!CanPlaceItem(item, x, y)) {
             return false;
         }
         item.X = x;
         item.Y = y;
-        _filledMask = GenerateFilledMask();
+        UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
         }
         return true;
+    }
+
+    private InventoryItemInstance? TakeItem(int x, int y) {
+        InventoryItemInstance? item = ItemAt(x, y);
+        if (item == null) {
+            return null;
+        }
+        Items.Remove(item);
+        UpdateItemMask();
+        if (!_ignoreTouches) {
+            Touched = true;
+        }
+        return item;
+    }
+
+    public InventoryMutator? GetMutator() {
+        if (Disabled || _locked) {
+            return null;
+        }
+        _locked = true;
+        return new InventoryMutator(this);
+    }
+
+    public class InventoryMutator {
+        private Inventory _inventory;
+        private bool _released;
+        public InventoryMutator(Inventory inventory) {
+            _inventory = inventory;
+            _released = false;
+        }
+        ~InventoryMutator() {
+            DebugTools.Assert(_inventory._locked, "Inventory was not locked when mutator was destroyed.");
+            _inventory._locked = false;
+        }
+
+        public void Release() {
+            DebugTools.Assert(!_released, "InventoryMutator.Release called multiple times");
+            if (!_released) {
+                _released = true;
+                _inventory._locked = false;
+            }
+        }
+
+        public bool PlaceItem(InventoryItemInstance item, int x, int y) {
+            if (_released) {
+                GD.PrintErr("InventoryMutator.PlaceItem called after InventoryMutator.Release");
+                return false;
+            }
+            return _inventory.PlaceItem(item, x, y);
+        }
+
+        public InventoryItemInstance? TakeItem(int x, int y) {
+            if (_released) {
+                GD.PrintErr("InventoryMutator.TakeItem called after InventoryMutator.Release");
+                return null;
+            }
+            return _inventory.TakeItem(x, y);
+        }
     }
 }
