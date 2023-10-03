@@ -19,11 +19,11 @@ public partial class AssetManager : Node {
         return _singleton;
     }
 
-    public Inventory DefaultInventory;
-
-    // TODO: add more asset types
-    public Dictionary<string, FishDefinition> FishDefinitions;
-    public Dictionary<string, InventoryItemDefinition> InventoryItemDefinitions;
+    public Dictionary<string, Inventory>? Inventories;
+    public Dictionary<string, InventoryItemDefinition>? InventoryItemDefinitions;
+    public Dictionary<string, InventoryItemCategory>? InventoryItemCategories;
+    public Dictionary<string, FishDefinition>? FishDefinitions;
+    public Dictionary<string, QuestDefinition>? QuestDefinitions;
 
     public AssetManager() {
         ProcessMode = ProcessModeEnum.Always;
