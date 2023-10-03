@@ -2,18 +2,60 @@ using System.Text.Json.Serialization;
 using System.Collections.Generic;
 using Godot;
 
-public class InventoryDTO {
-    public string Name { get; set; }
+public class InventoryDTO : IGameAssetDTO {
+    public string? Name { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
-    public List<InventoryItemInstanceDTO> Items { get; set; }
-    public string BackgroundImagePath { get; set; }
+    public List<InventoryItemInstanceDTO>? Items { get; set; }
+    public string? BackgroundImagePath { get; set; }
     public bool ShouldClearOnClose { get; set; }
     public bool Disabled { get; set; }
-    public bool[] UsableMask { get; set; }
+    public bool[]? UsableMask { get; set; }
+
+    public bool Validate() {
+        if (string.IsNullOrEmpty(Name)) {
+            return false;
+        }
+        if (Width <= 0 || Height <= 0) {
+            return false;
+        }
+        if (UsableMask == null) {
+            return false;
+        }
+        if (UsableMask.Length != Width * Height) {
+            return false;
+        }
+        if (!ConnectedArray.IsArrayConnected(Width, Height, UsableMask)) {
+            return false;
+        }
+        return true;
+    }
+
+    public string Stringify() {
+        string str = $"Name: {Name}\nWidth: {Width}\nHeight: {Height}\n";
+        str += $"BackgroundImagePath: {BackgroundImagePath}\n";
+        str += $"ShouldClearOnClose: {ShouldClearOnClose}\n";
+        str += $"Disabled: {Disabled}\n";
+        if (UsableMask != null) {
+            str += "UsableMask:\n";
+            for (int y = 0; y < Height; ++y) {
+                for (int x = 0; x < Width; ++x) {
+                    str += UsableMask[y * Width + x] ? "1" : "0";
+                }
+                str += "\n";
+            }
+        }
+        if (Items != null) {
+            str += "Items:\n";
+            foreach (InventoryItemInstanceDTO item in Items) {
+                str += $"{item.Stringify()}\n";
+            }
+        }
+        return str;
+    }
 }
 
-public class Inventory : IValidatedGameAsset {
+public class Inventory {
     public string Name { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
@@ -140,48 +182,5 @@ public class Inventory : IValidatedGameAsset {
             Touched = true;
         }
         return true;
-    }
-
-    public bool Validate() {
-        if (Name.Length == 0) {
-            return false;
-        }
-        if (Width <= 0 || Height <= 0) {
-            return false;
-        }
-        if (SerializedUsableMask == null) {
-            return false;
-        }
-        if (SerializedUsableMask.Length != Width * Height) {
-            return false;
-        }
-        if (!ConnectedArray.IsArrayConnected(Width, Height, SerializedUsableMask)) {
-            return false;
-        }
-        return true;
-    }
-
-    public string Stringify() {
-        string str = $"Name: {Name}\nWidth: {Width}\nHeight: {Height}\n";
-        str += $"BackgroundImagePath: {BackgroundImagePath}\n";
-        str += $"ShouldClearOnClose: {ShouldClearOnClose}\n";
-        str += $"Disabled: {Disabled}\n";
-        str += $"Touched: {Touched}\n";
-        if (SerializedUsableMask != null) {
-            str += "UsableMask:\n";
-            for (int y = 0; y < Height; ++y) {
-                for (int x = 0; x < Width; ++x) {
-                    str += SerializedUsableMask[y * Width + x] ? "1" : "0";
-                }
-                str += "\n";
-            }
-        }
-        if (Items != null) {
-            str += "Items:\n";
-            foreach (InventoryItemInstance item in Items) {
-                str += $"{item.Stringify()}\n";
-            }
-        }
-        return str;
     }
 }

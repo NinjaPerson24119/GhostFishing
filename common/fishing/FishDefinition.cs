@@ -1,11 +1,4 @@
-public class FishDefinition : InventoryItemDefinition, IValidatedGameAsset {
-    // TODO: Need to pre-load images for fish
-    /*
-    public void Load() {
-
-    }
-    */
-
+public class FishDefinitionDTO : InventoryItemDefinitionDTO, IGameAssetDTO {
     public override bool Validate() {
         return base.Validate();
     }
@@ -13,4 +6,13 @@ public class FishDefinition : InventoryItemDefinition, IValidatedGameAsset {
     public override string Stringify() {
         return base.Stringify();
     }
+}
+
+public class FishDefinition : InventoryItemDefinition {
+    // TODO: Need to pre-load images for fish
+    /*
+    public void Load() {
+
+    }
+    */
 }

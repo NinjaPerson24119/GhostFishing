@@ -1,17 +1,22 @@
-public class QuestDTO {
-    public string Name { get; set; }
-    public string Description { get; set; }
-}
-
-public class Quest : IValidatedGameAsset {
-    string Name { get; set; }
-    string Description { get; set; }
+public class QuestDTO : IGameAssetDTO {
+    public string? Name { get; set; }
+    public string? Description { get; set; }
 
     public bool Validate() {
-        return Name.Length > 0 && Description.Length > 0;
+        return !string.IsNullOrEmpty(Name) && !string.IsNullOrEmpty(Description);
     }
 
     public string Stringify() {
         return $"Quest: {Name}\nDescription: {Description}";
+    }
+}
+
+public class Quest {
+    string Name { get; set; }
+    string Description { get; set; }
+
+    public Quest(QuestDTO dto) {
+        Name = dto.Name ?? "";
+        Description = dto.Description ?? "";
     }
 }

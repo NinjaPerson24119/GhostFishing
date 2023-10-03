@@ -3,13 +3,13 @@ using System.IO;
 using System.Text.Json;
 using System.Collections.Generic;
 
-public interface IValidatedGameAsset {
+public interface IGameAssetDTO {
     bool Validate();
     string Stringify();
 }
 
 public class AssetDefinitionArray<T> {
-    public T[] Array { get; set; }
+    public T[]? Array { get; set; }
 }
 
 public partial class AssetManager : Node {
