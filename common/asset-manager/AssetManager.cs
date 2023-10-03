@@ -22,20 +22,42 @@ public partial class AssetManager : Node {
     private const string _itemCategoryDefinitionsPath = "res://data/item-categories.json";
     private const string _questDefinitionsPath = "res://data/quests.json";
 
-    private const string _temporaryInventoryID = "INVENTORY-dc106fde-f9a0-4a99-8b58-0dee17fce491";
     private PlayerStateAssetIDs[] _playerStateAssetIDs;
     private const string _storageInventoryID = "INVENTORY-9f5d56ed-c8aa-4899-b749-66bd734141fb";
 
     private InventoryDTO? _defaultBoatInventoryDTO;
     private InventoryDTO? _defaultQuestInventoryDTO;
     private InventoryDTO? _defaultStorageInventoryDTO;
-    private Dictionary<string, Inventory> _inventories = new Dictionary<string, Inventory>();
-    private Dictionary<string, InventoryItemDefinition> _inventoryItemDefinitions = new Dictionary<string, InventoryItemDefinition>();
-    private Dictionary<string, InventoryItemCategory> _inventoryItemCategories = new Dictionary<string, InventoryItemCategory>();
-    private Dictionary<string, QuestDefinition> _questDefinitions = new Dictionary<string, QuestDefinition>();
+
+    private AssetStore<InventoryItemCategoryDTO, InventoryItemCategory> _inventoryItemCategoryStore;
+    private AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition> _inventoryItemDefinitionStore;
+    private AssetStore<QuestDefinitionDTO, QuestDefinition> _questDefinitionStore;
+    private AssetStore<InventoryDTO, Inventory> _inventoryStore;
 
     public AssetManager() {
         ProcessMode = ProcessModeEnum.Always;
+
+        _inventoryItemCategoryStore = new AssetStore<InventoryItemCategoryDTO, InventoryItemCategory>(
+            (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
+            AssetIDValidator.IsInventoryItemCategoryID,
+            null
+        );
+        _questDefinitionStore = new AssetStore<QuestDefinitionDTO, QuestDefinition>(
+            (QuestDefinitionDTO dto) => new QuestDefinition(dto),
+            AssetIDValidator.IsQuestID,
+            null
+        );
+        _inventoryItemDefinitionStore = new AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition>(
+            (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
+            AssetIDValidator.IsInventoryItemDefinitionID,
+            (InventoryItemDefinition itemDefinition) => AreItemDefinitionsDepsSatisfied(itemDefinition)
+        );
+        _inventoryStore = new AssetStore<InventoryDTO, Inventory>(
+            (InventoryDTO dto) => new Inventory(dto),
+            AssetIDValidator.IsInventoryID,
+            (Inventory inventory) => AreInventoryDepsSatisfied(inventory)
+        );
+
         _playerStateAssetIDs = new PlayerStateAssetIDs[2]{
             new PlayerStateAssetIDs(
                 boatInventoryID: "INVENTORY-31cdec79-2a3b-4f4d-9e23-a878915f3973",
@@ -57,39 +79,61 @@ public partial class AssetManager : Node {
     }
 
     private void LoadAssets() {
+        // load order is significant
+        LoadAssetsFromJSON(_inventoryItemCategoryStore, _itemCategoryDefinitionsPath);
+        LoadAssetsFromJSON(_questDefinitionStore, _questDefinitionsPath);
+        LoadAssetsFromJSON(_inventoryItemDefinitionStore, _fishDefinitionsPath);
+
         _defaultBoatInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultBoatInventoryPath);
         _defaultQuestInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultQuestInventoryPath);
         _defaultStorageInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultStorageInventoryPath);
+    }
 
-        LoadAssets(
-            _inventoryItemDefinitions,
-            _fishDefinitionsPath,
-            (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
-            AssetIDValidator.IsInventoryItemDefinitionID
-        );
-        LoadAssets(
-            _inventoryItemCategories,
-            _itemCategoryDefinitionsPath,
-            (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
-            AssetIDValidator.IsInventoryItemCategoryID
-        );
-        LoadAssets(_questDefinitions,
-            _questDefinitionsPath,
-            (QuestDefinitionDTO dto) => new QuestDefinition(dto),
-            AssetIDValidator.IsQuestID
-        );
+    private bool AreInventoryDepsSatisfied(Inventory inventory) {
+        foreach (InventoryItemInstance item in inventory.Items) {
+            if (!AreItemInstanceDepsSatisfied(item)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private bool AreItemDefinitionsDepsSatisfied(InventoryItemDefinition itemDefinition) {
+        if (!_inventoryItemCategoryStore.HasAsset(itemDefinition.CategoryID)) {
+            return false;
+        }
+        return true;
+    }
+
+    private bool AreItemInstanceDepsSatisfied(InventoryItemInstance itemInstance) {
+        if (!_inventoryItemDefinitionStore.HasAsset(itemInstance.DefinitionID)) {
+            return false;
+        }
+        if (itemInstance.QuestDetails != null) {
+            if (!AreQuestDetailsDepsSatisfied(itemInstance.QuestDetails)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private bool AreQuestDetailsDepsSatisfied(InventoryItemInstanceQuestDetails questDetails) {
+        if (!_questDefinitionStore.HasAsset(questDetails.QuestDefinitionID)) {
+            return false;
+        }
+        return true;
     }
 
     private void InitializeInventories() {
         foreach (PlayerStateAssetIDs ids in _playerStateAssetIDs) {
-            if (!_inventories.ContainsKey(ids.BoatInventoryID) && _defaultBoatInventoryDTO != null) {
-                _inventories.Add(ids.BoatInventoryID, new Inventory(_defaultBoatInventoryDTO));
+            if (!_inventoryStore.HasAsset(ids.BoatInventoryID) && _defaultBoatInventoryDTO != null) {
+                _inventoryStore.AddAsset(ids.BoatInventoryID, _defaultBoatInventoryDTO);
             }
-            if (!_inventories.ContainsKey(ids.QuestInventoryID) && _defaultQuestInventoryDTO != null) {
-                _inventories.Add(ids.QuestInventoryID, new Inventory(_defaultQuestInventoryDTO));
+            if (!_inventoryStore.HasAsset(ids.QuestInventoryID) && _defaultQuestInventoryDTO != null) {
+                _inventoryStore.AddAsset(ids.QuestInventoryID, _defaultQuestInventoryDTO);
             }
-            if (!_inventories.ContainsKey(ids.StorageID) && _defaultStorageInventoryDTO != null) {
-                _inventories.Add(ids.StorageID, new Inventory(_defaultStorageInventoryDTO));
+            if (!_inventoryStore.HasAsset(ids.StorageID) && _defaultStorageInventoryDTO != null) {
+                _inventoryStore.AddAsset(ids.StorageID, _defaultStorageInventoryDTO);
             }
         }
     }
@@ -114,31 +158,14 @@ public partial class AssetManager : Node {
         }
     }
 
-    private delegate T BuildAssetFromDTO<DTO, T>(DTO dto) where DTO : IGameAssetDTO;
-    private delegate bool IsIDOfType(string id);
-    private void LoadAssets<DTO, T>(Dictionary<string, T> assetDict, string filePath, BuildAssetFromDTO<DTO, T> buildAsset, IsIDOfType isIDOfType) where DTO : IGameAssetDTO {
+    private void LoadAssetsFromJSON<DTO, T>(AssetStore<DTO, T> store, string filePath) where DTO : IGameAssetDTO {
         Dictionary<string, DTO>? assetDTOs = LoadAssetFromJSON<Dictionary<string, DTO>>(filePath);
         if (assetDTOs != null) {
             foreach (var kv in assetDTOs) {
-                T model;
-                try {
-                    model = buildAsset(kv.Value);
-                }
-                catch (Exception e) {
-                    GD.PrintErr($"Error building {typeof(T)} asset from DTO: {e}");
-                    continue;
-                }
-                if (!isIDOfType(kv.Key)) {
-                    GD.PrintErr($"Asset ID {kv.Key} is valid for asset type {typeof(T)}");
-                    continue;
-                }
-                assetDict.Add(kv.Key, model);
+                store.AddAsset(kv.Key, kv.Value);
             }
         }
     }
-
-    // TODO: validate referential integrity
-    // public void ValidateAssetReferrers() {}
 
     public PlayerStateView GetPlayerView(int playerIndex) {
         if (playerIndex < 0 || playerIndex >= _playerStateAssetIDs.Length) {
@@ -149,22 +176,10 @@ public partial class AssetManager : Node {
     }
 
     public Inventory GetInventory(string uuid) {
-        try {
-            return _inventories[uuid];
-        }
-        catch (KeyNotFoundException e) {
-            GD.PrintErr($"Inventory not found: {uuid}");
-            throw e;
-        }
+        return _inventoryStore.GetAsset(uuid);
     }
 
     public InventoryItemDefinition GetInventoryItemDefinition(string uuid) {
-        try {
-            return _inventoryItemDefinitions[uuid];
-        }
-        catch (KeyNotFoundException e) {
-            GD.PrintErr($"Inventory item definition not found: {uuid}");
-            throw e;
-        }
+        return _inventoryItemDefinitionStore.GetAsset(uuid);
     }
 }
