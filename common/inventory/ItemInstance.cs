@@ -25,12 +25,12 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
 
     public string Stringify() {
         string str = $"DefinitionID: {DefinitionID}\n";
-        str += $"X: {X}\nY: {Y}\nRotation: {Rotation}\n";
+        str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";
         if (QuestDetails != null) {
-            str += $"QuestDetails:\n{QuestDetails.Stringify()}\n";
+            str += $"QuestDetails (object):\n{QuestDetails.Stringify()}\n";
         }
         if (FlagOverrides != null) {
-            str += $"FlagOverrides:\n{FlagOverrides.Stringify()}\n";
+            str += $"FlagOverrides (object):\n{FlagOverrides.Stringify()}\n";
         }
         return str;
     }

@@ -36,17 +36,19 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
     }
 
     public virtual string Stringify() {
-        string str = $"Name: {Name}\nDescription: {Description}";
-        str += $"\nCurrencyValue: {CurrencyValue}\n";
+        string str = $"Name: {Name}\nDescription: {Description}\n";
+        str += $"CurrencyValue: {CurrencyValue}\n";
         str += $"ImagePath: {ImagePath}\n";
-        str += $"SilhouetteImagePath: {SilhouetteImagePath}\n";
+        if (SilhouetteImagePath != null) {
+            str += $"SilhouetteImagePath: {SilhouetteImagePath}\n";
+        }
         if (Space != null) {
-            str += $"\nSpace:\n{Space.Stringify()}";
+            str += $"Space (object):\n{Space.Stringify()}\n";
         }
         if (Flags != null) {
-            str += $"\nFlags:\n{Flags.Stringify()}";
+            str += $"Flags (object):\n{Flags.Stringify()}\n";
         }
-        str += $"\nCategory:\n{CategoryID}";
+        str += $"Category: {CategoryID}";
         str += $"BackgroundColorOverride: {BackgroundColorOverride}";
         return str;
     }

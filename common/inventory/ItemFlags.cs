@@ -14,7 +14,7 @@ public class InventoryItemFlagsDTO : IGameAssetDTO {
         string str = $"CanPutInStorage: {CanPutInStorage}\n";
         str += $"CanBeMovedByPlayer: {CanBeMovedByPlayer}\n";
         str += $"CanDelete: {CanDelete}\n";
-        str += $"RestrictPlayerTeleport: {RestrictPlayerTeleport}";
+        str += $"RestrictPlayerTeleport: {RestrictPlayerTeleport}\n";
         return str;
     }
 }

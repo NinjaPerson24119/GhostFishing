@@ -19,6 +19,10 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     }
 
     public void AddAsset(string id, DTO dto) {
+        if (dto == null) {
+            GD.PrintErr($"DTO is null for {id} with asset type {typeof(T)}");
+            return;
+        }
         T model;
         try {
             model = _buildAssetFromDTO(dto);

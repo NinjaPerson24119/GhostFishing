@@ -34,6 +34,8 @@ public partial class AssetManager : Node {
     private AssetStore<QuestDefinitionDTO, QuestDefinition> _questDefinitionStore;
     private AssetStore<InventoryDTO, Inventory> _inventoryStore;
 
+    private bool logLoadedDTOs = true;
+
     public AssetManager() {
         ProcessMode = ProcessModeEnum.Always;
 
@@ -74,7 +76,10 @@ public partial class AssetManager : Node {
 
     public override void _Ready() {
         _singletonTracker.Ready(this);
+
+        GD.Print("Asset Manager: Loading assets...");
         LoadAssets();
+        GD.Print("Asset Manager: Initializing inventories...");
         InitializeInventories();
     }
 
@@ -87,6 +92,11 @@ public partial class AssetManager : Node {
         _defaultBoatInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultBoatInventoryPath);
         _defaultQuestInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultQuestInventoryPath);
         _defaultStorageInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultStorageInventoryPath);
+        if (logLoadedDTOs) {
+            LogDTO("Default boat inventory", _defaultBoatInventoryDTO);
+            LogDTO("Default quest inventory", _defaultQuestInventoryDTO);
+            LogDTO("Default storage inventory", _defaultStorageInventoryDTO);
+        }
     }
 
     private bool AreInventoryDepsSatisfied(Inventory inventory) {
@@ -162,9 +172,20 @@ public partial class AssetManager : Node {
         Dictionary<string, DTO>? assetDTOs = LoadAssetFromJSON<Dictionary<string, DTO>>(filePath);
         if (assetDTOs != null) {
             foreach (var kv in assetDTOs) {
+                if (logLoadedDTOs) {
+                    LogDTO(kv.Key, kv.Value);
+                }
                 store.AddAsset(kv.Key, kv.Value);
             }
         }
+    }
+
+    private void LogDTO<DTO>(string id, DTO? dto) where DTO : IGameAssetDTO {
+        if (dto == null) {
+            GD.PrintErr($"DTO is null for {id} ({typeof(DTO)})");
+            return;
+        }
+        GD.Print($"Loaded Asset: {id} ({typeof(DTO)}):\n{dto.Stringify()}\n\n");
     }
 
     public PlayerStateView GetPlayerView(int playerIndex) {
