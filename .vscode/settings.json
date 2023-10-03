@@ -10,6 +10,4 @@
     "omnisharp.enableEditorConfigSupport": true,
     "editor.acceptSuggestionOnCommitCharacter": false,
     "dotnet.codeLens.enableReferencesCodeLens": false,
-    "omnisharp.autoStart": true,
-    "omnisharp.organizeImportsOnFormat": true,
 }
