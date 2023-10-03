@@ -7,6 +7,9 @@ public class InventoryDTO : IGameAssetDTO {
     public int Height { get; set; }
     public List<InventoryItemInstanceDTO>? Items { get; set; }
     public string? BackgroundImagePath { get; set; }
+    // disabled is used when an inventory needs to exist, but shouldn't be interactive
+    // - inspecting the contents of a locked chest
+    // - displaying a completed crafting result
     public bool Disabled { get; set; }
     public bool[]? UsableMask { get; set; }
 
