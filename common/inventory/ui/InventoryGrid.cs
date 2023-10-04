@@ -1,9 +1,21 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class InventoryUI : Control {
+public partial class InventoryGrid : Control {
     public partial class InventoryTile : Control {
+        private static Color _HoverOuterColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
+        private static Color _HoverInnerColor = new Color(0.8f, 0.8f, 0.8f, 1.8f);
         public Color TileColor = Colors.Green;
+        public bool Hovered {
+            get {
+                return _hovered;
+            }
+            set {
+                _hovered = value;
+                UpdateShader();
+            }
+        }
+        private bool _hovered;
         public bool Filled {
             get {
                 return _filled;
@@ -38,7 +50,12 @@ public partial class InventoryUI : Control {
         }
 
         private void UpdateShader() {
-            if (_filled) {
+            if (Hovered) {
+                _material.SetShaderParameter("outer_color", _HoverOuterColor);
+                _material.SetShaderParameter("inner_color", _HoverInnerColor);
+                return;
+            }
+            if (Filled) {
                 _material.SetShaderParameter("inner_color", TileColor);
             }
             else {
