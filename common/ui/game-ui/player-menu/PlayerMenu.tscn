@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://bevgtpu6amfkd"]
 
 [ext_resource type="Script" path="res://common/ui/game-ui/player-menu/PlayerMenu.cs" id="1_6osc1"]
-[ext_resource type="Script" path="res://common/inventory/ui/InventoryUI.cs" id="2_t2prx"]
+[ext_resource type="Script" path="res://common/inventory/ui/InventoryLayout.cs" id="1_iiqgh"]
 
 [node name="PlayerMenu" type="Control"]
 layout_mode = 3
@@ -12,8 +12,8 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_6osc1")
 
-[node name="Inventory" type="Control" parent="."]
+[node name="Control" type="Control" parent="."]
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
-script = ExtResource("2_t2prx")
+script = ExtResource("1_iiqgh")
