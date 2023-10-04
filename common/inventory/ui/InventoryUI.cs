@@ -60,13 +60,22 @@ public partial class InventoryUI : Control {
             ContainerHeightPx = _inventory.Height * TileSizePx + GridMarginPx * 2;
         }
 
-        // add a background color
+        // add a background image
+        TextureRect? backgroundImage = null;
+        if (_inventory.BackgroundImagePath != null) {
+            backgroundImage = new TextureRect() {
+                Texture = GD.Load<Texture2D>(_inventory.BackgroundImagePath),
+                Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+            };
+        }
+
+        // add a container color
         ColorRect containerBackgroundColor = new ColorRect() {
             Color = BackgroundColor,
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
         };
 
-        // add a background image
+        // add a container frame image
         TextureRect containerFrameImage = new TextureRect() {
             Texture = GD.Load<Texture2D>(_containerFrameImagePath),
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
@@ -97,9 +106,25 @@ public partial class InventoryUI : Control {
         }
 
         // structure layout
-        center.AddChild(_gridContainer);
-        containerFrameImage.AddChild(center);
-        containerBackgroundColor.AddChild(containerFrameImage);
+        List<Control?> layoutStack = new List<Control?> {
+            containerBackgroundColor,
+            backgroundImage,
+            containerFrameImage,
+            center,
+            _gridContainer,
+        };
+        if (layoutStack.Count == 0) {
+            return;
+        }
+        for (int i = 0; i < layoutStack.Count - 1; i++) {
+            if (layoutStack[i] != null) {
+                Control control = layoutStack[i]!;
+                while (layoutStack[i + 1] == null) {
+                    i++;
+                }
+                control.AddChild(layoutStack[i + 1]);
+            }
+        }
         AddChild(containerBackgroundColor);
     }
 }
