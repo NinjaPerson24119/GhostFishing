@@ -84,7 +84,7 @@ public partial class AssetManager : Node {
         GD.Print("Asset Manager: Done");
 
         var playerStateView = GetPlayerView(0);
-        GD.Print($"Player Default Inventory:\n{playerStateView.BoatInventory.Stringify()}");
+        GD.Print($"Player Default Inventory:\n{playerStateView.BoatInventory.StringRepresentationOfGrid()}");
     }
 
     private void LoadAssets() {

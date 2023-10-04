@@ -255,7 +255,7 @@ public class Inventory {
         }
     }
 
-    public string Stringify() {
+    public string StringRepresentationOfGrid() {
         string str = "";
         for (int y = 0; y < Height; ++y) {
             for (int x = 0; x < Width; ++x) {
