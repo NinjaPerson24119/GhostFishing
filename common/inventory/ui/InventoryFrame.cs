@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 public partial class InventoryFrame : Control {
     [Export]
@@ -16,14 +17,30 @@ public partial class InventoryFrame : Control {
     public int TileSizePx = 64;
     [Export]
     public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
-
+    private Inventory? _inventory = null!;
     private InventoryGrid _inventoryGrid = null!;
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
     public override void _Ready() {
-        // get inventory from player
-        PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
-        Inventory _inventory = player.BoatInventory;
+        if (_inventory != null) {
+            RespawnChildren();
+        }
+    }
+
+    public void SetInventory(Inventory inventory) {
+        _inventory = inventory;
+        RespawnChildren();
+    }
+
+    public void OnInventoryChanged() {
+        RespawnChildren();
+    }
+
+    public void RespawnChildren() {
+        if (_inventory == null) {
+            throw new Exception("Cannot spawn children because inventory is null.");
+        }
+        FreeChildren();
 
         // create grid
         _inventoryGrid = new InventoryGrid(
@@ -72,5 +89,12 @@ public partial class InventoryFrame : Control {
         }
         containerBackgroundColor.AddChild(containerFrameImage);
         AddChild(containerBackgroundColor);
+    }
+
+    private void FreeChildren() {
+        foreach (Node child in GetChildren()) {
+            RemoveChild(child);
+            child.QueueFree();
+        }
     }
 }

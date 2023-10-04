@@ -24,14 +24,14 @@ public partial class Menu : Control {
         }
     }
 
-    public void Open() {
+    public virtual void Open() {
         if (RequestedClose || IsOpen) {
             return;
         }
         Visible = true;
     }
 
-    public void Close() {
+    public virtual void Close() {
         Visible = false;
         RequestedClose = false;
     }

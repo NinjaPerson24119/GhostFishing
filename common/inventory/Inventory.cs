@@ -223,28 +223,30 @@ public class Inventory {
         return item;
     }
 
-    public InventoryMutator? GetMutator() {
+    public Mutator? GetMutator() {
         if (Disabled || _locked) {
             return null;
         }
         _locked = true;
-        return new InventoryMutator(this);
+        return new Mutator(this);
     }
 
-    public class InventoryMutator {
+    public class Mutator {
         private Inventory _inventory;
         private bool _released;
-        public InventoryMutator(Inventory inventory) {
+        public Mutator(Inventory inventory) {
             _inventory = inventory;
             _released = false;
         }
-        ~InventoryMutator() {
-            DebugTools.Assert(_inventory._locked, "Inventory was not locked when mutator was destroyed.");
-            _inventory._locked = false;
+        ~Mutator() {
+            if (!_released) {
+                GD.PrintErr("InventoryMutator was not released before destruction.");
+                _inventory._locked = false;
+            }
         }
 
         public void Release() {
-            DebugTools.Assert(!_released, "InventoryMutator.Release called multiple times");
+            DebugTools.Assert(!_released, "Mutator.Release called multiple times");
             if (!_released) {
                 _released = true;
                 _inventory._locked = false;
