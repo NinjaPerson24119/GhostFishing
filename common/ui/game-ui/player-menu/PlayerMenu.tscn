@@ -1,7 +1,9 @@
-[gd_scene load_steps=3 format=3 uid="uid://bevgtpu6amfkd"]
+[gd_scene load_steps=4 format=3 uid="uid://bevgtpu6amfkd"]
 
 [ext_resource type="Script" path="res://common/ui/game-ui/player-menu/PlayerMenu.cs" id="1_6osc1"]
-[ext_resource type="Script" path="res://common/ui/game-ui/player-menu/InventoryUI.cs" id="2_gkiuy"]
+[ext_resource type="Texture2D" uid="uid://bpt3ttis44i7t" path="res://artwork/generated/ui/inventory-square.png" id="2_fedug"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_rx0h2"]
 
 [node name="PlayerMenu" type="Control"]
 layout_mode = 3
@@ -12,22 +14,83 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_6osc1")
 
-[node name="InventoryUI" type="Control" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-script = ExtResource("2_gkiuy")
-
-[node name="Label" type="Label" parent="InventoryUI"]
+[node name="Label" type="Label" parent="."]
 layout_mode = 1
 offset_right = 170.0
 offset_bottom = 26.0
-text = "Inventory Placeholder"
+text = "Player Menu"
 
-[node name="TextureRect" type="TextureRect" parent="InventoryUI"]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="VSplitContainer" type="VSplitContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -960.0
+offset_bottom = 1080.0
+grow_horizontal = 0
+split_offset = 500
+
+[node name="BottomSlot" type="MarginContainer" parent="VSplitContainer"]
+layout_mode = 2
+
+[node name="AspectRatioContainer" type="AspectRatioContainer" parent="."]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -640.0
+offset_bottom = 640.0
+grow_horizontal = 0
+
+[node name="GridContainer" type="GridContainer" parent="AspectRatioContainer"]
+layout_mode = 2
+columns = 10
+
+[node name="TextureRect2" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect3" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect4" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect5" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect6" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect7" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect8" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect9" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")
+
+[node name="TextureRect10" type="TextureRect" parent="AspectRatioContainer/GridContainer"]
+material = SubResource("ShaderMaterial_rx0h2")
+layout_mode = 2
+texture = ExtResource("2_fedug")

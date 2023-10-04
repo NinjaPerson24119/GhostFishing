@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b3rqh3tlhmuqq"
-path="res://.godot/imported/SkeletonFish.png-926de4a9fed486c047a1ebef5e28168b.ctex"
+uid="uid://bpt3ttis44i7t"
+path="res://.godot/imported/inventory-square.png-88c0d15959e330229ab6b932f6befb00.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://artwork/generated/fish/SkeletonFish.png"
-dest_files=["res://.godot/imported/SkeletonFish.png-926de4a9fed486c047a1ebef5e28168b.ctex"]
+source_file="res://artwork/generated/ui/inventory-square.png"
+dest_files=["res://.godot/imported/inventory-square.png-88c0d15959e330229ab6b932f6befb00.ctex"]
 
 [params]
 
