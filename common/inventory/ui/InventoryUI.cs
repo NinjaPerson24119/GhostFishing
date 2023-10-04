@@ -22,6 +22,11 @@ public partial class InventoryUI : Control {
     private string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
     private string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
 
+    // need to position items relative to grid
+    private GridContainer _gridContainer = new GridContainer();
+    // need to change tile colors
+    private List<Control> _tileControls = new List<Control>();
+
     private Inventory _inventory = null!;
     private ShaderMaterial _material;
 
@@ -30,7 +35,8 @@ public partial class InventoryUI : Control {
             Shader = GD.Load<Shader>(_tileShaderPath)
         };
         _material.SetShaderParameter("background_color", BackgroundColor);
-        _material.SetShaderParameter("color", TileColor);
+        _material.SetShaderParameter("outer_color", TileColor);
+        _material.SetShaderParameter("inner_color", BackgroundColor);
     }
 
     public override void _Ready() {
@@ -44,12 +50,10 @@ public partial class InventoryUI : Control {
             Material = _material,
         };
 
-        GridContainer gridContainer = new GridContainer() {
-            Columns = _inventory.Width,
-            CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx)
-        };
-        gridContainer.AddThemeConstantOverride("h_separation", 0);
-        gridContainer.AddThemeConstantOverride("v_separation", 0);
+        _gridContainer.Columns = _inventory.Width;
+        _gridContainer.CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
+        _gridContainer.AddThemeConstantOverride("h_separation", 0);
+        _gridContainer.AddThemeConstantOverride("v_separation", 0);
 
         // fit container dimensions
         if (FitContainerToGrid) {
@@ -88,19 +92,21 @@ public partial class InventoryUI : Control {
             for (int y = 0; y < _inventory.Height; y++) {
                 Control control;
                 if (_inventory.SpaceUsable(x, y)) {
-                    control = (TextureRect)tile.Duplicate();
+                    control = (Control)tile.Duplicate();
                 }
                 else {
                     // use empty Control as spacer
                     control = new Control() {
                         Size = new Vector2(TileSizePx, TileSizePx),
+                        CustomMinimumSize = new Vector2(TileSizePx, TileSizePx),
                     };
                 }
-                gridContainer.AddChild(control);
+                _gridContainer.AddChild(control);
+                _tileControls.Add(control);
             }
         }
 
-        center.AddChild(gridContainer);
+        center.AddChild(_gridContainer);
         containerFrameImage.AddChild(center);
         if (backgroundImage != null) {
             containerBackgroundColor.AddChild(backgroundImage);
