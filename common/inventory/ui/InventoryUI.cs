@@ -33,6 +33,7 @@ public partial class InventoryUI : Control {
         _material = new ShaderMaterial() {
             Shader = GD.Load<Shader>(_tileShaderPath)
         };
+        _material.SetShaderParameter("background_color", BackgroundColor);
         _material.SetShaderParameter("color", TileColor);
     }
 
@@ -51,8 +52,6 @@ public partial class InventoryUI : Control {
         _gridContainer.CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
         _gridContainer.AddThemeConstantOverride("h_separation", 0);
         _gridContainer.AddThemeConstantOverride("v_separation", 0);
-        // minimum size must be set for empty Controls to act as spacers
-        //_gridContainer.CustomMinimumSize = new Vector2(TileSizePx, TileSizePx);
 
         // fit container dimensions
         if (FitContainerToGrid) {
@@ -82,12 +81,6 @@ public partial class InventoryUI : Control {
         };
         _layoutControls.Add(containerFrameImage);
 
-        // add second layer after background image so it can't appear through grid
-        ColorRect containerBackgroundColorInner = new ColorRect() {
-            Color = BackgroundColor,
-            CustomMinimumSize = _gridContainer.CustomMinimumSize,
-        };
-
         // center grid in container
         CenterContainer center = new CenterContainer() {
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
@@ -112,7 +105,6 @@ public partial class InventoryUI : Control {
             }
         }
 
-        center.AddChild(containerBackgroundColorInner);
         center.AddChild(_gridContainer);
         containerFrameImage.AddChild(center);
         if (backgroundImage != null) {
