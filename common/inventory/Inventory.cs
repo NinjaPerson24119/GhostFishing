@@ -6,7 +6,7 @@ using Godot;
 public class InventoryDTO : IGameAssetDTO {
     public int Width { get; set; }
     public int Height { get; set; }
-    public List<InventoryItemInstanceDTO>? Items { get; set; }
+    public InventoryItemInstanceDTO[]? Items { get; set; }
     public string? BackgroundImagePath { get; set; }
     // disabled is used when an inventory needs to exist, but shouldn't be interactive
     // - inspecting the contents of a locked chest
@@ -46,9 +46,9 @@ public class InventoryDTO : IGameAssetDTO {
             }
         }
         if (Items != null) {
-            str += "Items:\n";
+            str += "Items (array):\n";
             foreach (InventoryItemInstanceDTO item in Items) {
-                str += $"{item.Stringify()}\n";
+                str += $"{item.Stringify()}\n\n";
             }
         }
         return str;
@@ -60,9 +60,6 @@ public class Inventory {
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
     public string? BackgroundImagePath { get; set; }
-    // hint to the game that this inventory should be cleared when closed (e.g. for fishing result / temporary inventories)
-    // TODO: this should throw an error somehow if the inventory contains items that cannot be deleted / are quest items
-    public bool ShouldClearOnClose { get; set; }
     public bool Disabled { get; set; }
 
     public bool Touched { get; set; }
@@ -77,6 +74,7 @@ public class Inventory {
     // TODO: Complete() and add masks for specific categories and item UUIDs
     // _locked is used to prevent creating multiple mutators at once
     private bool _locked;
+    private bool _printLogs = true;
 
     public Inventory(InventoryDTO dto) {
         if (!dto.IsValid()) {
@@ -96,9 +94,13 @@ public class Inventory {
 
         Items = new List<InventoryItemInstance>();
         if (dto.Items != null) {
+            if (_printLogs) {
+                GD.Print($"Placing {dto.Items.Length} items into inventory");
+            }
             _ignoreTouches = true;
-            foreach (InventoryItemInstance item in Items) {
-                PlaceItem(item, item.X, item.Y);
+            foreach (InventoryItemInstanceDTO item in dto.Items) {
+                InventoryItemInstance itemInstance = new InventoryItemInstance(item);
+                PlaceItem(itemInstance, item.X, item.Y);
             }
             _ignoreTouches = false;
         }
@@ -115,15 +117,27 @@ public class Inventory {
     public bool CanPlaceItem(InventoryItemInstance item, int x, int y) {
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
         if (x < 0 || y < 0 || x + itemDef.Space.Width > Width || y + itemDef.Space.Height > Height) {
+            if (_printLogs) {
+                GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to edge of inventory");
+            }
             return false;
         }
         for (int i = 0; i < itemDef.Space.Width; i++) {
             for (int j = 0; j < itemDef.Space.Height; j++) {
                 int indexConsidered = (y + j) * Width + (x + i);
+                if (!itemDef.Space.GetFilledMask(item.Rotation)[j * itemDef.Space.Width + i]) {
+                    continue;
+                }
                 if (!_usableMask[indexConsidered]) {
+                    if (_printLogs) {
+                        GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to unusable space");
+                    }
                     return false;
                 }
                 if (_itemMask[indexConsidered] != -1) {
+                    if (_printLogs) {
+                        GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to occupied space");
+                    }
                     return false;
                 }
             }
@@ -133,16 +147,19 @@ public class Inventory {
 
     public void UpdateItemMask() {
         int[] newItemMask = Enumerable.Repeat(-1, Width * Height).ToArray();
-        for (int i = 0; i < Items.Count; i++) {
+        for (int idx = 0; idx < Items.Count; idx++) {
             InventoryItemDefinition itemDef;
-            itemDef = AssetManager.Ref().GetInventoryItemDefinition(Items[i].DefinitionID);
+            itemDef = AssetManager.Ref().GetInventoryItemDefinition(Items[idx].DefinitionID);
 
-            for (int x = 0; x < itemDef.Space.Width; x++) {
-                for (int y = 0; y < itemDef.Space.Height; y++) {
-                    int indexConsidered = (Items[i].Y + y) * Width + (Items[i].X + x);
+            for (int i = 0; i < itemDef.Space.Width; i++) {
+                for (int j = 0; j < itemDef.Space.Height; j++) {
+                    if (!itemDef.Space.GetFilledMask(Items[idx].Rotation)[j * itemDef.Space.Width + i]) {
+                        continue;
+                    }
+                    int indexConsidered = (Items[idx].Y + j) * Width + (Items[idx].X + i);
                     DebugTools.Assert(_usableMask[indexConsidered]);
                     DebugTools.Assert(newItemMask[indexConsidered] == -1);
-                    newItemMask[indexConsidered] = i;
+                    newItemMask[indexConsidered] = idx;
                 }
             }
         }
@@ -159,13 +176,20 @@ public class Inventory {
 
     private bool PlaceItem(InventoryItemInstance item, int x, int y) {
         if (!CanPlaceItem(item, x, y)) {
+            if (_printLogs) {
+                GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) (CanPlaceItem() failed)");
+            }
             return false;
         }
         item.X = x;
         item.Y = y;
+        Items.Add(item);
         UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
+        }
+        if (_printLogs) {
+            GD.Print($"Placed item {item.DefinitionID} at ({x}, {y})");
         }
         return true;
     }
@@ -179,6 +203,9 @@ public class Inventory {
         UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
+        }
+        if (_printLogs) {
+            GD.Print($"Took item {item.DefinitionID} at ({x}, {y})");
         }
         return item;
     }
@@ -226,5 +253,24 @@ public class Inventory {
             }
             return _inventory.TakeItem(x, y);
         }
+    }
+
+    public string Stringify() {
+        string str = "";
+        for (int y = 0; y < Height; ++y) {
+            for (int x = 0; x < Width; ++x) {
+                if (!_usableMask[y * Width + x]) {
+                    str += "XX";
+                    continue;
+                }
+                if (_itemMask[y * Width + x] == -1) {
+                    str += "  ";
+                    continue;
+                }
+                str += $"{_itemMask[y * Width + x]:D2}";
+            }
+            str += "\n";
+        }
+        return str;
     }
 }

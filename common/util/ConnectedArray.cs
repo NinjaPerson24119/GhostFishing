@@ -1,5 +1,6 @@
 public static class ConnectedArray {
     // checks if an array defining a space is connected
+    // TODO: this won't guard against splitting the inventory in half
     public static bool IsArrayConnected(int width, int height, bool[] array) {
         for (int x = 0; x < width; x++) {
             for (int y = 0; y < width; y++) {

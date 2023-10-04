@@ -34,7 +34,7 @@ public partial class AssetManager : Node {
     private AssetStore<QuestDefinitionDTO, QuestDefinition> _questDefinitionStore;
     private AssetStore<InventoryDTO, Inventory> _inventoryStore;
 
-    private bool logLoadedDTOs = true;
+    private bool _logLoadedDTOs = true;
 
     public AssetManager() {
         ProcessMode = ProcessModeEnum.Always;
@@ -81,6 +81,10 @@ public partial class AssetManager : Node {
         LoadAssets();
         GD.Print("Asset Manager: Initializing inventories...");
         InitializeInventories();
+        GD.Print("Asset Manager: Done");
+
+        var playerStateView = GetPlayerView(0);
+        GD.Print($"Player Default Inventory:\n{playerStateView.BoatInventory.Stringify()}");
     }
 
     private void LoadAssets() {
@@ -92,7 +96,7 @@ public partial class AssetManager : Node {
         _defaultBoatInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultBoatInventoryPath);
         _defaultQuestInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultQuestInventoryPath);
         _defaultStorageInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultStorageInventoryPath);
-        if (logLoadedDTOs) {
+        if (_logLoadedDTOs) {
             LogDTO("Default boat inventory", _defaultBoatInventoryDTO);
             LogDTO("Default quest inventory", _defaultQuestInventoryDTO);
             LogDTO("Default storage inventory", _defaultStorageInventoryDTO);
@@ -172,7 +176,7 @@ public partial class AssetManager : Node {
         Dictionary<string, DTO>? assetDTOs = LoadAssetFromJSON<Dictionary<string, DTO>>(filePath);
         if (assetDTOs != null) {
             foreach (var kv in assetDTOs) {
-                if (logLoadedDTOs) {
+                if (_logLoadedDTOs) {
                     LogDTO(kv.Key, kv.Value);
                 }
                 store.AddAsset(kv.Key, kv.Value);
