@@ -25,10 +25,6 @@ public partial class InventoryUI : Control {
     private Inventory _inventory = null!;
     private ShaderMaterial _material;
 
-    private List<Control> _layoutControls = new List<Control>();
-    private GridContainer _gridContainer = new GridContainer();
-    private List<Control> _gridControls = new List<Control>();
-
     public InventoryUI() {
         _material = new ShaderMaterial() {
             Shader = GD.Load<Shader>(_tileShaderPath)
@@ -48,10 +44,12 @@ public partial class InventoryUI : Control {
             Material = _material,
         };
 
-        _gridContainer.Columns = _inventory.Width;
-        _gridContainer.CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
-        _gridContainer.AddThemeConstantOverride("h_separation", 0);
-        _gridContainer.AddThemeConstantOverride("v_separation", 0);
+        GridContainer gridContainer = new GridContainer() {
+            Columns = _inventory.Width,
+            CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx)
+        };
+        gridContainer.AddThemeConstantOverride("h_separation", 0);
+        gridContainer.AddThemeConstantOverride("v_separation", 0);
 
         // fit container dimensions
         if (FitContainerToGrid) {
@@ -79,13 +77,11 @@ public partial class InventoryUI : Control {
             Texture = GD.Load<Texture2D>(_containerFrameImagePath),
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
         };
-        _layoutControls.Add(containerFrameImage);
 
         // center grid in container
         CenterContainer center = new CenterContainer() {
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
         };
-        _layoutControls.Add(center);
 
         // add tiles to grid
         for (int x = 0; x < _inventory.Width; x++) {
@@ -100,12 +96,11 @@ public partial class InventoryUI : Control {
                         Size = new Vector2(TileSizePx, TileSizePx),
                     };
                 }
-                _gridControls.Add(control);
-                _gridContainer.AddChild(control);
+                gridContainer.AddChild(control);
             }
         }
 
-        center.AddChild(_gridContainer);
+        center.AddChild(gridContainer);
         containerFrameImage.AddChild(center);
         if (backgroundImage != null) {
             containerBackgroundColor.AddChild(backgroundImage);
