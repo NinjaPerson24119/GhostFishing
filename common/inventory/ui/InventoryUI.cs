@@ -2,6 +2,51 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class InventoryUI : Control {
+    public partial class InventoryTile : Control {
+        public Color TileColor = Colors.Green;
+        public bool Filled {
+            get {
+                return _filled;
+            }
+            set {
+                _filled = value;
+                UpdateShader();
+            }
+        }
+        private bool _filled;
+        public Color BackgroundColor = Colors.Yellow;
+
+        private ShaderMaterial _material = new ShaderMaterial();
+        private string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
+        private string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
+
+        public InventoryTile(Color tileColor, Color backgroundColor, bool filled) {
+            _material.Shader = GD.Load<Shader>(_tileShaderPath);
+            _material.SetShaderParameter("background_color", backgroundColor);
+            _material.SetShaderParameter("outer_color", tileColor);
+
+            TileColor = tileColor;
+            BackgroundColor = backgroundColor;
+            Filled = filled;
+            UpdateShader();
+
+            TextureRect tile = new TextureRect() {
+                Texture = GD.Load<Texture2D>(_tileImagePath),
+                Material = _material,
+            };
+            AddChild(tile);
+        }
+
+        private void UpdateShader() {
+            if (_filled) {
+                _material.SetShaderParameter("inner_color", TileColor);
+            }
+            else {
+                _material.SetShaderParameter("inner_color", BackgroundColor);
+            }
+        }
+    }
+
     [Export]
     public int ContainerWidthPx = 800;
     [Export]
@@ -10,17 +55,15 @@ public partial class InventoryUI : Control {
     [Export]
     public bool FitContainerToGrid = true;
     [Export]
-    public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
-    [Export]
     public int GridMarginPx = 40;
     [Export]
-    public Color TileColor = new Color(0.72f, 0.44f, 0.10f, 0.5f);
+    public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
+    [Export]
+    public Color DefaultTileColor = new Color(0.72f, 0.44f, 0.10f, 0.5f);
     [Export]
     public int TileSizePx = 64;
 
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
-    private string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
-    private string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
 
     // need to position items relative to grid
     private GridContainer _gridContainer = new GridContainer();
@@ -28,27 +71,11 @@ public partial class InventoryUI : Control {
     private List<Control> _tileControls = new List<Control>();
 
     private Inventory _inventory = null!;
-    private ShaderMaterial _material;
-
-    public InventoryUI() {
-        _material = new ShaderMaterial() {
-            Shader = GD.Load<Shader>(_tileShaderPath)
-        };
-        _material.SetShaderParameter("background_color", BackgroundColor);
-        _material.SetShaderParameter("outer_color", TileColor);
-        _material.SetShaderParameter("inner_color", BackgroundColor);
-    }
 
     public override void _Ready() {
         // get inventory from player
         PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
         _inventory = player.BoatInventory;
-
-        // define a tile we can duplicate
-        TextureRect tile = new TextureRect() {
-            Texture = GD.Load<Texture2D>(_tileImagePath),
-            Material = _material,
-        };
 
         _gridContainer.Columns = _inventory.Width;
         _gridContainer.CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
@@ -88,19 +115,30 @@ public partial class InventoryUI : Control {
         };
 
         // add tiles to grid
-        for (int x = 0; x < _inventory.Width; x++) {
-            for (int y = 0; y < _inventory.Height; y++) {
+        for (int y = 0; y < _inventory.Height; y++) {
+            for (int x = 0; x < _inventory.Width; x++) {
                 Control control;
                 if (_inventory.SpaceUsable(x, y)) {
-                    control = (Control)tile.Duplicate();
+                    bool spaceFilled = _inventory.SpaceFilled(x, y);
+                    Color color = DefaultTileColor;
+                    // get the item's background color if it has one
+                    if (spaceFilled) {
+                        InventoryItemInstance? item = _inventory.ItemAt(x, y);
+                        if (item == null) {
+                            throw new System.Exception("InventoryUI: item is null but space is filled");
+                        }
+                        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+                        color = itemDef.BackgroundColorOverride ?? DefaultTileColor;
+                    }
+                    InventoryTile tile = new InventoryTile(color, BackgroundColor, spaceFilled);
+                    control = tile;
                 }
                 else {
                     // use empty Control as spacer
-                    control = new Control() {
-                        Size = new Vector2(TileSizePx, TileSizePx),
-                        CustomMinimumSize = new Vector2(TileSizePx, TileSizePx),
-                    };
+                    control = new Control();
                 }
+                control.Size = new Vector2(TileSizePx, TileSizePx);
+                control.CustomMinimumSize = new Vector2(TileSizePx, TileSizePx);
                 _gridContainer.AddChild(control);
                 _tileControls.Add(control);
             }

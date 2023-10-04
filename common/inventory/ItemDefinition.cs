@@ -1,4 +1,5 @@
 using System;
+using Godot;
 
 public class InventoryItemDefinitionDTO : IGameAssetDTO {
     public string? Name { get; set; }
@@ -63,7 +64,7 @@ public class InventoryItemDefinition {
     public InventoryItemSpaceProperties Space { get; set; }
     public InventoryItemFlags Flags { get; set; }
     public string CategoryID { get; set; }
-    public string? BackgroundColorOverride { get; set; }
+    public Color? BackgroundColorOverride { get; set; }
 
     public InventoryItemDefinition(InventoryItemDefinitionDTO dto) {
         if (!dto.IsValid()) {
@@ -77,7 +78,12 @@ public class InventoryItemDefinition {
         Space = new InventoryItemSpaceProperties(dto.Space!);
         Flags = new InventoryItemFlags(dto.Flags!);
         CategoryID = dto.CategoryID!;
-        BackgroundColorOverride = dto.BackgroundColorOverride;
+        if (dto.BackgroundColorOverride == null) {
+            BackgroundColorOverride = null;
+        }
+        else {
+            BackgroundColorOverride = new Color(dto.BackgroundColorOverride);
+        }
     }
 }
 
