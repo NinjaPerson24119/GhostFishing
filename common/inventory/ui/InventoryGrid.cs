@@ -33,6 +33,8 @@ public partial class InventoryGrid : GridContainer {
         private string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
 
         public InventoryTile(Color tileColor, Color backgroundColor, bool filled) {
+            FocusMode = FocusModeEnum.All;
+
             _material.Shader = GD.Load<Shader>(_tileShaderPath);
             _material.SetShaderParameter("background_color", backgroundColor);
             _material.SetShaderParameter("outer_color", tileColor);
@@ -46,12 +48,28 @@ public partial class InventoryGrid : GridContainer {
             Material = _material;
         }
 
+        public override void _Notification(int what) {
+            switch (what) {
+                case (int)NotificationFocusEnter:
+                    Hovered = true;
+                    break;
+
+                case (int)NotificationFocusExit:
+                    Hovered = false;
+                    break;
+            }
+        }
+
         private void UpdateShader() {
             if (Hovered) {
                 _material.SetShaderParameter("outer_color", _HoverOuterColor);
                 _material.SetShaderParameter("inner_color", _HoverInnerColor);
                 return;
             }
+            else {
+                _material.SetShaderParameter("outer_color", TileColor);
+            }
+
             if (Filled) {
                 _material.SetShaderParameter("inner_color", TileColor);
             }
