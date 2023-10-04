@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class InventoryLayout : Control {
+public partial class InventoryFrame : Control {
     [Export]
     public int ContainerWidthPx = 800;
     [Export]
