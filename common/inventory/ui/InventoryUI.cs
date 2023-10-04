@@ -48,7 +48,7 @@ public partial class InventoryUI : Control {
         };
 
         _gridContainer.Columns = _inventory.Width;
-        _gridContainer.Size = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
+        _gridContainer.CustomMinimumSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
         _gridContainer.AddThemeConstantOverride("h_separation", 0);
         _gridContainer.AddThemeConstantOverride("v_separation", 0);
         // minimum size must be set for empty Controls to act as spacers
@@ -82,6 +82,12 @@ public partial class InventoryUI : Control {
         };
         _layoutControls.Add(containerFrameImage);
 
+        // add second layer after background image so it can't appear through grid
+        ColorRect containerBackgroundColorInner = new ColorRect() {
+            Color = BackgroundColor,
+            CustomMinimumSize = _gridContainer.CustomMinimumSize,
+        };
+
         // center grid in container
         CenterContainer center = new CenterContainer() {
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
@@ -97,34 +103,22 @@ public partial class InventoryUI : Control {
                 }
                 else {
                     // use empty Control as spacer
-                    control = new Control();
-                    control.Size = new Vector2(TileSizePx, TileSizePx);
+                    control = new Control() {
+                        Size = new Vector2(TileSizePx, TileSizePx),
+                    };
                 }
                 _gridControls.Add(control);
                 _gridContainer.AddChild(control);
             }
         }
 
-        // structure layout
-        List<Control?> layoutStack = new List<Control?> {
-            containerBackgroundColor,
-            backgroundImage,
-            containerFrameImage,
-            center,
-            _gridContainer,
-        };
-        if (layoutStack.Count == 0) {
-            return;
+        center.AddChild(containerBackgroundColorInner);
+        center.AddChild(_gridContainer);
+        containerFrameImage.AddChild(center);
+        if (backgroundImage != null) {
+            containerBackgroundColor.AddChild(backgroundImage);
         }
-        for (int i = 0; i < layoutStack.Count - 1; i++) {
-            if (layoutStack[i] != null) {
-                Control control = layoutStack[i]!;
-                while (layoutStack[i + 1] == null) {
-                    i++;
-                }
-                control.AddChild(layoutStack[i + 1]);
-            }
-        }
+        containerBackgroundColor.AddChild(containerFrameImage);
         AddChild(containerBackgroundColor);
     }
 }

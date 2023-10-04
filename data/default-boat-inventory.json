@@ -9,6 +9,7 @@
             "Rotation": 1
         }
     ],
+    "BackgroundImagePath": "res://artwork/generated/ui/BoatInventoryBackground.png",
     "UsableMask": [
         false,
         false,
