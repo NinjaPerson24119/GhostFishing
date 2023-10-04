@@ -129,5 +129,42 @@ public partial class InventoryGrid : GridContainer {
                 _tileControls.Add(control);
             }
         }
+
+        // assign tile neighbors
+        // the default grid assignments don't work because we have empty controls
+        for (int y = 0; y < _inventory.Height; y++) {
+            for (int x = 0; x < _inventory.Width; x++) {
+                int index = y * _inventory.Width + x;
+                Control control = _tileControls[index];
+                if (control is InventoryTile tile) {
+                    // top
+                    int neighborIdx = (y - 1) * _inventory.Width + x;
+                    tile.FocusNeighborTop = GetTileNodePath(neighborIdx);
+
+                    // bottom
+                    neighborIdx = (y + 1) * _inventory.Width + x;
+                    tile.FocusNeighborBottom = GetTileNodePath(neighborIdx);
+
+                    // left
+                    neighborIdx = y * _inventory.Width + (x - 1);
+                    tile.FocusNeighborLeft = GetTileNodePath(neighborIdx);
+
+                    // right
+                    neighborIdx = y * _inventory.Width + (x + 1);
+                    tile.FocusNeighborRight = GetTileNodePath(neighborIdx);
+                }
+            }
+        }
+    }
+
+    private NodePath? GetTileNodePath(int idx) {
+        if (idx < 0 || idx >= _tileControls.Count) {
+            return null;
+        }
+        Control control = _tileControls[idx];
+        if (control is InventoryTile tile) {
+            return tile.GetPath();
+        }
+        return null;
     }
 }
