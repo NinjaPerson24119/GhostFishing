@@ -1,2 +1,5 @@
 # Godot 4+ specific ignores
 .godot/
+
+# Artwork can be generated after clone
+artwork/generated/

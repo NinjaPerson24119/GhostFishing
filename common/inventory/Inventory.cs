@@ -166,6 +166,13 @@ public class Inventory {
         _itemMask = newItemMask;
     }
 
+    public bool SpaceUsable(int x, int y) {
+        if (x < 0 || y < 0 || x >= Width || y >= Height) {
+            return false;
+        }
+        return _usableMask[y * Width + x];
+    }
+
     public InventoryItemInstance? ItemAt(int x, int y) {
         int index = _itemMask[y * Width + x];
         if (index == -1) {

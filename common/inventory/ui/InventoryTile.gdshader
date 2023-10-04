@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-uniform vec3 color : hint_color;
+uniform vec3 color : source_color;
 
 void fragment() {
     if (texture(TEXTURE, UV).a > 0.0) {
