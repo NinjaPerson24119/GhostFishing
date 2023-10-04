@@ -4,6 +4,7 @@ public partial class PlayerMenu : Menu {
     private InventoryFrame _inventoryFrame = null!;
     private InventoryItemTransport _itemTransport = new InventoryItemTransport();
     private Inventory _boatInventory = null!;
+    private InventoryFrame _boatInventoryFrame = null!;
 
     public override void _Ready() {
         base._Ready();
@@ -11,9 +12,9 @@ public partial class PlayerMenu : Menu {
 
         PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
         _boatInventory = player.BoatInventory;
-        InventoryFrame boatInventoryFrame = new InventoryFrame();
-        boatInventoryFrame.SetInventory(_boatInventory);
-        AddChild(boatInventoryFrame);
+        _boatInventoryFrame = new InventoryFrame();
+        _boatInventoryFrame.SetInventory(_boatInventory);
+        AddChild(_boatInventoryFrame);
     }
 
     public override void Open() {
@@ -23,6 +24,7 @@ public partial class PlayerMenu : Menu {
 
     public void OpenInventory() {
         _itemTransport.OpenInventory(_boatInventory);
+        _boatInventoryFrame.Focus();
         GD.Print("Opened inventory.");
     }
 

@@ -17,8 +17,8 @@ public partial class InventoryFrame : Control {
     public int TileSizePx = 64;
     [Export]
     public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
-    private Inventory? _inventory = null!;
-    private InventoryGrid _inventoryGrid = null!;
+    private Inventory? _inventory;
+    private InventoryGrid? _inventoryGrid;
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
     public override void _Ready() {
@@ -96,5 +96,12 @@ public partial class InventoryFrame : Control {
             RemoveChild(child);
             child.QueueFree();
         }
+    }
+
+    public void Focus() {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot focus because inventory grid is null.");
+        }
+        _inventoryGrid.FocusFirstTile();
     }
 }

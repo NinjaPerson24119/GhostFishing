@@ -12,6 +12,9 @@ public partial class InventoryGrid : GridContainer {
             }
             set {
                 _hovered = value;
+                if (value) {
+                    EmitSignal(SignalName.Focused, _position);
+                }
                 UpdateShader();
             }
         }
@@ -29,11 +32,18 @@ public partial class InventoryGrid : GridContainer {
         public Color BackgroundColor = Colors.Yellow;
 
         private ShaderMaterial _material = new ShaderMaterial();
-        private string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
-        private string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
+        private Vector2I _position;
 
-        public InventoryTile(Color tileColor, Color backgroundColor, bool filled) {
+        private const string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
+        private const string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
+
+        [Signal]
+        public delegate void FocusedEventHandler(Vector2I position);
+
+        public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool filled) {
             FocusMode = FocusModeEnum.All;
+
+            _position = position;
 
             _material.Shader = GD.Load<Shader>(_tileShaderPath);
             _material.SetShaderParameter("background_color", backgroundColor);
@@ -83,9 +93,8 @@ public partial class InventoryGrid : GridContainer {
     private int _tileSizePx = 64;
     private Color _defaultTileColor;
     private Color _backgroundColor;
-
-    // need to change tile colors
     private List<Control> _tileControls = new List<Control>();
+    private Vector2I _focusedTilePosition = new Vector2I(-1, -1);
 
     public InventoryGrid(Inventory inventory, int tileSizePx, Color defaultTileColor, Color backgroundColor) {
         _inventory = inventory;
@@ -116,7 +125,9 @@ public partial class InventoryGrid : GridContainer {
                         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
                         color = itemDef.BackgroundColorOverride ?? _defaultTileColor;
                     }
-                    InventoryTile tile = new InventoryTile(color, _backgroundColor, spaceFilled);
+                    Vector2I position = new Vector2I(x, y);
+                    InventoryTile tile = new InventoryTile(position, color, _backgroundColor, spaceFilled);
+                    tile.Focused += OnTileFocused;
                     control = tile;
                 }
                 else {
@@ -166,5 +177,25 @@ public partial class InventoryGrid : GridContainer {
             return tile.GetPath();
         }
         return null;
+    }
+
+    private void OnTileFocused(Vector2I position) {
+        _focusedTilePosition = position;
+        GD.Print($"Focused tile at {position}");
+    }
+
+    public void FocusFirstTile() {
+        int i = 0;
+        while (i < _tileControls.Count) {
+            Control control = _tileControls[i];
+            if (control is InventoryTile tile) {
+                tile.GrabFocus();
+                return;
+            }
+            i++;
+        }
+        if (i == _tileControls.Count) {
+            throw new System.Exception("Failed to focus first tile because no tiles were found.");
+        }
     }
 }
