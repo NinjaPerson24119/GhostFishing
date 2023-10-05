@@ -69,14 +69,16 @@ public class Inventory {
     // indicate spaces that are usable (shape might not be a perfect rectangle)
     private bool[] _usableMask;
     // spaces that are currently occupied
-    // each space contains the index of the item occupying it or UnusedSpacePlaceholder
+    // each space contains the index of the item occupying it or UNUSED_SPACE_PLACEHOLDER
     private int[] _itemMask;
     // TODO: Complete() and add masks for specific categories and item UUIDs
     // _locked is used to prevent creating multiple mutators at once
     private bool _locked;
     private bool _printLogs = true;
 
-    private const int UnusedSpacePlaceholder = -1;
+    private const int UNUSED_SPACE_PLACEHOLDER = -1;
+
+
 
     public Inventory(InventoryDTO dto) {
         if (!dto.IsValid()) {
@@ -92,7 +94,7 @@ public class Inventory {
         else {
             _usableMask = dto.UsableMask;
         }
-        _itemMask = Enumerable.Repeat(UnusedSpacePlaceholder, Width * Height).ToArray();
+        _itemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
 
         Items = new List<InventoryItemInstance>();
         if (dto.Items != null) {
@@ -112,7 +114,7 @@ public class Inventory {
         Width = width;
         Height = height;
         _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
-        _itemMask = Enumerable.Repeat(UnusedSpacePlaceholder, Width * Height).ToArray();
+        _itemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
         Items = new List<InventoryItemInstance>();
     }
 
@@ -136,7 +138,7 @@ public class Inventory {
                     }
                     return false;
                 }
-                if (_itemMask[indexConsidered] != UnusedSpacePlaceholder) {
+                if (_itemMask[indexConsidered] != UNUSED_SPACE_PLACEHOLDER) {
                     if (_printLogs) {
                         GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to occupied space");
                     }
@@ -148,7 +150,7 @@ public class Inventory {
     }
 
     public void UpdateItemMask() {
-        int[] newItemMask = Enumerable.Repeat(UnusedSpacePlaceholder, Width * Height).ToArray();
+        int[] newItemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
         for (int idx = 0; idx < Items.Count; idx++) {
             InventoryItemDefinition itemDef;
             itemDef = AssetManager.Ref().GetInventoryItemDefinition(Items[idx].DefinitionID);
@@ -160,7 +162,7 @@ public class Inventory {
                     }
                     int indexConsidered = (Items[idx].Y + j) * Width + (Items[idx].X + i);
                     DebugTools.Assert(_usableMask[indexConsidered]);
-                    DebugTools.Assert(newItemMask[indexConsidered] == UnusedSpacePlaceholder);
+                    DebugTools.Assert(newItemMask[indexConsidered] == UNUSED_SPACE_PLACEHOLDER);
                     newItemMask[indexConsidered] = idx;
                 }
             }
@@ -169,7 +171,7 @@ public class Inventory {
     }
 
     public bool SpaceFilled(int x, int y) {
-        return _itemMask[y * Width + x] != UnusedSpacePlaceholder;
+        return _itemMask[y * Width + x] != UNUSED_SPACE_PLACEHOLDER;
     }
 
     public bool SpaceUsable(int x, int y) {
@@ -181,7 +183,7 @@ public class Inventory {
 
     public InventoryItemInstance? ItemAt(int x, int y) {
         int index = _itemMask[y * Width + x];
-        if (index == UnusedSpacePlaceholder) {
+        if (index == UNUSED_SPACE_PLACEHOLDER) {
             return null;
         }
         return Items[index];
@@ -278,7 +280,7 @@ public class Inventory {
                     str += "XX";
                     continue;
                 }
-                if (_itemMask[y * Width + x] == UnusedSpacePlaceholder) {
+                if (_itemMask[y * Width + x] == UNUSED_SPACE_PLACEHOLDER) {
                     str += "  ";
                     continue;
                 }

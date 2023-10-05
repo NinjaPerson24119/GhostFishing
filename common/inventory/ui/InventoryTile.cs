@@ -4,29 +4,29 @@ public partial class InventoryTile : TextureRect {
     private static Color _HoverOuterColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
     private static Color _HoverInnerColor = new Color(0.8f, 0.8f, 0.8f, 1.8f);
     private Color TileColor = Colors.Green;
-    private bool Hovered {
+    private bool isHovered {
         get {
-            return _hovered;
+            return _isHovered;
         }
         set {
-            _hovered = value;
+            _isHovered = value;
             if (value) {
                 EmitSignal(SignalName.Focused, _position);
             }
             UpdateShader();
         }
     }
-    private bool _hovered;
-    private bool Filled {
+    private bool _isHovered;
+    private bool isFilled {
         get {
-            return _filled;
+            return _isFilled;
         }
         set {
-            _filled = value;
+            _isFilled = value;
             UpdateShader();
         }
     }
-    private bool _filled;
+    private bool _isFilled;
     private Color BackgroundColor = Colors.Yellow;
 
     private ShaderMaterial _material = new ShaderMaterial();
@@ -41,7 +41,7 @@ public partial class InventoryTile : TextureRect {
     [Signal]
     public delegate void GlobalPositionChangedEventHandler(Vector2 globalPosition);
 
-    public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool filled) {
+    public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool isFilled) {
         FocusMode = FocusModeEnum.All;
 
         _position = position;
@@ -52,7 +52,7 @@ public partial class InventoryTile : TextureRect {
 
         TileColor = tileColor;
         BackgroundColor = backgroundColor;
-        Filled = filled;
+        this.isFilled = isFilled;
         UpdateShader();
 
         Texture = GD.Load<Texture2D>(_tileImagePath);
@@ -70,16 +70,16 @@ public partial class InventoryTile : TextureRect {
     public override void _Notification(int what) {
         switch (what) {
             case (int)NotificationFocusEnter:
-                Hovered = true;
+                isHovered = true;
                 break;
             case (int)NotificationFocusExit:
-                Hovered = false;
+                isHovered = false;
                 break;
         }
     }
 
     private void UpdateShader() {
-        if (Hovered) {
+        if (isHovered) {
             _material.SetShaderParameter("outer_color", _HoverOuterColor);
             _material.SetShaderParameter("inner_color", _HoverInnerColor);
             return;
@@ -88,7 +88,7 @@ public partial class InventoryTile : TextureRect {
             _material.SetShaderParameter("outer_color", TileColor);
         }
 
-        if (Filled) {
+        if (isFilled) {
             _material.SetShaderParameter("inner_color", TileColor);
         }
         else {
