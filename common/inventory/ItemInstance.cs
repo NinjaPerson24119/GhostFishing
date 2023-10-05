@@ -2,11 +2,11 @@ using System;
 using Godot;
 
 public class InventoryItemInstanceDTO : IGameAssetDTO {
+    public string? InstanceID { get; set; }
     public string? DefinitionID { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
     public InventoryItemRotation Rotation { get; set; }
-    public InventoryItemInstanceQuestDetailsDTO? QuestDetails { get; set; }
     public InventoryItemFlagsDTO? FlagOverrides { get; set; }
 
     public bool IsValid() {
@@ -16,20 +16,13 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
         if (X < 0 || Y < 0) {
             return false;
         }
-        if (QuestDetails != null) {
-            if (!QuestDetails.IsValid()) {
-                return false;
-            }
-        }
         return true;
     }
 
     public string Stringify() {
-        string str = $"DefinitionID: {DefinitionID}\n";
+        string str = $"InstanceID: {InstanceID}\n";
+        str += $"DefinitionID: {DefinitionID}\n";
         str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";
-        if (QuestDetails != null) {
-            str += $"QuestDetails (object):\n{QuestDetails.Stringify()}\n";
-        }
         if (FlagOverrides != null) {
             str += $"FlagOverrides (object):\n{FlagOverrides.Stringify()}\n";
         }
@@ -38,6 +31,7 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
 }
 
 public class InventoryItemInstance {
+    public string InstanceID { get; set; }
     public string DefinitionID { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
@@ -47,20 +41,22 @@ public class InventoryItemInstance {
             return Mathf.Pi / 2 * (int)Rotation;
         }
     }
-    public InventoryItemInstanceQuestDetails? QuestDetails { get; set; }
     public InventoryItemFlags? FlagOverrides { get; set; }
 
     public InventoryItemInstance(InventoryItemInstanceDTO dto) {
         if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemInstanceDTO");
         }
+        if (string.IsNullOrEmpty(dto.InstanceID)) {
+            InstanceID = AssetIDUtil.GenerateInventoryItemInstanceID();
+        }
+        else {
+            InstanceID = dto.InstanceID;
+        }
         DefinitionID = dto.DefinitionID!;
         X = dto.X;
         Y = dto.Y;
         Rotation = dto.Rotation;
-        if (dto.QuestDetails != null) {
-            QuestDetails = new InventoryItemInstanceQuestDetails(dto.QuestDetails);
-        }
         if (dto.FlagOverrides != null) {
             FlagOverrides = new InventoryItemFlags(dto.FlagOverrides);
         }

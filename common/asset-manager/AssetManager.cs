@@ -41,22 +41,22 @@ public partial class AssetManager : Node {
 
         _inventoryItemCategoryStore = new AssetStore<InventoryItemCategoryDTO, InventoryItemCategory>(
             (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
-            AssetIDValidator.IsInventoryItemCategoryID,
+            AssetIDUtil.IsInventoryItemCategoryID,
             null
         );
         _questDefinitionStore = new AssetStore<QuestDefinitionDTO, QuestDefinition>(
             (QuestDefinitionDTO dto) => new QuestDefinition(dto),
-            AssetIDValidator.IsQuestID,
+            AssetIDUtil.IsQuestID,
             null
         );
         _inventoryItemDefinitionStore = new AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition>(
             (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
-            AssetIDValidator.IsInventoryItemDefinitionID,
+            AssetIDUtil.IsInventoryItemDefinitionID,
             (InventoryItemDefinition itemDefinition) => AreItemDefinitionsDepsSatisfied(itemDefinition)
         );
         _inventoryStore = new AssetStore<InventoryDTO, Inventory>(
             (InventoryDTO dto) => new Inventory(dto),
-            AssetIDValidator.IsInventoryID,
+            AssetIDUtil.IsInventoryID,
             (Inventory inventory) => AreInventoryDepsSatisfied(inventory)
         );
 
