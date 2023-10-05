@@ -12,8 +12,7 @@ public partial class PlayerMenu : Menu {
 
         PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
         _boatInventory = player.BoatInventory;
-        _boatInventoryFrame = new InventoryFrame();
-        _boatInventoryFrame.SetInventory(_boatInventory);
+        _boatInventoryFrame = new InventoryFrame(_boatInventory);
         AddChild(_boatInventoryFrame);
     }
 

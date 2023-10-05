@@ -1,12 +1,5 @@
 using System;
 
-public enum InventoryItemRotation {
-    None = 0,
-    Clockwise90 = 1,
-    Clockwise180 = 2,
-    Clockwise270 = 3,
-}
-
 public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     public int Width { get; set; }
     public int Height { get; set; }

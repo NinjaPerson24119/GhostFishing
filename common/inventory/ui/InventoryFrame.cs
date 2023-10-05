@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class InventoryFrame : Control {
     [Export]
@@ -17,30 +18,47 @@ public partial class InventoryFrame : Control {
     public int TileSizePx = 64;
     [Export]
     public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
+
     private Inventory? _inventory;
     private InventoryGrid? _inventoryGrid;
+    private List<TextureRect> _itemControls = new List<TextureRect>();
+
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
-    public override void _Ready() {
-        if (_inventory != null) {
-            RespawnChildren();
-        }
-    }
-
-    public void SetInventory(Inventory inventory) {
+    public InventoryFrame(Inventory inventory) {
         _inventory = inventory;
-        RespawnChildren();
     }
 
-    public void OnInventoryChanged() {
-        RespawnChildren();
+    public override void _Ready() {
+        SpawnFrame();
     }
 
     public void RespawnChildren() {
+        FreeChildren();
+        SpawnFrame();
+    }
+
+    private void FreeChildren() {
+        foreach (Node child in GetChildren()) {
+            RemoveChild(child);
+            child.QueueFree();
+        }
+    }
+
+    public void Focus() {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot focus because inventory grid is null.");
+        }
+        _inventoryGrid.FocusFirstTile();
+    }
+
+    public void SpawnFrame() {
+        if (GetChildCount() > 0) {
+            throw new Exception("Cannot spawn children because there are already children.");
+        }
         if (_inventory == null) {
             throw new Exception("Cannot spawn children because inventory is null.");
         }
-        FreeChildren();
 
         // create grid
         _inventoryGrid = new InventoryGrid(
@@ -49,6 +67,7 @@ public partial class InventoryFrame : Control {
             defaultTileColor: DefaultTileColor,
             backgroundColor: BackgroundColor
         );
+        _inventoryGrid.Initialized += SpawnGridDependents;
 
         // fit container dimensions
         if (FitContainerToGrid) {
@@ -88,20 +107,43 @@ public partial class InventoryFrame : Control {
             containerBackgroundColor.AddChild(backgroundImage);
         }
         containerBackgroundColor.AddChild(containerFrameImage);
-        AddChild(containerBackgroundColor);
+        CallDeferred("add_child", containerBackgroundColor);
     }
 
-    private void FreeChildren() {
-        foreach (Node child in GetChildren()) {
-            RemoveChild(child);
-            child.QueueFree();
+    public void SpawnGridDependents() {
+        SpawnItems();
+    }
+
+    public void SpawnItems() {
+        if (_inventory == null) {
+            throw new Exception("Cannot add items because inventory is null.");
         }
-    }
-
-    public void Focus() {
         if (_inventoryGrid == null) {
-            throw new Exception("Cannot focus because inventory grid is null.");
+            throw new Exception("Cannot add items because inventory grid is null.");
         }
-        _inventoryGrid.FocusFirstTile();
+        if (_inventoryGrid.IsInitialized == false) {
+            throw new Exception("Cannot add items because inventory grid is not initialized.");
+        }
+
+        // add items to grid
+        foreach (InventoryItemInstance item in _inventory.Items) {
+            InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+
+            float width = TileSizePx * itemDef.Space.Width;
+            float height = TileSizePx * itemDef.Space.Height;
+            Vector2 tileGlobalPosition = _inventoryGrid.GetTileGlobalPosition(new Vector2I(item.X, item.Y));
+            GD.Print($"InventoryFrame: adding item at {tileGlobalPosition} ({width}x{height})");
+
+            TextureRect textureRect = new TextureRect() {
+                Texture = GD.Load<Texture2D>(itemDef.ImagePath),
+                GlobalPosition = tileGlobalPosition,
+                Size = new Vector2(width, height),
+                Rotation = item.RotationRadians,
+            };
+            textureRect.PivotOffset = textureRect.Size / 2;
+            _itemControls.Add(textureRect);
+            CallDeferred("add_child", textureRect);
+        }
+        GD.Print("InventoryFrame: added items");
     }
 }

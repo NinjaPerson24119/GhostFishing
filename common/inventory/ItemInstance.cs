@@ -1,4 +1,5 @@
 using System;
+using Godot;
 
 public class InventoryItemInstanceDTO : IGameAssetDTO {
     public string? DefinitionID { get; set; }
@@ -41,6 +42,11 @@ public class InventoryItemInstance {
     public int X { get; set; }
     public int Y { get; set; }
     public InventoryItemRotation Rotation { get; set; }
+    public float RotationRadians {
+        get {
+            return Mathf.Pi / 2 * (int)Rotation;
+        }
+    }
     public InventoryItemInstanceQuestDetails? QuestDetails { get; set; }
     public InventoryItemFlags? FlagOverrides { get; set; }
 
@@ -58,5 +64,13 @@ public class InventoryItemInstance {
         if (dto.FlagOverrides != null) {
             FlagOverrides = new InventoryItemFlags(dto.FlagOverrides);
         }
+    }
+
+    public void RotateClockwise() {
+        Rotation = (InventoryItemRotation)(((int)Rotation + 1) % 4);
+    }
+
+    public void RotateCounterClockwise() {
+        Rotation = (InventoryItemRotation)(((int)Rotation + 3) % 4);
     }
 }

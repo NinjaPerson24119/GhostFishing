@@ -284,7 +284,7 @@ public partial class Ocean : Node3D {
                     waterTile.Position = new Vector3(waterTile.Position.X, waterTile.Position.Y + _distantTileHeightOffset, waterTile.Position.Z);
                     waterTile.NoDisplacement = true;
                 }
-                AddChild(waterTile);
+                CallDeferred("add_child", waterTile);
             }
         }
         GD.Print("All water tiles spawned");

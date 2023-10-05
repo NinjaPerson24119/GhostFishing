@@ -94,4 +94,18 @@ public class InventoryItemTransport {
         mutator.PlaceItem(_item, _lastTake.X, _lastTake.Y);
         _lastTake = null;
     }
+
+    public void RotateClockwise() {
+        if (_item == null) {
+            throw new Exception("Cannot rotate because item is null.");
+        }
+        _item.RotateClockwise();
+    }
+
+    public void RotateCounterClockwise() {
+        if (_item == null) {
+            throw new Exception("Cannot rotate because item is null.");
+        }
+        _item.RotateCounterClockwise();
+    }
 }

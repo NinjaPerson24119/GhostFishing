@@ -42,6 +42,8 @@ public partial class InventoryGrid : GridContainer {
 
         public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool filled) {
             FocusMode = FocusModeEnum.All;
+            SetNotifyTransform(true);
+            SetNotifyLocalTransform(true);
 
             _position = position;
 
@@ -56,6 +58,12 @@ public partial class InventoryGrid : GridContainer {
 
             Texture = GD.Load<Texture2D>(_tileImagePath);
             Material = _material;
+
+            ItemRectChanged += OnItemRectChanged;
+        }
+
+        public void OnItemRectChanged() {
+            GD.Print($"ItemRectChanged: {GlobalPosition}, {Position}");
         }
 
         public override void _Notification(int what) {
@@ -66,6 +74,12 @@ public partial class InventoryGrid : GridContainer {
 
                 case (int)NotificationFocusExit:
                     Hovered = false;
+                    break;
+                case (int)NotificationTransformChanged:
+                    GD.Print($"Notify: {GlobalPosition}, {Position}");
+                    break;
+                case (int)NotificationLocalTransformChanged:
+                    GD.Print($"Notify local: {GlobalPosition}, {Position}");
                     break;
             }
         }
@@ -95,6 +109,22 @@ public partial class InventoryGrid : GridContainer {
     private Color _backgroundColor;
     private List<Control> _tileControls = new List<Control>();
     private Vector2I _focusedTilePosition = new Vector2I(-1, -1);
+    public bool IsInitialized {
+        get {
+            return _isInitialized;
+        }
+        set {
+            _isInitialized = value;
+            if (value) {
+                EmitSignal(SignalName.Initialized);
+                GD.Print($"InventoryGrid: initialized ({value})");
+            }
+        }
+    }
+    private bool _isInitialized = false;
+
+    [Signal]
+    public delegate void InitializedEventHandler();
 
     public InventoryGrid(Inventory inventory, int tileSizePx, Color defaultTileColor, Color backgroundColor) {
         _inventory = inventory;
@@ -166,6 +196,8 @@ public partial class InventoryGrid : GridContainer {
                 }
             }
         }
+
+        IsInitialized = true;
     }
 
     private NodePath? GetTileNodePath(int idx) {
@@ -177,6 +209,19 @@ public partial class InventoryGrid : GridContainer {
             return tile.GetPath();
         }
         return null;
+    }
+
+    public Vector2 GetTileGlobalPosition(Vector2I position) {
+        int idx = position.Y * _inventory.Width + position.X;
+        if (idx < 0 || idx >= _tileControls.Count) {
+            throw new System.Exception($"InventoryGrid: invalid tile position {position}. There are {_tileControls.Count} tiles.");
+        }
+        Control control = _tileControls[idx];
+        if (!(control is InventoryTile)) {
+            throw new System.Exception($"InventoryGrid: got global position for non-tile at {position}");
+        }
+        GD.Print($"InventoryGrid: got global position for tile at {position}, {_tileControls[idx].GlobalPosition}");
+        return _tileControls[idx].GlobalPosition;
     }
 
     private void OnTileFocused(Vector2I position) {
