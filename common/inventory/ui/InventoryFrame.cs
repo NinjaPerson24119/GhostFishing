@@ -126,34 +126,69 @@ public partial class InventoryFrame : Control {
         if (_inventory == null) {
             throw new Exception("Cannot add items because inventory is null.");
         }
-        if (_inventoryGrid == null) {
-            throw new Exception("Cannot add items because inventory grid is null.");
-        }
-        if (_inventoryGrid.IsInitialized == false) {
-            throw new Exception("Cannot add items because inventory grid is not initialized.");
-        }
+
 
         // add items to grid
         foreach (InventoryItemInstance item in _inventory.Items) {
-            InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
-
-            float width = TileSizePx * itemDef.Space.Width;
-            float height = TileSizePx * itemDef.Space.Height;
-            InventoryItemControl itemControl = new InventoryItemControl() {
-                Texture = GD.Load<Texture2D>(itemDef.ImagePath),
-                Size = new Vector2(width, height),
-                Rotation = item.RotationRadians,
-            };
-            itemControl.PivotOffset = itemControl.Size / 2;
-            _itemControls.Add(itemControl);
-            InventoryTile tile = _inventoryGrid.GetTile(new Vector2I(item.X, item.Y));
-            tile.GlobalPositionChanged += itemControl.OnInventoryTileGlobalPositionChanged;
+            InventoryItemControl itemControl = BuildItemControl(item);
             CallDeferred("add_child", itemControl);
         }
         GD.Print("InventoryFrame: added items");
     }
 
-    public void OnInventoryUpdated(Inventory.UpdateType updateType, int itemIdx) {
+    public InventoryItemControl BuildItemControl(InventoryItemInstance item) {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot build item control because inventory grid is null.");
+        }
+        if (_inventoryGrid.IsInitialized == false) {
+            throw new Exception("Cannot build item control because inventory grid is not initialized.");
+        }
+
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+
+        float width = TileSizePx * itemDef.Space.Width;
+        float height = TileSizePx * itemDef.Space.Height;
+        InventoryItemControl itemControl = new InventoryItemControl(item.InstanceID) {
+            Texture = GD.Load<Texture2D>(itemDef.ImagePath),
+            Size = new Vector2(width, height),
+            Rotation = item.RotationRadians,
+        };
+        itemControl.PivotOffset = itemControl.Size / 2;
+        _itemControls.Add(itemControl);
+        InventoryTile tile = _inventoryGrid.GetTile(new Vector2I(item.X, item.Y));
+        tile.GlobalPositionChanged += itemControl.OnInventoryTileGlobalPositionChanged;
+
+        return itemControl;
+    }
+
+    public void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
+        if (_inventory == null) {
+            throw new Exception("Cannot update inventory because inventory is null.");
+        }
+
+        switch (updateType) {
+            case Inventory.UpdateType.Place:
+                InventoryItemInstance? item = _inventory.GetItemByID(itemInstanceID);
+                if (item == null) {
+                    throw new Exception("Inventory emitted place update with item instance ID that doesn't exist.");
+                }
+                InventoryItemControl itemControl = BuildItemControl(item);
+                _itemControls.Add(itemControl);
+                break;
+            case Inventory.UpdateType.Take:
+                InventoryItemControl? itemControlToRemove = null;
+                foreach (InventoryItemControl itemControlToCheck in _itemControls) {
+                    if (itemControlToCheck.InventoryItemInstanceID == itemInstanceID) {
+                        itemControlToRemove = itemControlToCheck;
+                        break;
+                    }
+                }
+                if (itemControlToRemove == null) {
+                    throw new Exception("Inventory emitted take update with item instance ID that doesn't exist.");
+                }
+                _itemControls.Remove(itemControlToRemove);
+                break;
+        }
         GD.Print("Inventory updated");
     }
 }

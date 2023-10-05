@@ -215,6 +215,15 @@ public partial class Inventory : Node {
         return true;
     }
 
+    public InventoryItemInstance? GetItemByID(string itemInstanceID) {
+        foreach (InventoryItemInstance item in Items) {
+            if (item.InstanceID == itemInstanceID) {
+                return item;
+            }
+        }
+        return null;
+    }
+
     private InventoryItemInstance? TakeItem(int x, int y) {
         InventoryItemInstance? item = ItemAt(x, y);
         if (item == null) {
