@@ -13,7 +13,14 @@ public partial class PlayerMenu : Menu {
         PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
         _boatInventory = player.BoatInventory;
         _boatInventoryFrame = new InventoryFrame(_boatInventory);
-        AddChild(_boatInventoryFrame);
+        _boatInventoryFrame.SetAnchorsPreset(LayoutPreset.TopRight);
+
+        Control inventoryContainer = new Control();
+        // TODO: figure out how to align to top-right, why is this rocket science?
+        inventoryContainer.SetAnchor(Side.Left, 0.75f);
+        inventoryContainer.AddChild(_boatInventoryFrame);
+
+        AddChild(inventoryContainer);
     }
 
     public override void Open() {
