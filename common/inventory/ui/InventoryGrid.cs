@@ -2,107 +2,6 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class InventoryGrid : GridContainer {
-    public partial class InventoryTile : TextureRect {
-        private static Color _HoverOuterColor = new Color(1.0f, 1.0f, 1.0f, 1.0f);
-        private static Color _HoverInnerColor = new Color(0.8f, 0.8f, 0.8f, 1.8f);
-        public Color TileColor = Colors.Green;
-        public bool Hovered {
-            get {
-                return _hovered;
-            }
-            set {
-                _hovered = value;
-                if (value) {
-                    EmitSignal(SignalName.Focused, _position);
-                }
-                UpdateShader();
-            }
-        }
-        private bool _hovered;
-        public bool Filled {
-            get {
-                return _filled;
-            }
-            set {
-                _filled = value;
-                UpdateShader();
-            }
-        }
-        private bool _filled;
-        public Color BackgroundColor = Colors.Yellow;
-
-        private ShaderMaterial _material = new ShaderMaterial();
-        private Vector2I _position;
-
-        private const string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
-        private const string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
-
-        [Signal]
-        public delegate void FocusedEventHandler(Vector2I position);
-
-        public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool filled) {
-            FocusMode = FocusModeEnum.All;
-            SetNotifyTransform(true);
-            SetNotifyLocalTransform(true);
-
-            _position = position;
-
-            _material.Shader = GD.Load<Shader>(_tileShaderPath);
-            _material.SetShaderParameter("background_color", backgroundColor);
-            _material.SetShaderParameter("outer_color", tileColor);
-
-            TileColor = tileColor;
-            BackgroundColor = backgroundColor;
-            Filled = filled;
-            UpdateShader();
-
-            Texture = GD.Load<Texture2D>(_tileImagePath);
-            Material = _material;
-
-            ItemRectChanged += OnItemRectChanged;
-        }
-
-        public void OnItemRectChanged() {
-            GD.Print($"ItemRectChanged: {GlobalPosition}, {Position}");
-        }
-
-        public override void _Notification(int what) {
-            switch (what) {
-                case (int)NotificationFocusEnter:
-                    Hovered = true;
-                    break;
-
-                case (int)NotificationFocusExit:
-                    Hovered = false;
-                    break;
-                case (int)NotificationTransformChanged:
-                    GD.Print($"Notify: {GlobalPosition}, {Position}");
-                    break;
-                case (int)NotificationLocalTransformChanged:
-                    GD.Print($"Notify local: {GlobalPosition}, {Position}");
-                    break;
-            }
-        }
-
-        private void UpdateShader() {
-            if (Hovered) {
-                _material.SetShaderParameter("outer_color", _HoverOuterColor);
-                _material.SetShaderParameter("inner_color", _HoverInnerColor);
-                return;
-            }
-            else {
-                _material.SetShaderParameter("outer_color", TileColor);
-            }
-
-            if (Filled) {
-                _material.SetShaderParameter("inner_color", TileColor);
-            }
-            else {
-                _material.SetShaderParameter("inner_color", BackgroundColor);
-            }
-        }
-    }
-
     private Inventory _inventory;
     private int _tileSizePx = 64;
     private Color _defaultTileColor;
@@ -211,7 +110,7 @@ public partial class InventoryGrid : GridContainer {
         return null;
     }
 
-    public Vector2 GetTileGlobalPosition(Vector2I position) {
+    public InventoryTile GetTile(Vector2I position) {
         int idx = position.Y * _inventory.Width + position.X;
         if (idx < 0 || idx >= _tileControls.Count) {
             throw new System.Exception($"InventoryGrid: invalid tile position {position}. There are {_tileControls.Count} tiles.");
@@ -220,8 +119,7 @@ public partial class InventoryGrid : GridContainer {
         if (!(control is InventoryTile)) {
             throw new System.Exception($"InventoryGrid: got global position for non-tile at {position}");
         }
-        GD.Print($"InventoryGrid: got global position for tile at {position}, {_tileControls[idx].GlobalPosition}");
-        return _tileControls[idx].GlobalPosition;
+        return (InventoryTile)control;
     }
 
     private void OnTileFocused(Vector2I position) {

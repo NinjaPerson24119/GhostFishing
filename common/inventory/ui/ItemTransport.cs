@@ -5,23 +5,24 @@ public class InventoryItemTransport {
     public class TakeItemAction {
         public Inventory From;
         public Inventory.Mutator FromMutator;
-        public int X;
-        public int Y;
+        public Vector2I Position;
 
-        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, int x, int y) {
+        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, Vector2I position) {
             From = from;
             FromMutator = fromMutator;
-            X = x;
-            Y = y;
+            Position = position;
         }
     }
 
-    public int X;
-    public int Y;
+    public Vector2I Position;
     private TakeItemAction? _lastTake;
     private InventoryItemInstance? _item;
     private Inventory? _inventory;
     private Inventory.Mutator? _mutator;
+
+    public void OnSelectedPositionChanged(Vector2I position) {
+        Position = position;
+    }
 
     public void OpenInventory(Inventory inventory) {
         if (_inventory != null || _mutator != null) {
@@ -49,9 +50,9 @@ public class InventoryItemTransport {
     }
 
     public void PlaceItem() {
-        PlaceItem(X, Y);
+        PlaceItem(Position);
     }
-    private void PlaceItem(int X, int Y) {
+    private void PlaceItem(Vector2I position) {
         if (_item == null) {
             throw new Exception("Cannot place because item is null.");
         }
@@ -61,7 +62,7 @@ public class InventoryItemTransport {
         if (_mutator == null) {
             throw new Exception("Cannot place because mutator is null.");
         }
-        _mutator.PlaceItem(_item, X, Y);
+        _mutator.PlaceItem(_item, position.X, position.Y);
         _item = null;
     }
 
@@ -75,8 +76,8 @@ public class InventoryItemTransport {
         if (_mutator == null) {
             throw new Exception("Cannot take because mutator is null.");
         }
-        _lastTake = new TakeItemAction(_inventory, _mutator, X, Y);
-        _item = _mutator.TakeItem(X, Y);
+        _lastTake = new TakeItemAction(_inventory, _mutator, Position);
+        _item = _mutator.TakeItem(Position.X, Position.Y);
     }
 
     public void RevertTakeItem() {
@@ -91,7 +92,7 @@ public class InventoryItemTransport {
         if (mutator == null) {
             throw new Exception("Cannot revert take because ");
         }
-        mutator.PlaceItem(_item, _lastTake.X, _lastTake.Y);
+        mutator.PlaceItem(_item, _lastTake.Position.X, _lastTake.Position.Y);
         _lastTake = null;
     }
 

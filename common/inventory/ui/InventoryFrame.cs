@@ -21,7 +21,7 @@ public partial class InventoryFrame : Control {
 
     private Inventory? _inventory;
     private InventoryGrid? _inventoryGrid;
-    private List<TextureRect> _itemControls = new List<TextureRect>();
+    private List<InventoryItemControl> _itemControls = new List<InventoryItemControl>();
 
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
@@ -131,18 +131,16 @@ public partial class InventoryFrame : Control {
 
             float width = TileSizePx * itemDef.Space.Width;
             float height = TileSizePx * itemDef.Space.Height;
-            Vector2 tileGlobalPosition = _inventoryGrid.GetTileGlobalPosition(new Vector2I(item.X, item.Y));
-            GD.Print($"InventoryFrame: adding item at {tileGlobalPosition} ({width}x{height})");
-
-            TextureRect textureRect = new TextureRect() {
+            InventoryItemControl itemControl = new InventoryItemControl() {
                 Texture = GD.Load<Texture2D>(itemDef.ImagePath),
-                GlobalPosition = tileGlobalPosition,
                 Size = new Vector2(width, height),
                 Rotation = item.RotationRadians,
             };
-            textureRect.PivotOffset = textureRect.Size / 2;
-            _itemControls.Add(textureRect);
-            CallDeferred("add_child", textureRect);
+            itemControl.PivotOffset = itemControl.Size / 2;
+            _itemControls.Add(itemControl);
+            InventoryTile tile = _inventoryGrid.GetTile(new Vector2I(item.X, item.Y));
+            tile.GlobalPositionChanged += itemControl.OnInventoryTileGlobalPositionChanged;
+            CallDeferred("add_child", itemControl);
         }
         GD.Print("InventoryFrame: added items");
     }
