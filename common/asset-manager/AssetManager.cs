@@ -123,18 +123,6 @@ public partial class AssetManager : Node {
         if (!_inventoryItemDefinitionStore.HasAsset(itemInstance.DefinitionID)) {
             return false;
         }
-        if (itemInstance.QuestDetails != null) {
-            if (!AreQuestDetailsDepsSatisfied(itemInstance.QuestDetails)) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private bool AreQuestDetailsDepsSatisfied(InventoryItemInstanceQuestDetails questDetails) {
-        if (!_questDefinitionStore.HasAsset(questDetails.QuestDefinitionID)) {
-            return false;
-        }
         return true;
     }
 
