@@ -26,11 +26,19 @@ public partial class InventoryFrame : Control {
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
     public InventoryFrame(Inventory inventory) {
-        _inventory = inventory;
+        SetInventory(inventory);
     }
 
     public override void _Ready() {
         SpawnFrame();
+    }
+
+    public void SetInventory(Inventory inventory) {
+        if (_inventory != null) {
+            _inventory.Updated -= OnInventoryUpdated;
+        }
+        _inventory = inventory;
+        _inventory.Updated += OnInventoryUpdated;
     }
 
     public void RespawnChildren() {
@@ -143,5 +151,9 @@ public partial class InventoryFrame : Control {
             CallDeferred("add_child", itemControl);
         }
         GD.Print("InventoryFrame: added items");
+    }
+
+    public void OnInventoryUpdated(Inventory.UpdateType updateType, int itemIdx) {
+        GD.Print("Inventory updated");
     }
 }

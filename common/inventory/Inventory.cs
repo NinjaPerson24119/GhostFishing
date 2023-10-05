@@ -55,7 +55,7 @@ public class InventoryDTO : IGameAssetDTO {
     }
 }
 
-public class Inventory {
+public partial class Inventory : Node {
     public int Width { get; set; }
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
@@ -78,7 +78,12 @@ public class Inventory {
 
     private const int UNUSED_SPACE_PLACEHOLDER = -1;
 
-
+    public enum UpdateType {
+        Place = 0,
+        Take = 2,
+    }
+    [Signal]
+    public delegate void UpdatedEventHandler(UpdateType updateType, string itemInstanceID);
 
     public Inventory(InventoryDTO dto) {
         if (!dto.IsValid()) {
@@ -202,6 +207,7 @@ public class Inventory {
         UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
+            EmitSignal(SignalName.Updated, (int)UpdateType.Place, item.InstanceID);
         }
         if (_printLogs) {
             GD.Print($"Placed item {item.DefinitionID} at ({x}, {y})");
@@ -214,11 +220,12 @@ public class Inventory {
         if (item == null) {
             return null;
         }
-        Items.Remove(item);
-        UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
+            EmitSignal(SignalName.Updated, (int)UpdateType.Take, item.InstanceID);
         }
+        Items.Remove(item);
+        UpdateItemMask();
         if (_printLogs) {
             GD.Print($"Took item {item.DefinitionID} at ({x}, {y})");
         }
