@@ -19,12 +19,17 @@ public class InventoryItemTransport {
     private InventoryItemInstance? _item;
     private Inventory? _inventory;
     private Inventory.Mutator? _mutator;
+    private InventoryFrame? _frame;
 
     public void OnSelectedPositionChanged(Vector2I position) {
         Position = position;
     }
 
-    public void OpenInventory(Inventory inventory) {
+    public bool HasItem() {
+        return _item != null;
+    }
+
+    public void OpenInventory(Inventory inventory, InventoryFrame inventoryFrame) {
         if (_inventory != null || _mutator != null) {
             throw new Exception("Cannot open inventory because inventory and/or mutator is not null.");
         }
@@ -34,6 +39,8 @@ public class InventoryItemTransport {
         if (_mutator == null) {
             throw new Exception("Failed to get mutator from inventory. It's probably already opened.");
         }
+        _frame = inventoryFrame;
+        _frame.SelectedPositionChanged += OnSelectedPositionChanged;
     }
 
     public void CloseInventory() {
@@ -62,7 +69,10 @@ public class InventoryItemTransport {
         if (_mutator == null) {
             throw new Exception("Cannot place because mutator is null.");
         }
-        _mutator.PlaceItem(_item, position.X, position.Y);
+        bool result = _mutator.PlaceItem(_item, position.X, position.Y);
+        if (!result) {
+            GD.Print("Can't place item");
+        }
         _item = null;
     }
 
@@ -78,6 +88,9 @@ public class InventoryItemTransport {
         }
         _lastTake = new TakeItemAction(_inventory, _mutator, Position);
         _item = _mutator.TakeItem(Position.X, Position.Y);
+        if (_item == null) {
+            GD.Print("Nothing to take");
+        }
     }
 
     public void RevertTakeItem() {
@@ -92,7 +105,10 @@ public class InventoryItemTransport {
         if (mutator == null) {
             throw new Exception("Cannot revert take because ");
         }
-        mutator.PlaceItem(_item, _lastTake.Position.X, _lastTake.Position.Y);
+        bool result = mutator.PlaceItem(_item, _lastTake.Position.X, _lastTake.Position.Y);
+        if (!result) {
+            throw new Exception("Failed to revert take.");
+        }
         _lastTake = null;
     }
 

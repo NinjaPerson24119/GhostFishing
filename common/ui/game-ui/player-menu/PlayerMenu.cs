@@ -23,13 +23,44 @@ public partial class PlayerMenu : Menu {
         AddChild(inventoryContainer);
     }
 
+    public override void _Input(InputEvent inputEvent) {
+        GD.Print("PlayerMenu input delegates to base.");
+        base._Input(inputEvent);
+        if (!AcceptingInput) {
+            GD.Print("Not accepting input.");
+            return;
+        }
+        GD.Print("Processing PlayerMenu input event.");
+
+        if (inputEvent.IsActionPressed("select")) {
+            GD.Print("Select.");
+            if (!_itemTransport.HasItem()) {
+                GD.Print("Taking item.");
+                _itemTransport.TakeItem();
+            }
+            else {
+                _itemTransport.PlaceItem();
+            }
+        }
+        if (inputEvent.IsActionPressed("cancel") && _itemTransport.HasItem()) {
+            _itemTransport.RevertTakeItem();
+        }
+        if (inputEvent.IsActionPressed("inventory_rotate_clockwise")) {
+            _itemTransport.RotateClockwise();
+        }
+        if (inputEvent.IsActionPressed("inventory_rotate_counterclockwise")) {
+            _itemTransport.RotateCounterClockwise();
+        }
+        CloseActionClosesMenu = _itemTransport.HasItem();
+    }
+
     public override void Open() {
         base.Open();
         CallDeferred(nameof(OpenInventory));
     }
 
     public void OpenInventory() {
-        _itemTransport.OpenInventory(_boatInventory);
+        _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
         _boatInventoryFrame.Focus();
         GD.Print("Opened inventory.");
     }

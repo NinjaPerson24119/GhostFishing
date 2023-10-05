@@ -25,6 +25,9 @@ public partial class InventoryFrame : Control {
 
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
+    [Signal]
+    public delegate void SelectedPositionChangedEventHandler(Vector2I position);
+
     public InventoryFrame(Inventory inventory) {
         SetInventory(inventory);
     }
@@ -174,6 +177,7 @@ public partial class InventoryFrame : Control {
                 }
                 InventoryItemControl itemControl = BuildItemControl(item);
                 _itemControls.Add(itemControl);
+                CallDeferred("add_child", itemControl);
                 break;
             case Inventory.UpdateType.Take:
                 InventoryItemControl? itemControlToRemove = null;
@@ -186,9 +190,18 @@ public partial class InventoryFrame : Control {
                 if (itemControlToRemove == null) {
                     throw new Exception("Inventory emitted take update with item instance ID that doesn't exist.");
                 }
-                _itemControls.Remove(itemControlToRemove);
+                itemControlToRemove.QueueFree();
+                bool result = _itemControls.Remove(itemControlToRemove);
+                if (!result) {
+                    throw new Exception("Failed to remove item control from list.");
+                }
                 break;
         }
         GD.Print("Inventory updated");
+    }
+
+    public void OnSelectedPositionChanged(Vector2I position) {
+        // relay
+        EmitSignal(nameof(SelectedPositionChangedEventHandler), position);
     }
 }

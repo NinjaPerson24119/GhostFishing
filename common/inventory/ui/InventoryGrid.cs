@@ -7,7 +7,6 @@ public partial class InventoryGrid : GridContainer {
     private Color _defaultTileColor;
     private Color _backgroundColor;
     private List<Control> _tileControls = new List<Control>();
-    private Vector2I _focusedTilePosition = new Vector2I(-1, -1);
     public bool IsInitialized {
         get {
             return _isInitialized;
@@ -24,6 +23,8 @@ public partial class InventoryGrid : GridContainer {
 
     [Signal]
     public delegate void InitializedEventHandler();
+    [Signal]
+    public delegate void SelectedPositionChangedEventHandler(Vector2I position);
 
     public InventoryGrid(Inventory inventory, int tileSizePx, Color defaultTileColor, Color backgroundColor) {
         _inventory = inventory;
@@ -123,7 +124,8 @@ public partial class InventoryGrid : GridContainer {
     }
 
     private void OnTileFocused(Vector2I position) {
-        _focusedTilePosition = position;
+        // reducer
+        EmitSignal(SignalName.SelectedPositionChanged, position);
         GD.Print($"Focused tile at {position}");
     }
 
