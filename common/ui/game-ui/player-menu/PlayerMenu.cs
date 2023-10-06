@@ -1,8 +1,11 @@
 using Godot;
 
 public partial class PlayerMenu : Menu {
+    [Export]
+    public int TileSizePx = 64;
+
     private InventoryFrame _inventoryFrame = null!;
-    private InventoryItemTransport _itemTransport = new InventoryItemTransport();
+    private InventoryItemTransport _itemTransport = null!;
     private Inventory _boatInventory = null!;
     private InventoryFrame _boatInventoryFrame = null!;
 
@@ -12,28 +15,30 @@ public partial class PlayerMenu : Menu {
 
         PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
         _boatInventory = player.BoatInventory;
-        _boatInventoryFrame = new InventoryFrame(_boatInventory);
+        _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx) {
+            Name = "BoatInventoryFrame"
+        };
         _boatInventoryFrame.SetAnchorsPreset(LayoutPreset.TopRight);
 
-        Control inventoryContainer = new Control();
+        Control inventoryContainer = new Control() {
+            Name = "InventoryLayout"
+        };
         // TODO: figure out how to align to top-right, why is this rocket science?
         inventoryContainer.SetAnchor(Side.Left, 0.75f);
         inventoryContainer.AddChild(_boatInventoryFrame);
-
         AddChild(inventoryContainer);
+
+        _itemTransport = new InventoryItemTransport(TileSizePx);
+        AddChild(_itemTransport);
     }
 
     public override void _Input(InputEvent inputEvent) {
-        //GD.Print("PlayerMenu input delegates to base.");
         base._Input(inputEvent);
         if (!AcceptingInput) {
-            //GD.Print("Not accepting input.");
             return;
         }
-        //GD.Print("Processing PlayerMenu input event.");
 
         if (inputEvent.IsActionPressed("select")) {
-            //GD.Print("Select.");
             if (!_itemTransport.HasItem()) {
                 GD.Print("Taking item.");
                 _itemTransport.TakeItem();
@@ -43,7 +48,7 @@ public partial class PlayerMenu : Menu {
                 _itemTransport.PlaceItem();
             }
         }
-        if (inputEvent.IsActionPressed("cancel") && _itemTransport.HasItem()) {
+        if (inputEvent.IsActionPressed("cancel")) {
             _itemTransport.RevertTakeItem();
         }
         if (inputEvent.IsActionPressed("inventory_rotate_clockwise")) {
@@ -52,6 +57,7 @@ public partial class PlayerMenu : Menu {
         if (inputEvent.IsActionPressed("inventory_rotate_counterclockwise")) {
             _itemTransport.RotateCounterClockwise();
         }
+
         CloseActionClosesMenu = _itemTransport.HasItem();
     }
 
@@ -62,7 +68,6 @@ public partial class PlayerMenu : Menu {
 
     public void OpenInventory() {
         _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
-        _boatInventoryFrame.Focus();
         GD.Print("Opened inventory.");
     }
 

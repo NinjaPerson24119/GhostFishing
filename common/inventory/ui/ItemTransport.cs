@@ -1,33 +1,63 @@
 using System;
 using Godot;
 
-public class InventoryItemTransport {
+public partial class InventoryItemTransport : Node2D {
     public class TakeItemAction {
         public Inventory From;
         public Inventory.Mutator FromMutator;
-        public Vector2I Position;
+        public Vector2I TilePosition;
 
-        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, Vector2I position) {
+        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, Vector2I tilePosition) {
             From = from;
             FromMutator = fromMutator;
-            Position = position;
+            TilePosition = tilePosition;
         }
     }
 
-    public Vector2I Position;
     private TakeItemAction? _lastTake;
+    // item we're currently holding
     private InventoryItemInstance? _item;
+    // position of the tile we're currently hovering over in the inventory
+    public Vector2I TilePosition;
+    // inventory we're currently interacting with
     private Inventory? _inventory;
     private Inventory.Mutator? _mutator;
+    // visual representation of inventory we need to send updates to
     private InventoryFrame? _frame;
+    private int _tileSize;
+    private Node2D _selector = new Node2D() {
+        Name = "Selector"
+    };
+    private ColorRect _highlight = new ColorRect() {
+        Name = "Highlight",
+        Color = new Color(1.0f, 1.0f, 1.0f, 0.5f)
+    };
+    private Sprite2D _sprite = new Sprite2D() {
+        Name = "ItemSprite",
+        Centered = true
+    };
 
-    public void OnSelectedPositionChanged(Vector2I position) {
-        GD.Print($"Transport position changed: {position}");
-        Position = position;
+    public InventoryItemTransport(int TileSize) {
+        _tileSize = TileSize;
     }
 
-    public bool HasItem() {
-        return _item != null;
+    public override void _Ready() {
+        Name = "ItemTransport";
+
+        _selector.Scale = new Vector2(_tileSize, _tileSize);
+        AddChild(_selector);
+
+        _highlight.Size = new Vector2(1, 1);
+        _selector.AddChild(_highlight);
+
+        _selector.AddChild(_sprite);
+    }
+
+    public override void _ExitTree() {
+        if (_mutator != null) {
+            GD.PrintErr("InventoryItemTransport was not closed before being destroyed.");
+            _mutator.Dispose();
+        }
     }
 
     public void OpenInventory(Inventory inventory, InventoryFrame inventoryFrame) {
@@ -42,6 +72,13 @@ public class InventoryItemTransport {
         }
         _frame = inventoryFrame;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
+
+        _selector.Visible = true;
+
+        _frame.FocusEntered += () => InventoryFocused(true);
+        _frame.FocusExited += () => InventoryFocused(false);
+        _frame.SelectedPositionChanged += OnSelectedPositionChanged;
+        _frame.GrabFocus();
     }
 
     public void CloseInventory() {
@@ -57,59 +94,59 @@ public class InventoryItemTransport {
         _inventory = null;
     }
 
-    public void PlaceItem() {
-        PlaceItem(Position);
+    public bool HasItem() {
+        return _item != null;
     }
-    private void PlaceItem(Vector2I position) {
-        if (_item == null) {
-            throw new Exception("Cannot place because item is null.");
+
+    public void PlaceItem() {
+        PlaceItem(TilePosition);
+    }
+    private void PlaceItem(Vector2I tilePosition) {
+        if (_item == null || _inventory == null || _mutator == null) {
+            return;
         }
-        if (_inventory == null) {
-            throw new Exception("Cannot place because inventory is null.");
-        }
-        if (_mutator == null) {
-            throw new Exception("Cannot place because mutator is null.");
-        }
-        bool result = _mutator.PlaceItem(_item, position.X, position.Y);
+        bool result = _mutator.PlaceItem(_item, tilePosition.X, tilePosition.Y);
         if (!result) {
             GD.Print("Can't place item");
         }
         _item = null;
+
+        _selector.Scale = new Vector2(_tileSize, _tileSize);
+        _sprite.Visible = false;
     }
 
     public void TakeItem() {
-        if (_item != null) {
-            throw new Exception("Cannot place because item is not null (already have an item).");
+        if (_item == null || _inventory == null || _mutator == null) {
+            return;
         }
-        if (_inventory == null) {
-            throw new Exception("Cannot place because inventory is null.");
-        }
-        if (_mutator == null) {
-            throw new Exception("Cannot take because mutator is null.");
-        }
-        _item = _mutator.TakeItem(Position.X, Position.Y);
+        _item = _mutator.TakeItem(TilePosition.X, TilePosition.Y);
         if (_item == null) {
             GD.Print("Nothing to take");
             return;
         }
-        _lastTake = new TakeItemAction(_inventory, _mutator, Position);
+        _lastTake = new TakeItemAction(_inventory, _mutator, TilePosition);
+
+        string imagePath = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID).ImagePath;
+        Texture2D texture = GD.Load<Texture2D>(imagePath);
+        _sprite.Texture = texture;
+        _sprite.Position = new Vector2(texture.GetWidth() / 2, texture.GetHeight() / 2);
+        _sprite.Rotation = _item.RotationRadians;
+        _selector.Scale = new Vector2(_tileSize / texture.GetWidth(), _tileSize / texture.GetHeight());
+        _sprite.Visible = true;
     }
 
     public void RevertTakeItem() {
-        if (_item == null) {
-            throw new Exception("Cannot revert take because item is null.");
-        }
-        if (_lastTake == null) {
-            throw new Exception("Have item, but last take is null.");
+        if (_item == null || _lastTake == null) {
+            return;
         }
 
-        Inventory.Mutator? mutator = _lastTake.From.GetMutator();
+        Inventory.Mutator? mutator = _lastTake.FromMutator;
         if (mutator == null) {
-            throw new Exception("Cannot revert take because ");
+            throw new Exception("Failed to revert take because lastTake mutator is null.");
         }
-        bool result = mutator.PlaceItem(_item, _lastTake.Position.X, _lastTake.Position.Y);
+        bool result = mutator.PlaceItem(_item, _lastTake.TilePosition.X, _lastTake.TilePosition.Y);
         if (!result) {
-            throw new Exception("Failed to revert take.");
+            throw new Exception("Failed to revert take. This should be impossible since we just took it.");
         }
         _lastTake = null;
     }
@@ -126,5 +163,23 @@ public class InventoryItemTransport {
             throw new Exception("Cannot rotate because item is null.");
         }
         _item.RotateCounterClockwise();
+    }
+
+    public void OnSelectedPositionChanged(Vector2I tilePosition) {
+        if (_frame == null) {
+            throw new Exception("Cannot change selected position because frame is null.");
+        }
+
+        GD.Print($"Transport tilePosition changed: {tilePosition}");
+        TilePosition = tilePosition;
+        _selector.Position = _frame.GetSelectorGlobalPosition();
+    }
+
+    public void InventoryFocused(bool isFocused) {
+        if (_frame == null) {
+            throw new Exception("Cannot change inventory focus because frame is null.");
+        }
+        _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
+        _selector.Visible = isFocused;
     }
 }
