@@ -41,7 +41,7 @@ public partial class InventoryTile : TextureRect {
     [Signal]
     public delegate void GlobalPositionChangedEventHandler(Vector2 globalPosition);
 
-    public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool isFilled, bool visible) {
+    public InventoryTile(Vector2I position, Color tileColor, Color backgroundColor, bool isFilled) {
         FocusMode = FocusModeEnum.All;
 
         _position = position;
@@ -57,8 +57,6 @@ public partial class InventoryTile : TextureRect {
 
         Texture = GD.Load<Texture2D>(_tileImagePath);
         Material = _material;
-
-        Visible = visible;
     }
 
     public override void _Process(double delta) {
