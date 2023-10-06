@@ -17,7 +17,7 @@ public partial class InventoryTile : TextureRect {
         }
     }
     private bool _isHovered;
-    private bool isFilled {
+    public bool IsFilled {
         get {
             return _isFilled;
         }
@@ -52,7 +52,7 @@ public partial class InventoryTile : TextureRect {
 
         TileColor = tileColor;
         BackgroundColor = backgroundColor;
-        this.isFilled = isFilled;
+        IsFilled = isFilled;
         UpdateShader();
 
         Texture = GD.Load<Texture2D>(_tileImagePath);
@@ -88,7 +88,7 @@ public partial class InventoryTile : TextureRect {
             _material.SetShaderParameter("outer_color", TileColor);
         }
 
-        if (isFilled) {
+        if (IsFilled) {
             _material.SetShaderParameter("inner_color", TileColor);
         }
         else {

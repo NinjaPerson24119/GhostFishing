@@ -31,6 +31,8 @@ public partial class InventoryGrid : GridContainer {
         _tileSizePx = tileSizePx;
         _defaultTileColor = defaultTileColor;
         _backgroundColor = backgroundColor;
+
+        _inventory.Updated += OnInventoryUpdated;
     }
 
     public override void _Ready() {
@@ -52,7 +54,7 @@ public partial class InventoryGrid : GridContainer {
                         if (item == null) {
                             throw new System.Exception("InventoryUI: item is null but space is filled");
                         }
-                        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+                        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
                         color = itemDef.BackgroundColorOverride ?? _defaultTileColor;
                     }
                     Vector2I position = new Vector2I(x, y);
@@ -141,6 +143,24 @@ public partial class InventoryGrid : GridContainer {
         }
         if (i == _tileControls.Count) {
             throw new System.Exception("Failed to focus first tile because no tiles were found.");
+        }
+    }
+
+    private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
+        GD.Print("InventoryGrid: inventory updated");
+        // update filled state of tiles
+        for (int y = 0; y < _inventory.Height; y++) {
+            for (int x = 0; x < _inventory.Width; x++) {
+                int idx = y * _inventory.Width + x;
+                Control control = _tileControls[idx];
+                if (control is InventoryTile tile) {
+                    bool isFilled = _inventory.SpaceFilled(x, y);
+                    if (isFilled) {
+                        GD.Print($"Still filled at {x}, {y}");
+                    }
+                    tile.IsFilled = isFilled;
+                }
+            }
         }
     }
 }

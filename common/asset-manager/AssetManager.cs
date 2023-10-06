@@ -120,7 +120,7 @@ public partial class AssetManager : Node {
     }
 
     private bool AreItemInstanceDepsSatisfied(InventoryItemInstance itemInstance) {
-        if (!_inventoryItemDefinitionStore.HasAsset(itemInstance.DefinitionID)) {
+        if (!_inventoryItemDefinitionStore.HasAsset(itemInstance.ItemDefinitionID)) {
             return false;
         }
         return true;

@@ -112,6 +112,9 @@ public partial class InventoryFrame : Control {
             Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
         };
 
+        // relay tile selection events
+        _inventoryGrid.SelectedPositionChanged += OnSelectedPositionChanged;
+
         center.AddChild(_inventoryGrid);
         containerFrameImage.AddChild(center);
         if (backgroundImage != null) {
@@ -136,7 +139,7 @@ public partial class InventoryFrame : Control {
             InventoryItemControl itemControl = BuildItemControl(item);
             CallDeferred("add_child", itemControl);
         }
-        GD.Print("InventoryFrame: added items");
+        GD.Print($"InventoryFrame: added {_itemControls.Count} items");
     }
 
     public InventoryItemControl BuildItemControl(InventoryItemInstance item) {
@@ -147,11 +150,11 @@ public partial class InventoryFrame : Control {
             throw new Exception("Cannot build item control because inventory grid is not initialized.");
         }
 
-        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
 
         float width = TileSizePx * itemDef.Space.Width;
         float height = TileSizePx * itemDef.Space.Height;
-        InventoryItemControl itemControl = new InventoryItemControl(item.InstanceID) {
+        InventoryItemControl itemControl = new InventoryItemControl(item.ItemInstanceID) {
             Texture = GD.Load<Texture2D>(itemDef.ImagePath),
             Size = new Vector2(width, height),
             Rotation = item.RotationRadians,
@@ -164,7 +167,7 @@ public partial class InventoryFrame : Control {
         return itemControl;
     }
 
-    public void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
+    private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
         if (_inventory == null) {
             throw new Exception("Cannot update inventory because inventory is null.");
         }
@@ -190,11 +193,13 @@ public partial class InventoryFrame : Control {
                 if (itemControlToRemove == null) {
                     throw new Exception("Inventory emitted take update with item instance ID that doesn't exist.");
                 }
-                itemControlToRemove.QueueFree();
-                bool result = _itemControls.Remove(itemControlToRemove);
-                if (!result) {
+                int result = _itemControls.RemoveAll(c => c.InventoryItemInstanceID == itemInstanceID);
+                if (result == 0) {
                     throw new Exception("Failed to remove item control from list.");
                 }
+                GD.Print($"Item controls remaining: {_itemControls.Count}");
+                GD.Print($"Freed {itemControlToRemove.InventoryItemInstanceID}");
+                itemControlToRemove.CallDeferred("free");
                 break;
         }
         GD.Print("Inventory updated");
@@ -202,6 +207,6 @@ public partial class InventoryFrame : Control {
 
     public void OnSelectedPositionChanged(Vector2I position) {
         // relay
-        EmitSignal(nameof(SelectedPositionChangedEventHandler), position);
+        EmitSignal(SignalName.SelectedPositionChanged, position);
     }
 }

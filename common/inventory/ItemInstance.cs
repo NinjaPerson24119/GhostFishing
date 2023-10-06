@@ -2,15 +2,15 @@ using System;
 using Godot;
 
 public class InventoryItemInstanceDTO : IGameAssetDTO {
-    public string? InstanceID { get; set; }
-    public string? DefinitionID { get; set; }
+    public string? ItemInstanceID { get; set; }
+    public string? ItemDefinitionID { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
     public InventoryItemRotation Rotation { get; set; }
     public InventoryItemFlagsDTO? FlagOverrides { get; set; }
 
     public bool IsValid() {
-        if (string.IsNullOrEmpty(DefinitionID)) {
+        if (string.IsNullOrEmpty(ItemDefinitionID)) {
             return false;
         }
         if (X < 0 || Y < 0) {
@@ -20,8 +20,8 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
     }
 
     public string Stringify() {
-        string str = $"InstanceID: {InstanceID}\n";
-        str += $"DefinitionID: {DefinitionID}\n";
+        string str = $"ItemInstanceID: {ItemInstanceID}\n";
+        str += $"ItemDefinitionID: {ItemDefinitionID}\n";
         str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";
         if (FlagOverrides != null) {
             str += $"FlagOverrides (object):\n{FlagOverrides.Stringify()}\n";
@@ -31,8 +31,8 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
 }
 
 public class InventoryItemInstance {
-    public string InstanceID { get; set; }
-    public string DefinitionID { get; set; }
+    public string ItemInstanceID { get; set; }
+    public string ItemDefinitionID { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
     public InventoryItemRotation Rotation { get; set; }
@@ -47,13 +47,13 @@ public class InventoryItemInstance {
         if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryItemInstanceDTO");
         }
-        if (string.IsNullOrEmpty(dto.InstanceID)) {
-            InstanceID = AssetIDUtil.GenerateInventoryItemInstanceID();
+        if (string.IsNullOrEmpty(dto.ItemInstanceID)) {
+            ItemInstanceID = AssetIDUtil.GenerateInventoryItemInstanceID();
         }
         else {
-            InstanceID = dto.InstanceID;
+            ItemInstanceID = dto.ItemInstanceID;
         }
-        DefinitionID = dto.DefinitionID!;
+        ItemDefinitionID = dto.ItemDefinitionID!;
         X = dto.X;
         Y = dto.Y;
         Rotation = dto.Rotation;

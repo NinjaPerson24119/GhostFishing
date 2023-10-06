@@ -24,21 +24,22 @@ public partial class PlayerMenu : Menu {
     }
 
     public override void _Input(InputEvent inputEvent) {
-        GD.Print("PlayerMenu input delegates to base.");
+        //GD.Print("PlayerMenu input delegates to base.");
         base._Input(inputEvent);
         if (!AcceptingInput) {
-            GD.Print("Not accepting input.");
+            //GD.Print("Not accepting input.");
             return;
         }
-        GD.Print("Processing PlayerMenu input event.");
+        //GD.Print("Processing PlayerMenu input event.");
 
         if (inputEvent.IsActionPressed("select")) {
-            GD.Print("Select.");
+            //GD.Print("Select.");
             if (!_itemTransport.HasItem()) {
                 GD.Print("Taking item.");
                 _itemTransport.TakeItem();
             }
             else {
+                GD.Print("Placing item.");
                 _itemTransport.PlaceItem();
             }
         }

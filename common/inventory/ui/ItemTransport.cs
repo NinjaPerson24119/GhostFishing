@@ -22,6 +22,7 @@ public class InventoryItemTransport {
     private InventoryFrame? _frame;
 
     public void OnSelectedPositionChanged(Vector2I position) {
+        GD.Print($"Transport position changed: {position}");
         Position = position;
     }
 
@@ -86,11 +87,12 @@ public class InventoryItemTransport {
         if (_mutator == null) {
             throw new Exception("Cannot take because mutator is null.");
         }
-        _lastTake = new TakeItemAction(_inventory, _mutator, Position);
         _item = _mutator.TakeItem(Position.X, Position.Y);
         if (_item == null) {
             GD.Print("Nothing to take");
+            return;
         }
+        _lastTake = new TakeItemAction(_inventory, _mutator, Position);
     }
 
     public void RevertTakeItem() {

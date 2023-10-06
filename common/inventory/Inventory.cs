@@ -124,10 +124,10 @@ public partial class Inventory : Node {
     }
 
     public bool CanPlaceItem(InventoryItemInstance item, int x, int y) {
-        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.DefinitionID);
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
         if (x < 0 || y < 0 || x + itemDef.Space.Width > Width || y + itemDef.Space.Height > Height) {
             if (_printLogs) {
-                GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to edge of inventory");
+                GD.Print($"Can't place item {item.ItemDefinitionID} at ({x}, {y}) due to edge of inventory");
             }
             return false;
         }
@@ -139,13 +139,13 @@ public partial class Inventory : Node {
                 }
                 if (!_usableMask[indexConsidered]) {
                     if (_printLogs) {
-                        GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to unusable space");
+                        GD.Print($"Can't place item {item.ItemDefinitionID} at ({x}, {y}) due to unusable space");
                     }
                     return false;
                 }
                 if (_itemMask[indexConsidered] != UNUSED_SPACE_PLACEHOLDER) {
                     if (_printLogs) {
-                        GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) due to occupied space");
+                        GD.Print($"Can't place item {item.ItemDefinitionID} at ({x}, {y}) due to occupied space");
                     }
                     return false;
                 }
@@ -158,7 +158,7 @@ public partial class Inventory : Node {
         int[] newItemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
         for (int idx = 0; idx < Items.Count; idx++) {
             InventoryItemDefinition itemDef;
-            itemDef = AssetManager.Ref().GetInventoryItemDefinition(Items[idx].DefinitionID);
+            itemDef = AssetManager.Ref().GetInventoryItemDefinition(Items[idx].ItemDefinitionID);
 
             for (int i = 0; i < itemDef.Space.Width; i++) {
                 for (int j = 0; j < itemDef.Space.Height; j++) {
@@ -197,7 +197,7 @@ public partial class Inventory : Node {
     private bool PlaceItem(InventoryItemInstance item, int x, int y) {
         if (!CanPlaceItem(item, x, y)) {
             if (_printLogs) {
-                GD.Print($"Can't place item {item.DefinitionID} at ({x}, {y}) (CanPlaceItem() failed)");
+                GD.Print($"Can't place item {item.ItemDefinitionID} at ({x}, {y}) (CanPlaceItem() failed)");
             }
             return false;
         }
@@ -207,17 +207,17 @@ public partial class Inventory : Node {
         UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
-            EmitSignal(SignalName.Updated, (int)UpdateType.Place, item.InstanceID);
+            EmitSignal(SignalName.Updated, (int)UpdateType.Place, item.ItemInstanceID);
         }
         if (_printLogs) {
-            GD.Print($"Placed item {item.DefinitionID} at ({x}, {y})");
+            GD.Print($"Placed item {item.ItemInstanceID} with definition {item.ItemDefinitionID} at ({x}, {y})");
         }
         return true;
     }
 
     public InventoryItemInstance? GetItemByID(string itemInstanceID) {
         foreach (InventoryItemInstance item in Items) {
-            if (item.InstanceID == itemInstanceID) {
+            if (item.ItemInstanceID == itemInstanceID) {
                 return item;
             }
         }
@@ -227,16 +227,19 @@ public partial class Inventory : Node {
     private InventoryItemInstance? TakeItem(int x, int y) {
         InventoryItemInstance? item = ItemAt(x, y);
         if (item == null) {
+            if (_printLogs) {
+                GD.Print($"Can't take item at ({x}, {y}) (no item there)");
+            }
             return null;
-        }
-        if (!_ignoreTouches) {
-            Touched = true;
-            EmitSignal(SignalName.Updated, (int)UpdateType.Take, item.InstanceID);
         }
         Items.Remove(item);
         UpdateItemMask();
+        if (!_ignoreTouches) {
+            Touched = true;
+            EmitSignal(SignalName.Updated, (int)UpdateType.Take, item.ItemInstanceID);
+        }
         if (_printLogs) {
-            GD.Print($"Took item {item.DefinitionID} at ({x}, {y})");
+            GD.Print($"Took item {item.ItemInstanceID} with definition {item.ItemDefinitionID} at ({x}, {y})");
         }
         return item;
     }
