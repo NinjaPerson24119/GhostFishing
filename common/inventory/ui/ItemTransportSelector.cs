@@ -2,9 +2,8 @@ using Godot;
 
 public partial class InventoryItemTransportSelector : Node2D {
     private int _tileSize;
-    private ColorRect _highlight = new ColorRect() {
-        Name = "Highlight",
-        Color = new Color(1.0f, 1.0f, 1.0f, 0.5f)
+    private Sprite2D _outline = new Sprite2D() {
+        Name = "Outline",
     };
     private Sprite2D _sprite = new Sprite2D() {
         Name = "ItemSprite",
@@ -14,10 +13,11 @@ public partial class InventoryItemTransportSelector : Node2D {
 
     public InventoryItemTransportSelector(int tileSize) {
         _tileSize = tileSize;
-        Scale = new Vector2(_tileSize, _tileSize);
 
-        _highlight.Size = new Vector2(1, 1);
-        AddChild(_highlight);
+        Texture2D outlineTexture = GD.Load<Texture2D>("res://artwork/generated/ui/Selector.png");
+        _outline.Texture = outlineTexture;
+        _outline.Scale = new Vector2(tileSize / outlineTexture.GetWidth(), tileSize / outlineTexture.GetHeight());
+        AddChild(_outline);
 
         AddChild(_sprite);
     }
@@ -26,7 +26,7 @@ public partial class InventoryItemTransportSelector : Node2D {
         if (_item == null) {
             return;
         }
-        Scale = new Vector2(_tileSize, _tileSize);
+        Scale = new Vector2(1, 1);
         _sprite.Visible = false;
     }
 
@@ -36,10 +36,13 @@ public partial class InventoryItemTransportSelector : Node2D {
         string imagePath = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID).ImagePath;
         Texture2D texture = GD.Load<Texture2D>(imagePath);
         _sprite.Texture = texture;
-        _sprite.Position = new Vector2(texture.GetWidth() / 2, texture.GetHeight() / 2);
+        _sprite.Position = new Vector2(_tileSize / 2, _tileSize / 2);
+        _sprite.Scale = new Vector2(_tileSize / texture.GetWidth(), _tileSize / texture.GetHeight());
         _sprite.Rotation = _item.RotationRadians;
         _sprite.Visible = true;
-        
-        Scale = new Vector2(_tileSize / texture.GetWidth(), _tileSize / texture.GetHeight());
+
+        // width / height
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
+        Scale = new Vector2(itemDef.Space.Width, itemDef.Space.Height);
     }
 }
