@@ -6,7 +6,7 @@ public partial class InventoryGrid : GridContainer {
     private int _tileSizePx = 64;
     private Color _defaultTileColor;
     private Color _backgroundColor;
-    private List<Control> _tileControls = new List<Control>();
+    private List<InventoryTile> _tileControls = new List<InventoryTile>();
     public bool IsInitialized {
         get {
             return _isInitialized;
@@ -44,32 +44,28 @@ public partial class InventoryGrid : GridContainer {
         // add tiles to grid
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {
-                Control control;
-                if (_inventory.SpaceUsable(x, y)) {
-                    bool spaceFilled = _inventory.SpaceFilled(x, y);
-                    Color color = _defaultTileColor;
-                    // get the item's background color if it has one
-                    if (spaceFilled) {
-                        InventoryItemInstance? item = _inventory.ItemAt(x, y);
-                        if (item == null) {
-                            throw new System.Exception("InventoryUI: item is null but space is filled");
-                        }
-                        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
-                        color = itemDef.BackgroundColorOverride ?? _defaultTileColor;
+                bool spaceUsable = _inventory.SpaceUsable(x, y);
+                bool spaceFilled = _inventory.SpaceFilled(x, y);
+
+                Color color = _defaultTileColor;
+                // get the item's background color if it has one
+                if (spaceFilled) {
+                    InventoryItemInstance? item = _inventory.ItemAt(x, y);
+                    if (item == null) {
+                        throw new System.Exception("InventoryUI: item is null but space is filled");
                     }
-                    Vector2I position = new Vector2I(x, y);
-                    InventoryTile tile = new InventoryTile(position, color, _backgroundColor, spaceFilled);
-                    tile.Focused += OnTileFocused;
-                    control = tile;
+                    InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
+                    color = itemDef.BackgroundColorOverride ?? _defaultTileColor;
                 }
-                else {
-                    // use empty Control as spacer
-                    control = new Control();
-                }
-                control.Size = new Vector2(_tileSizePx, _tileSizePx);
-                control.CustomMinimumSize = new Vector2(_tileSizePx, _tileSizePx);
-                AddChild(control);
-                _tileControls.Add(control);
+
+                Vector2I position = new Vector2I(x, y);
+                InventoryTile tile = new InventoryTile(position, color, _backgroundColor, spaceFilled, spaceUsable);
+                tile.Focused += OnTileFocused;
+                tile.Size = new Vector2(_tileSizePx, _tileSizePx);
+                tile.CustomMinimumSize = new Vector2(_tileSizePx, _tileSizePx);
+
+                AddChild(tile);
+                _tileControls.Add(tile);
             }
         }
 
@@ -78,24 +74,22 @@ public partial class InventoryGrid : GridContainer {
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {
                 int index = y * _inventory.Width + x;
-                Control control = _tileControls[index];
-                if (control is InventoryTile tile) {
-                    // top
-                    int neighborIdx = (y - 1) * _inventory.Width + x;
-                    tile.FocusNeighborTop = GetTileNodePath(neighborIdx);
+                InventoryTile tile = _tileControls[index];
+                // top
+                int neighborIdx = (y - 1) * _inventory.Width + x;
+                tile.FocusNeighborTop = GetTileNodePath(neighborIdx);
 
-                    // bottom
-                    neighborIdx = (y + 1) * _inventory.Width + x;
-                    tile.FocusNeighborBottom = GetTileNodePath(neighborIdx);
+                // bottom
+                neighborIdx = (y + 1) * _inventory.Width + x;
+                tile.FocusNeighborBottom = GetTileNodePath(neighborIdx);
 
-                    // left
-                    neighborIdx = y * _inventory.Width + (x - 1);
-                    tile.FocusNeighborLeft = GetTileNodePath(neighborIdx);
+                // left
+                neighborIdx = y * _inventory.Width + (x - 1);
+                tile.FocusNeighborLeft = GetTileNodePath(neighborIdx);
 
-                    // right
-                    neighborIdx = y * _inventory.Width + (x + 1);
-                    tile.FocusNeighborRight = GetTileNodePath(neighborIdx);
-                }
+                // right
+                neighborIdx = y * _inventory.Width + (x + 1);
+                tile.FocusNeighborRight = GetTileNodePath(neighborIdx);
             }
         }
 
@@ -103,14 +97,16 @@ public partial class InventoryGrid : GridContainer {
     }
 
     private NodePath? GetTileNodePath(int idx) {
+        // expected to handle index out of bounds when trying to get above the grid, for example
         if (idx < 0 || idx >= _tileControls.Count) {
             return null;
         }
-        Control control = _tileControls[idx];
-        if (control is InventoryTile tile) {
-            return tile.GetPath();
+        InventoryTile tile = _tileControls[idx];
+        // pretend the tile doesn't exist if it's not visible
+        if (!tile.Visible) {
+            return null;
         }
-        return null;
+        return tile.GetPath();
     }
 
     public InventoryTile GetTile(Vector2I position) {
@@ -118,11 +114,7 @@ public partial class InventoryGrid : GridContainer {
         if (idx < 0 || idx >= _tileControls.Count) {
             throw new System.Exception($"InventoryGrid: invalid tile position {position}. There are {_tileControls.Count} tiles.");
         }
-        Control control = _tileControls[idx];
-        if (!(control is InventoryTile)) {
-            throw new System.Exception($"InventoryGrid: got global position for non-tile at {position}");
-        }
-        return (InventoryTile)control;
+        return _tileControls[idx];
     }
 
     private void OnTileFocused(Vector2I position) {
@@ -134,8 +126,8 @@ public partial class InventoryGrid : GridContainer {
     public void FocusFirstTile() {
         int i = 0;
         while (i < _tileControls.Count) {
-            Control control = _tileControls[i];
-            if (control is InventoryTile tile) {
+            InventoryTile tile = _tileControls[i];
+            if (tile.Visible) {
                 tile.GrabFocus();
                 return;
             }
@@ -152,11 +144,9 @@ public partial class InventoryGrid : GridContainer {
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {
                 int idx = y * _inventory.Width + x;
-                Control control = _tileControls[idx];
-                if (control is InventoryTile tile) {
-                    bool isFilled = _inventory.SpaceFilled(x, y);
-                    tile.IsFilled = isFilled;
-                }
+                InventoryTile tile = _tileControls[idx];
+                bool isFilled = _inventory.SpaceFilled(x, y);
+                tile.IsFilled = isFilled;
             }
         }
     }
