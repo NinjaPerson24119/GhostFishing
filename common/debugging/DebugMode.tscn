@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3 uid="uid://bhko81t6hcnt3"]
+[gd_scene load_steps=2 format=3 uid="uid://bhko81t6hcnt3"]
 
 [ext_resource type="Script" path="res://common/debugging/DebugMode.cs" id="1_ep38k"]
-[ext_resource type="Texture2D" uid="uid://xky7xko8rr5s" path="res://artwork/generated/fish/SkeletonFish.png" id="2_7qpo3"]
 
 [node name="DebugMode" type="Control"]
 z_index = 1000
@@ -22,9 +21,3 @@ offset_bottom = 63.0
 theme_override_colors/font_color = Color(0, 1, 0, 1)
 theme_override_font_sizes/font_size = 18
 text = "DEBUG ON"
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-position = Vector2(128, 128)
-rotation = 6.28319
-scale = Vector2(2, 2)
-texture = ExtResource("2_7qpo3")

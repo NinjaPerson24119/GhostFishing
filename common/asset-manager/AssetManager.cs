@@ -43,22 +43,26 @@ public partial class AssetManager : Node {
         _inventoryItemCategoryStore = new AssetStore<InventoryItemCategoryDTO, InventoryItemCategory>(
             (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
             AssetIDUtil.IsInventoryItemCategoryID,
-            null
+            null,
+            AssetIDUtil.IsInventoryItemCategoryID
         );
         _questDefinitionStore = new AssetStore<QuestDefinitionDTO, QuestDefinition>(
             (QuestDefinitionDTO dto) => new QuestDefinition(dto),
             AssetIDUtil.IsQuestID,
-            null
+            null,
+            AssetIDUtil.IsQuestID
         );
         _inventoryItemDefinitionStore = new AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition>(
             (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
             AssetIDUtil.IsInventoryItemDefinitionID,
-            (InventoryItemDefinition itemDefinition) => AreItemDefinitionsDepsSatisfied(itemDefinition)
+            (InventoryItemDefinition itemDefinition) => AreItemDefinitionsDepsSatisfied(itemDefinition),
+            AssetIDUtil.IsInventoryItemDefinitionID
         );
         _inventoryStore = new AssetStore<InventoryDTO, Inventory>(
             (InventoryDTO dto) => new Inventory(dto),
             AssetIDUtil.IsInventoryID,
-            (Inventory inventory) => AreInventoryDepsSatisfied(inventory)
+            (Inventory inventory) => AreInventoryDepsSatisfied(inventory),
+            AssetIDUtil.IsInventoryID
         );
 
         _playerStateAssetIDs = new PlayerStateAssetIDs[2]{
@@ -196,5 +200,9 @@ public partial class AssetManager : Node {
 
     public InventoryItemDefinition GetInventoryItemDefinition(string uuid) {
         return _inventoryItemDefinitionStore.GetAsset(uuid);
+    }
+
+    public InventoryItemCategory GetInventoryCategory(string uuid) {
+        return _inventoryItemCategoryStore.GetAsset(uuid);
     }
 }

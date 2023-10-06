@@ -8,7 +8,7 @@ public partial class InventoryFrame : Control {
     // if this is set then the container dimensions are ignored
     public bool FitContainerToGrid = true;
     // this is the margin between the container and the grid (only applies if FitContainerToGrid is true)
-    public int GridMarginPx = 60;
+    public int GridMarginPx = 30;
     public int TileSizePx { get; private set; }
     public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
     public Color DefaultTileColor = new Color(0.72f, 0.44f, 0.10f, 0.5f);
@@ -103,8 +103,8 @@ public partial class InventoryFrame : Control {
 
         Vector2 gridSize = new Vector2(_inventory.Width * TileSizePx, _inventory.Height * TileSizePx);
         if (FitContainerToGrid) {
-            ContainerWidthPx = gridSize.X + GridMarginPx;
-            ContainerHeightPx = gridSize.Y + GridMarginPx;
+            ContainerWidthPx = gridSize.X + GridMarginPx * 2;
+            ContainerHeightPx = gridSize.Y + GridMarginPx * 2;
         }
 
         if (_inventory.BackgroundImagePath != null) {
@@ -173,7 +173,7 @@ public partial class InventoryFrame : Control {
         InventoryItemSprite sprite = new InventoryItemSprite(item.ItemInstanceID) {
             Name = $"InventoryItemSprite_{item.ItemInstanceID}",
             Texture = texture,
-            Position = new Vector2(item.X, item.Y) * TileSizePx + new Vector2(itemDef.Space.Width - 1, itemDef.Space.Height - 1) * (TileSizePx / 2),
+            Position = new Vector2(item.X, item.Y) * TileSizePx + new Vector2(width / 2, height / 2),
             Scale = scale,
             Centered = true,
             Rotation = item.RotationRadians,

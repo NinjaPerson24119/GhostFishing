@@ -22,18 +22,7 @@ public partial class InventoryGrid : Node2D {
             for (int x = 0; x < _inventory.Width; x++) {
                 bool spaceUsable = _inventory.SpaceUsable(x, y);
                 bool spaceFilled = _inventory.SpaceFilled(x, y);
-
-                Color color = _defaultTileColor;
-                // get the item's background color if it has one
-                if (spaceFilled) {
-                    InventoryItemInstance? item = _inventory.ItemAt(x, y);
-                    if (item == null) {
-                        throw new System.Exception("Inventory ItemAt returned null but space is filled");
-                    }
-                    InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
-                    color = itemDef.BackgroundColorOverride ?? _defaultTileColor;
-                }
-
+                Color color = GetTileFillColor(x, y);
                 Vector2 position = new Vector2(x * _tileSizePx, y * _tileSizePx);
                 InventoryTile tile = new InventoryTile(position, _tileSizePx, color, _backgroundColor, spaceFilled, spaceUsable) {
                     Name = $"InventoryTile_{x}_{y}"
@@ -44,16 +33,29 @@ public partial class InventoryGrid : Node2D {
         }
     }
 
+    private Color GetTileFillColor(int x, int y) {
+        Color color = _defaultTileColor;
+        bool spaceFilled = _inventory.SpaceFilled(x, y);
+        if (spaceFilled) {
+            InventoryItemInstance? item = _inventory.ItemAt(x, y);
+            if (item == null) {
+                throw new System.Exception("Inventory ItemAt returned null but space is filled");
+            }
+            if (item.BackgroundColor != null) {
+                color = item.BackgroundColor.Value;
+            }
+        }
+        return color;
+    }
+
     private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
         // update filled state of tiles
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {
                 int idx = y * _inventory.Width + x;
-                InventoryTile control = _tiles[idx];
-                if (control is InventoryTile tile) {
-                    bool isFilled = _inventory.SpaceFilled(x, y);
-                    tile.IsFilled = isFilled;
-                }
+                InventoryTile tile = _tiles[idx];
+                tile.IsFilled = _inventory.SpaceFilled(x, y);
+                tile.TileColor = GetTileFillColor(x, y);
             }
         }
     }

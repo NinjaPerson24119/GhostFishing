@@ -97,6 +97,7 @@ public partial class InventoryItemTransport : Node2D {
         bool result = _mutator.PlaceItem(_item, tilePosition.X, tilePosition.Y);
         if (!result) {
             GD.Print("Can't place item");
+            return;
         }
         _item = null;
 
@@ -104,7 +105,7 @@ public partial class InventoryItemTransport : Node2D {
     }
 
     public void TakeItem() {
-        if (_item == null || _inventory == null || _mutator == null) {
+        if (_item != null || _inventory == null || _mutator == null) {
             return;
         }
         _item = _mutator.TakeItem(TilePosition.X, TilePosition.Y);
@@ -115,6 +116,7 @@ public partial class InventoryItemTransport : Node2D {
         _lastTake = new TakeItemAction(_inventory, _mutator, TilePosition);
 
         _selector.AssignItem(_item);
+        GD.Print("Took item (transport)");
     }
 
     public void RevertTakeItem() {
@@ -138,6 +140,7 @@ public partial class InventoryItemTransport : Node2D {
             throw new Exception("Cannot rotate because item is null.");
         }
         _item.RotateClockwise();
+        _selector.OnItemUpdated();
     }
 
     public void RotateCounterClockwise() {
@@ -145,6 +148,7 @@ public partial class InventoryItemTransport : Node2D {
             throw new Exception("Cannot rotate because item is null.");
         }
         _item.RotateCounterClockwise();
+        _selector.OnItemUpdated();
     }
 
     public void OnSelectedPositionChanged(Vector2I tilePosition) {
@@ -167,6 +171,7 @@ public partial class InventoryItemTransport : Node2D {
         if (_frame == null) {
             throw new Exception("Cannot change inventory focus because frame is null.");
         }
+        GD.Print($"Selector pos: {_frame.GetSelectorGlobalPosition()}");
         _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
         _selector.Visible = isFocused;
     }

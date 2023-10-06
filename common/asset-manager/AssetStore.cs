@@ -8,17 +8,23 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     public delegate T BuildAssetFromDTO(DTO dto);
     public delegate bool IsIDOfType(string id);
     public delegate bool AreDepsSatisfied(T asset);
+    public delegate bool IsValidID(string id);
     private BuildAssetFromDTO _buildAssetFromDTO;
     private IsIDOfType _isIDOfType;
     private AreDepsSatisfied? _areDepsSatisfied;
+    private IsValidID _isValidID;
 
-    public AssetStore(BuildAssetFromDTO buildAssetFromDTO, IsIDOfType isIDOfType, AreDepsSatisfied? areDepsSatisfied) {
+    public AssetStore(BuildAssetFromDTO buildAssetFromDTO, IsIDOfType isIDOfType, AreDepsSatisfied? areDepsSatisfied, IsValidID isValidID) {
         _buildAssetFromDTO = buildAssetFromDTO;
         _isIDOfType = isIDOfType;
         _areDepsSatisfied = areDepsSatisfied;
+        _isValidID = isValidID;
     }
 
     public void AddAsset(string id, DTO dto) {
+        if (!_isValidID(id)) {
+            throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
+        }
         if (dto == null) {
             GD.PrintErr($"DTO is null for {id} with asset type {typeof(T)}");
             return;
@@ -43,6 +49,9 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     }
 
     public T GetAsset(string id) {
+        if (!_isValidID(id)) {
+            throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
+        }
         try {
             return _assets[id];
         }
@@ -53,6 +62,9 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     }
 
     public bool HasAsset(string id) {
+        if (!_isValidID(id)) {
+            throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
+        }
         return _assets.ContainsKey(id);
     }
 }

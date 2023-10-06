@@ -1,4 +1,5 @@
 using System;
+using Godot;
 
 public class InventoryItemCategoryDTO : IGameAssetDTO {
     public string? Name { get; set; }
@@ -20,7 +21,7 @@ public class InventoryItemCategoryDTO : IGameAssetDTO {
 public class InventoryItemCategory {
     public string Name { get; set; }
     public string IconImagePath { get; set; }
-    public string BackgroundColor { get; set; }
+    public Color BackgroundColor { get; set; }
 
     public InventoryItemCategory(InventoryItemCategoryDTO dto) {
         if (!dto.IsValid()) {
@@ -28,6 +29,6 @@ public class InventoryItemCategory {
         }
         Name = dto.Name!;
         IconImagePath = dto.IconImagePath!;
-        BackgroundColor = dto.BackgroundColor!;
+        BackgroundColor = new Color(dto.BackgroundColor!);
     }
 }

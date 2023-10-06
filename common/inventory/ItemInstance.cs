@@ -42,6 +42,7 @@ public class InventoryItemInstance {
         }
     }
     public InventoryItemFlags? FlagOverrides { get; set; }
+    public Color? BackgroundColor;
 
     public InventoryItemInstance(InventoryItemInstanceDTO dto) {
         if (!dto.IsValid()) {
@@ -59,6 +60,15 @@ public class InventoryItemInstance {
         Rotation = dto.Rotation;
         if (dto.FlagOverrides != null) {
             FlagOverrides = new InventoryItemFlags(dto.FlagOverrides);
+        }
+
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(ItemDefinitionID);
+        if (itemDef.BackgroundColorOverride != null) {
+            BackgroundColor = itemDef.BackgroundColorOverride;
+        }
+        else if (itemDef.CategoryID != null) {
+            InventoryItemCategory category = AssetManager.Ref().GetInventoryCategory(itemDef.CategoryID);
+            BackgroundColor = category.BackgroundColor;
         }
     }
 

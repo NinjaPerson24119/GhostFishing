@@ -1,7 +1,16 @@
 using Godot;
 
 public partial class InventoryTile : Sprite2D {
-    private Color TileColor = Colors.Green;
+    public Color TileColor {
+        get {
+            return _tileColor;
+        }
+        set {
+            _tileColor = value;
+            UpdateShader();
+        }
+    }
+    private Color _tileColor;
     public bool IsFilled {
         get {
             return _isFilled;
@@ -13,13 +22,15 @@ public partial class InventoryTile : Sprite2D {
     }
     private bool _isFilled;
 
-    private Color BackgroundColor = Colors.Yellow;
+    private Color BackgroundColor;
     private ShaderMaterial _material = new ShaderMaterial();
 
     private const string _tileImagePath = "res://artwork/generated/ui/InventoryTile.png";
     private const string _tileShaderPath = "res://common/inventory/ui/InventoryTile.gdshader";
 
     public InventoryTile(Vector2 position, float tileSize, Color tileColor, Color backgroundColor, bool isFilled, bool isVisible) {
+        Centered = false;
+
         _material.Shader = GD.Load<Shader>(_tileShaderPath);
         _material.SetShaderParameter("background_color", backgroundColor);
         _material.SetShaderParameter("outline_color", tileColor);
@@ -39,6 +50,7 @@ public partial class InventoryTile : Sprite2D {
     }
 
     private void UpdateShader() {
+        _material.SetShaderParameter("outline_color", TileColor);
         if (IsFilled) {
             _material.SetShaderParameter("fill_color", TileColor);
         }
