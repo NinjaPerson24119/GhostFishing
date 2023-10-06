@@ -24,33 +24,14 @@ public partial class InventoryItemTransport : Node2D {
     private Inventory.Mutator? _mutator;
     // visual representation of inventory we need to send updates to
     private InventoryFrame? _frame;
-    private int _tileSize;
-    private Node2D _selector = new Node2D() {
-        Name = "Selector"
-    };
-    private ColorRect _highlight = new ColorRect() {
-        Name = "Highlight",
-        Color = new Color(1.0f, 1.0f, 1.0f, 0.5f)
-    };
-    private Sprite2D _sprite = new Sprite2D() {
-        Name = "ItemSprite",
-        Centered = true
-    };
+    private InventoryItemTransportSelector _selector;
 
     public InventoryItemTransport(int TileSize) {
-        _tileSize = TileSize;
-    }
-
-    public override void _Ready() {
         Name = "ItemTransport";
-
-        _selector.Scale = new Vector2(_tileSize, _tileSize);
-        AddChild(_selector);
-
-        _highlight.Size = new Vector2(1, 1);
-        _selector.AddChild(_highlight);
-
-        _selector.AddChild(_sprite);
+        _selector = new InventoryItemTransportSelector(TileSize) {
+            Name = "Selector"
+        };
+        CallDeferred("add_child", _selector);
     }
 
     public override void _ExitTree() {
@@ -75,13 +56,21 @@ public partial class InventoryItemTransport : Node2D {
 
         _selector.Visible = true;
 
-        _frame.FocusEntered += () => InventoryFocused(true);
-        _frame.FocusExited += () => InventoryFocused(false);
+        _frame.FocusEntered += OnInventoryFocused;
+        _frame.FocusExited += OnInventoryUnfocused;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
         _frame.GrabFocus();
     }
 
     public void CloseInventory() {
+        if (_frame == null) {
+            throw new Exception("Cannot close inventory because frame is null.");
+        }
+
+        _frame.FocusEntered -= OnInventoryFocused;
+        _frame.FocusExited -= OnInventoryUnfocused;
+        _frame.SelectedPositionChanged -= OnSelectedPositionChanged;
+
         if (_inventory == null || _mutator == null) {
             throw new Exception("Cannot close inventory because inventory and/or mutator is null.");
         }
@@ -111,8 +100,7 @@ public partial class InventoryItemTransport : Node2D {
         }
         _item = null;
 
-        _selector.Scale = new Vector2(_tileSize, _tileSize);
-        _sprite.Visible = false;
+        _selector.UnassignItem();
     }
 
     public void TakeItem() {
@@ -126,13 +114,7 @@ public partial class InventoryItemTransport : Node2D {
         }
         _lastTake = new TakeItemAction(_inventory, _mutator, TilePosition);
 
-        string imagePath = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID).ImagePath;
-        Texture2D texture = GD.Load<Texture2D>(imagePath);
-        _sprite.Texture = texture;
-        _sprite.Position = new Vector2(texture.GetWidth() / 2, texture.GetHeight() / 2);
-        _sprite.Rotation = _item.RotationRadians;
-        _selector.Scale = new Vector2(_tileSize / texture.GetWidth(), _tileSize / texture.GetHeight());
-        _sprite.Visible = true;
+        _selector.AssignItem(_item);
     }
 
     public void RevertTakeItem() {
@@ -172,10 +154,16 @@ public partial class InventoryItemTransport : Node2D {
 
         GD.Print($"Transport tilePosition changed: {tilePosition}");
         TilePosition = tilePosition;
-        _selector.Position = _frame.GetSelectorGlobalPosition();
+        _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
     }
 
-    public void InventoryFocused(bool isFocused) {
+    public void OnInventoryFocused() {
+        InventoryFocused(true);
+    }
+    public void OnInventoryUnfocused() {
+        InventoryFocused(false);
+    }
+    private void InventoryFocused(bool isFocused) {
         if (_frame == null) {
             throw new Exception("Cannot change inventory focus because frame is null.");
         }
