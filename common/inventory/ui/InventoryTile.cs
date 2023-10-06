@@ -61,10 +61,11 @@ public partial class InventoryTile : TextureRect {
 
     public override void _Process(double delta) {
         // NOTIFICATION_TRANSFORM_CHANGED doesn't work, so do it ourselves
-        if (GlobalPosition != _lastGlobalPosition) {
-            EmitSignal(SignalName.GlobalPositionChanged, GlobalPosition);
-            _lastGlobalPosition = GlobalPosition;
-        }
+        //if (GlobalPosition != _lastGlobalPosition) {
+        //    
+        //}
+        EmitSignal(SignalName.GlobalPositionChanged, GlobalPosition);
+        _lastGlobalPosition = GlobalPosition;
     }
 
     public override void _Notification(int what) {

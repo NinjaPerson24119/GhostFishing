@@ -155,9 +155,6 @@ public partial class InventoryGrid : GridContainer {
                 Control control = _tileControls[idx];
                 if (control is InventoryTile tile) {
                     bool isFilled = _inventory.SpaceFilled(x, y);
-                    if (isFilled) {
-                        GD.Print($"Still filled at {x}, {y}");
-                    }
                     tile.IsFilled = isFilled;
                 }
             }

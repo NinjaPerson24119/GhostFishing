@@ -133,7 +133,6 @@ public partial class InventoryFrame : Control {
             throw new Exception("Cannot add items because inventory is null.");
         }
 
-
         // add items to grid
         foreach (InventoryItemInstance item in _inventory.Items) {
             InventoryItemControl itemControl = BuildItemControl(item);
@@ -152,17 +151,20 @@ public partial class InventoryFrame : Control {
 
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
 
+        InventoryTile tile = _inventoryGrid.GetTile(new Vector2I(item.X, item.Y));
         float width = TileSizePx * itemDef.Space.Width;
         float height = TileSizePx * itemDef.Space.Height;
-        InventoryItemControl itemControl = new InventoryItemControl(item.ItemInstanceID) {
+        InventoryItemControl itemControl = new InventoryItemControl(item.ItemInstanceID, tile) {
             Texture = GD.Load<Texture2D>(itemDef.ImagePath),
+            GlobalPosition = tile.GlobalPosition,
             Size = new Vector2(width, height),
             Rotation = item.RotationRadians,
+            ZIndex = 10,
         };
         itemControl.PivotOffset = itemControl.Size / 2;
         _itemControls.Add(itemControl);
-        InventoryTile tile = _inventoryGrid.GetTile(new Vector2I(item.X, item.Y));
-        tile.GlobalPositionChanged += itemControl.OnInventoryTileGlobalPositionChanged;
+
+        GD.Print($"Control placed at {tile.GlobalPosition}");
 
         return itemControl;
     }

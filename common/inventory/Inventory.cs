@@ -255,7 +255,7 @@ public partial class Inventory : Node {
         return new Mutator(this);
     }
 
-    public class Mutator {
+    public class Mutator : IDisposable {
         private Inventory _inventory;
         private bool _released;
         public Mutator(Inventory inventory) {
@@ -264,13 +264,13 @@ public partial class Inventory : Node {
         }
         ~Mutator() {
             if (!_released) {
-                GD.PrintErr("InventoryMutator was not released before destruction.");
-                _inventory._locked = false;
+                GD.PrintErr("InventoryMutator was not disposed before destructor.");
+                Dispose();
             }
         }
 
-        public void Release() {
-            DebugTools.Assert(!_released, "Mutator.Release called multiple times");
+        public void Dispose() {
+            // should be idempotent
             if (!_released) {
                 _released = true;
                 _inventory._locked = false;
@@ -279,7 +279,7 @@ public partial class Inventory : Node {
 
         public bool PlaceItem(InventoryItemInstance item, int x, int y) {
             if (_released) {
-                GD.PrintErr("InventoryMutator.PlaceItem called after InventoryMutator.Release");
+                GD.PrintErr("InventoryMutator.PlaceItem called after mutator was disposed");
                 return false;
             }
             return _inventory.PlaceItem(item, x, y);
@@ -287,7 +287,7 @@ public partial class Inventory : Node {
 
         public InventoryItemInstance? TakeItem(int x, int y) {
             if (_released) {
-                GD.PrintErr("InventoryMutator.TakeItem called after InventoryMutator.Release");
+                GD.PrintErr("InventoryMutator.TakeItem called after mutator was disposed");
                 return null;
             }
             return _inventory.TakeItem(x, y);

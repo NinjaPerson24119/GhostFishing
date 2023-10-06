@@ -52,9 +52,9 @@ public class InventoryItemTransport {
         if (_item != null) {
             RevertTakeItem();
         }
-        _mutator.Release();
-        _inventory = null;
+        _mutator.Dispose();
         _mutator = null;
+        _inventory = null;
     }
 
     public void PlaceItem() {
