@@ -232,7 +232,10 @@ public partial class Inventory : Node {
             }
             return null;
         }
-        Items.Remove(item);
+        bool removeSucceeded = Items.Remove(item);
+        if (!removeSucceeded) {
+            throw new Exception("Failed to remove item from inventory");
+        }
         UpdateItemMask();
         if (!_ignoreTouches) {
             Touched = true;
