@@ -14,24 +14,27 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
 
     public virtual bool IsValid() {
         if (string.IsNullOrEmpty(Name) || string.IsNullOrEmpty(Description)) {
+            GD.PrintErr($"Name or Description is null or empty.");
             return false;
         }
         if (CurrencyValue < 0) {
+            GD.PrintErr($"CurrencyValue is less than 0.");
             return false;
         }
         if (string.IsNullOrEmpty(ImagePath)) {
+            GD.PrintErr($"ImagePath is null or empty.");
             return false;
         }
         // Silhouette is optional
         if (Space == null || !Space.IsValid()) {
+            GD.Print($"Space is null or invalid.");
             return false;
         }
         if (Flags == null || !Flags.IsValid()) {
+            GD.Print($"Flags is null or invalid.");
             return false;
         }
-        if (string.IsNullOrEmpty(CategoryID)) {
-            return false;
-        }
+        // Category is optional
         // BackgroundColorOverride is optional
         return true;
     }
@@ -49,7 +52,9 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
         if (Flags != null) {
             str += $"Flags (object):\n{Flags.Stringify()}\n";
         }
-        str += $"Category: {CategoryID}";
+        if (CategoryID != null) {
+            str += $"Category: {CategoryID}";
+        }
         str += $"BackgroundColorOverride: {BackgroundColorOverride}";
         return str;
     }
@@ -63,12 +68,12 @@ public class InventoryItemDefinition {
     public string? SilhouetteImagePath { get; set; }
     public InventoryItemSpaceProperties Space { get; set; }
     public InventoryItemFlags Flags { get; set; }
-    public string CategoryID { get; set; }
+    public string? CategoryID { get; set; }
     public Color? BackgroundColorOverride { get; set; }
 
     public InventoryItemDefinition(InventoryItemDefinitionDTO dto) {
         if (!dto.IsValid()) {
-            throw new ArgumentException("Invalid InventoryItemDefinitionDTO");
+            throw new ArgumentException($"Invalid InventoryItemDefinitionDTO \n{dto.Stringify()}");
         }
         Name = dto.Name!;
         Description = dto.Description!;
@@ -77,7 +82,7 @@ public class InventoryItemDefinition {
         SilhouetteImagePath = dto.SilhouetteImagePath;
         Space = new InventoryItemSpaceProperties(dto.Space!);
         Flags = new InventoryItemFlags(dto.Flags!);
-        CategoryID = dto.CategoryID!;
+        CategoryID = dto.CategoryID;
         if (dto.BackgroundColorOverride == null) {
             BackgroundColorOverride = null;
         }

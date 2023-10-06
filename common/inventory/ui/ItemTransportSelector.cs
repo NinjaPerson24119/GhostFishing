@@ -2,8 +2,10 @@ using Godot;
 
 public partial class InventoryItemTransportSelector : Node2D {
     private int _tileSize;
+    // for scaling simplicity center all the children
     private Sprite2D _outline = new Sprite2D() {
         Name = "Outline",
+        Centered = true
     };
     private Sprite2D _sprite = new Sprite2D() {
         Name = "ItemSprite",

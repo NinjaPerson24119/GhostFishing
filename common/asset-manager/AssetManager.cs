@@ -19,6 +19,7 @@ public partial class AssetManager : Node {
     private const string _defaultQuestInventoryPath = "res://data/default-quest-inventory.json";
     private const string _defaultStorageInventoryPath = "res://data/default-storage-inventory.json";
     private const string _fishDefinitionsPath = "res://data/fish.json";
+    private const string _itemDefinitionsPath = "res://data/items.json";
     private const string _itemCategoryDefinitionsPath = "res://data/item-categories.json";
     private const string _questDefinitionsPath = "res://data/quests.json";
 
@@ -91,6 +92,7 @@ public partial class AssetManager : Node {
         // load order is significant
         LoadAssetsFromJSON(_inventoryItemCategoryStore, _itemCategoryDefinitionsPath);
         LoadAssetsFromJSON(_questDefinitionStore, _questDefinitionsPath);
+        LoadAssetsFromJSON(_inventoryItemDefinitionStore, _itemDefinitionsPath);
         LoadAssetsFromJSON(_inventoryItemDefinitionStore, _fishDefinitionsPath);
 
         _defaultBoatInventoryDTO = LoadAssetFromJSON<InventoryDTO>(_defaultBoatInventoryPath);
@@ -113,7 +115,7 @@ public partial class AssetManager : Node {
     }
 
     private bool AreItemDefinitionsDepsSatisfied(InventoryItemDefinition itemDefinition) {
-        if (!_inventoryItemCategoryStore.HasAsset(itemDefinition.CategoryID)) {
+        if (itemDefinition.CategoryID != null && !_inventoryItemCategoryStore.HasAsset(itemDefinition.CategoryID)) {
             return false;
         }
         return true;

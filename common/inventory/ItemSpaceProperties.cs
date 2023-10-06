@@ -1,4 +1,5 @@
 using System;
+using Godot;
 
 public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     public int Width { get; set; }
@@ -7,15 +8,19 @@ public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
 
     public bool IsValid() {
         if (Width <= 0 || Height <= 0) {
+            GD.PrintErr($"Width or Height is less than or equal to 0.");
             return false;
         }
         if (FilledMask == null) {
+            GD.PrintErr($"FilledMask is null.");
             return false;
         }
         if (FilledMask.Length != Width * Height) {
+            GD.PrintErr($"FilledMask length is not equal to Width * Height.");
             return false;
         }
         if (!ConnectedArray.IsArrayConnected(Width, Height, FilledMask)) {
+            GD.PrintErr($"FilledMask is not connected.");
             return false;
         }
         return true;

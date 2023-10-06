@@ -147,11 +147,14 @@ public partial class InventoryFrame : Control {
         if (_inventory == null) {
             throw new Exception("Cannot add items because inventory is null.");
         }
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot add items because inventory grid is null.");
+        }
 
         GD.Print("Spawning inventory items");
         foreach (InventoryItemInstance item in _inventory.Items) {
             InventoryItemSprite itemSprite = BuildItemSprite(item);
-            CallDeferred("add_child", itemSprite);
+            _inventoryGrid.CallDeferred("add_child", itemSprite);
         }
         GD.Print($"InventoryFrame: added {_itemSprites.Count} items");
     }
@@ -166,14 +169,14 @@ public partial class InventoryFrame : Control {
         float width = TileSizePx * itemDef.Space.Width;
         float height = TileSizePx * itemDef.Space.Height;
         Texture2D texture = GD.Load<Texture2D>(itemDef.ImagePath);
+        Vector2 scale = new Vector2(width / texture.GetWidth(), height / texture.GetHeight());
         InventoryItemSprite sprite = new InventoryItemSprite(item.ItemInstanceID) {
             Name = $"InventoryItemSprite_{item.ItemInstanceID}",
             Texture = texture,
-            Position = _inventoryGrid.Position + new Vector2(width / 2, height / 2),
-            Scale = new Vector2(width / texture.GetWidth(), height / texture.GetHeight()),
+            Position = new Vector2(item.X, item.Y) * TileSizePx + new Vector2(itemDef.Space.Width - 1, itemDef.Space.Height - 1) * (TileSizePx / 2),
+            Scale = scale,
             Centered = true,
             Rotation = item.RotationRadians,
-            ZIndex = 10,
         };
         _itemSprites.Add(sprite);
 
@@ -184,6 +187,9 @@ public partial class InventoryFrame : Control {
         if (_inventory == null) {
             throw new Exception("Cannot update inventory because inventory is null.");
         }
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot update inventory because inventory grid is null.");
+        }
 
         switch (updateType) {
             case Inventory.UpdateType.Place:
@@ -193,7 +199,7 @@ public partial class InventoryFrame : Control {
                 }
                 InventoryItemSprite itemSprite = BuildItemSprite(item);
                 _itemSprites.Add(itemSprite);
-                CallDeferred("add_child", itemSprite);
+                _inventoryGrid.CallDeferred("add_child", itemSprite);
                 break;
             case Inventory.UpdateType.Take:
                 InventoryItemSprite? itemToRemove = null;
