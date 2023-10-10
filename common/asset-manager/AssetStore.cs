@@ -14,6 +14,8 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private AreDepsSatisfied? _areDepsSatisfied;
     private IsValidID _isValidID;
 
+    private List<Texture2D> _persistentTextures = new List<Texture2D>();
+
     public AssetStore(BuildAssetFromDTO buildAssetFromDTO, IsIDOfType isIDOfType, AreDepsSatisfied? areDepsSatisfied, IsValidID isValidID) {
         _buildAssetFromDTO = buildAssetFromDTO;
         _isIDOfType = isIDOfType;
@@ -22,6 +24,8 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     }
 
     public void AddAsset(string id, DTO dto) {
+        GD.Print($"Adding {typeof(T)} asset with ID: {id}");
+
         if (!_isValidID(id)) {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
         }
@@ -45,6 +49,23 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
             GD.PrintErr($"Dependencies not satisfied for {id} with asset type {typeof(T)}");
             return;
         }
+
+        var dtoWithImages = dto as IGameAssetDTOWithImages;
+        if (dtoWithImages != null) {
+            string[] imageAssetPaths = dtoWithImages.ImageAssetPaths();
+            foreach (string imageAssetPath in imageAssetPaths) {
+                string globalizedPath = ProjectSettings.GlobalizePath(imageAssetPath);
+                try {
+                    Texture2D texture = GD.Load<Texture2D>(globalizedPath);
+                    GD.Print($"Loaded texture from path {globalizedPath}");
+                    _persistentTextures.Add(texture);
+                }
+                catch (Exception e) {
+                    GD.PrintErr($"Error loading texture from path {globalizedPath}: {e}");
+                }
+            }
+        }
+
         _assets.Add(id, model);
     }
 

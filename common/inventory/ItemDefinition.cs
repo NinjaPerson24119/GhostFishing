@@ -1,7 +1,8 @@
 using System;
 using Godot;
+using System.Collections.Generic;
 
-public class InventoryItemDefinitionDTO : IGameAssetDTO {
+public class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     public string? Name { get; set; }
     public string? Description { get; set; }
     public int CurrencyValue { get; set; }
@@ -57,6 +58,17 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO {
         }
         str += $"BackgroundColorOverride: {BackgroundColorOverride}";
         return str;
+    }
+
+    public string[] ImageAssetPaths() {
+        List<string> paths = new List<string>();
+        if (!string.IsNullOrEmpty(ImagePath)) {
+            paths.Add(ImagePath);
+        }
+        if (!string.IsNullOrEmpty(SilhouetteImagePath)) {
+            paths.Add(SilhouetteImagePath);
+        }
+        return paths.ToArray();
     }
 }
 

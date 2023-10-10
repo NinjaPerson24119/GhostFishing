@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-public class InventoryItemCategoryDTO : IGameAssetDTO {
+public class InventoryItemCategoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     public string? Name { get; set; }
     public string? IconImagePath { get; set; }
     public string? BackgroundColor { get; set; }
@@ -15,6 +15,13 @@ public class InventoryItemCategoryDTO : IGameAssetDTO {
 
     public string Stringify() {
         return $"Name: {Name}\nIconImagePath: {IconImagePath}\nBackgroundColor: {BackgroundColor}";
+    }
+
+    public string[] ImageAssetPaths() {
+        if (string.IsNullOrEmpty(IconImagePath)) {
+            return new string[] { };
+        }
+        return new string[] { IconImagePath };
     }
 }
 

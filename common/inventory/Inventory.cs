@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class InventoryDTO : IGameAssetDTO {
+public class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     public int Width { get; set; }
     public int Height { get; set; }
     public InventoryItemInstanceDTO[]? Items { get; set; }
@@ -52,6 +52,13 @@ public class InventoryDTO : IGameAssetDTO {
             }
         }
         return str;
+    }
+
+    public string[] ImageAssetPaths() {
+        if (string.IsNullOrEmpty(BackgroundImagePath)) {
+            return new string[] { };
+        }
+        return new string[] { BackgroundImagePath };
     }
 }
 
