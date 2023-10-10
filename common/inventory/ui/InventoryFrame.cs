@@ -14,11 +14,13 @@ public partial class InventoryFrame : Control {
     public Color DefaultTileColor = new Color(0.72f, 0.44f, 0.10f);
     public Color CanPlaceItemTileColor = new Color(0.0f, 1.0f, 0.0f);
     public Color CannotPlaceItemTileColor = new Color(1.0f, 0.0f, 0.0f);
+    public Vector2I SelectedPosition { get; private set; } = new Vector2I(0, 0);
 
     private Inventory? _inventory;
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
-    public Vector2I SelectedPosition { get; private set; } = new Vector2I(0, 0);
+    private Vector2I _selectionBoundTopLeft = new Vector2I(0, 0);
+    private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
 
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
@@ -60,7 +62,7 @@ public partial class InventoryFrame : Control {
             updated = true;
         }
         if (updated) {
-            SelectedPosition = SelectedPosition.Clamp(new Vector2I(0, 0), new Vector2I(_inventory.Width - 1, _inventory.Height - 1));
+            SelectedPosition = SelectedPosition.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
             EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
         }
     }
@@ -75,6 +77,7 @@ public partial class InventoryFrame : Control {
         TileSizePx = tileSizePx;
 
         RespawnChildren();
+        ResetSelectionBound();
         SelectDefaultPosition();
     }
 
@@ -287,5 +290,24 @@ public partial class InventoryFrame : Control {
             };
         }
         _inventoryGrid.UpdateTileAppearances();
+    }
+
+    public void ResetSelectionBound() {
+        if (_inventory == null) {
+            throw new Exception("Cannot reset selection bound because inventory is null.");
+        }
+        _selectionBoundTopLeft = new Vector2I(0, 0);
+        _selectionBoundBottomRight = new Vector2I(_inventory.Width - 1, _inventory.Height - 1);
+    }
+
+    public void SetSelectionBound(Vector2I topLeft, Vector2I bottomRight) {
+        if (_inventory == null) {
+            throw new Exception("Cannot set selection bound because inventory is null.");
+        }
+        if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width - 1 || bottomRight.Y >= _inventory.Height - 1) {
+            throw new Exception("Cannot set selections bound beyond inventory bounds.");
+        }
+        _selectionBoundTopLeft = topLeft;
+        _selectionBoundBottomRight = bottomRight;
     }
 }

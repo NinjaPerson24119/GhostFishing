@@ -101,7 +101,7 @@ public partial class InventoryItemTransport : Node2D {
     }
 
     public void TakeItem() {
-        if (_item != null || _inventory == null || _mutator == null) {
+        if (_item != null || _inventory == null || _mutator == null || _frame == null) {
             return;
         }
         _item = _mutator.TakeItem(TilePosition.X, TilePosition.Y);
@@ -112,7 +112,11 @@ public partial class InventoryItemTransport : Node2D {
         _lastTake = new TakeItemAction(_inventory, _mutator, TilePosition);
 
         _selector.AssignItem(_item);
+
         SetItemTileAppearance();
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
+        _frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_inventory.Width - itemDef.Space.Width, _inventory.Height - itemDef.Space.Height));
+
         GD.Print("Took item (transport)");
     }
 
@@ -156,6 +160,7 @@ public partial class InventoryItemTransport : Node2D {
         _selector.UnassignItem();
         if (_frame != null) {
             _frame.ClearItemTilesAppearance();
+            _frame.ResetSelectionBound();
         }
     }
 
