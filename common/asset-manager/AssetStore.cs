@@ -14,13 +14,20 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private AreDepsSatisfied? _areDepsSatisfied;
     private IsValidID _isValidID;
 
-    private List<Texture2D> _persistentTextures = new List<Texture2D>();
+    private Dictionary<string, Texture2D>? _persistedTexturesStore;
 
-    public AssetStore(BuildAssetFromDTO buildAssetFromDTO, IsIDOfType isIDOfType, AreDepsSatisfied? areDepsSatisfied, IsValidID isValidID) {
+    public AssetStore(
+        BuildAssetFromDTO buildAssetFromDTO,
+        IsIDOfType isIDOfType,
+        AreDepsSatisfied? areDepsSatisfied,
+        IsValidID isValidID,
+        Dictionary<string, Texture2D>? persistedTexturesStore
+    ) {
         _buildAssetFromDTO = buildAssetFromDTO;
         _isIDOfType = isIDOfType;
         _areDepsSatisfied = areDepsSatisfied;
         _isValidID = isValidID;
+        _persistedTexturesStore = persistedTexturesStore;
     }
 
     public void AddAsset(string id, DTO dto) {
@@ -51,14 +58,17 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
         }
 
         var dtoWithImages = dto as IGameAssetDTOWithImages;
-        if (dtoWithImages != null) {
+        if (dtoWithImages != null && _persistedTexturesStore != null) {
             string[] imageAssetPaths = dtoWithImages.ImageAssetPaths();
             foreach (string imageAssetPath in imageAssetPaths) {
+                if (_persistedTexturesStore.ContainsKey(imageAssetPath)) {
+                    continue;
+                }
                 string globalizedPath = ProjectSettings.GlobalizePath(imageAssetPath);
                 try {
                     Texture2D texture = GD.Load<Texture2D>(globalizedPath);
                     GD.Print($"Loaded texture from path {globalizedPath}");
-                    _persistentTextures.Add(texture);
+                    _persistedTexturesStore.Add(imageAssetPath, texture);
                 }
                 catch (Exception e) {
                     GD.PrintErr($"Error loading texture from path {globalizedPath}: {e}");

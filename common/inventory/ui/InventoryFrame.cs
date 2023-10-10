@@ -31,6 +31,7 @@ public partial class InventoryFrame : Control {
         FocusMode = FocusModeEnum.All;
         TileSizePx = tileSizePx;
         SetInventory(inventory, tileSizePx);
+        AssetManager.Ref().PersistImage(_containerFrameImagePath);
     }
 
     public override void _ExitTree() {
@@ -304,7 +305,7 @@ public partial class InventoryFrame : Control {
         if (_inventory == null) {
             throw new Exception("Cannot set selection bound because inventory is null.");
         }
-        if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width - 1 || bottomRight.Y >= _inventory.Height - 1) {
+        if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width || bottomRight.Y >= _inventory.Height) {
             throw new Exception("Cannot set selections bound beyond inventory bounds.");
         }
         _selectionBoundTopLeft = topLeft;

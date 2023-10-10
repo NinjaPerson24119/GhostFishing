@@ -34,6 +34,8 @@ public partial class AssetManager : Node {
     private AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition> _inventoryItemDefinitionStore;
     private AssetStore<QuestDefinitionDTO, QuestDefinition> _questDefinitionStore;
     private AssetStore<InventoryDTO, Inventory> _inventoryStore;
+    // stores unglobalized paths to textures
+    private Dictionary<string, Texture2D> _persistedTextures = new Dictionary<string, Texture2D>();
 
     private bool _logLoadedDTOs = true;
 
@@ -44,25 +46,29 @@ public partial class AssetManager : Node {
             (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
             AssetIDUtil.IsInventoryItemCategoryID,
             null,
-            AssetIDUtil.IsInventoryItemCategoryID
+            AssetIDUtil.IsInventoryItemCategoryID,
+            _persistedTextures
         );
         _questDefinitionStore = new AssetStore<QuestDefinitionDTO, QuestDefinition>(
             (QuestDefinitionDTO dto) => new QuestDefinition(dto),
             AssetIDUtil.IsQuestID,
             null,
-            AssetIDUtil.IsQuestID
+            AssetIDUtil.IsQuestID,
+            _persistedTextures
         );
         _inventoryItemDefinitionStore = new AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition>(
             (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
             AssetIDUtil.IsInventoryItemDefinitionID,
             (InventoryItemDefinition itemDefinition) => AreItemDefinitionsDepsSatisfied(itemDefinition),
-            AssetIDUtil.IsInventoryItemDefinitionID
+            AssetIDUtil.IsInventoryItemDefinitionID,
+            _persistedTextures
         );
         _inventoryStore = new AssetStore<InventoryDTO, Inventory>(
             (InventoryDTO dto) => new Inventory(dto),
             AssetIDUtil.IsInventoryID,
             (Inventory inventory) => AreInventoryDepsSatisfied(inventory),
-            AssetIDUtil.IsInventoryID
+            AssetIDUtil.IsInventoryID,
+            _persistedTextures
         );
 
         _playerStateAssetIDs = new PlayerStateAssetIDs[2]{
@@ -204,5 +210,15 @@ public partial class AssetManager : Node {
 
     public InventoryItemCategory GetInventoryCategory(string uuid) {
         return _inventoryItemCategoryStore.GetAsset(uuid);
+    }
+
+    public void PersistImage(string imagePath) {
+        if (_persistedTextures.ContainsKey(imagePath)) {
+            return;
+        }
+        string globalizedPath = ProjectSettings.GlobalizePath(imagePath);
+        Texture2D texture = GD.Load<Texture2D>(globalizedPath);
+        _persistedTextures.Add(imagePath, texture);
+        GD.Print($"Persisted texture from path {globalizedPath}");
     }
 }
