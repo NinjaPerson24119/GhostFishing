@@ -21,6 +21,7 @@ public partial class InventoryFrame : Control {
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
     private Vector2I _selectionBoundTopLeft = new Vector2I(0, 0);
     private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
+
     private Timer _inputRepeatDebounceTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
@@ -29,6 +30,12 @@ public partial class InventoryFrame : Control {
         WaitTime = 0.5f,
         OneShot = true,
     };
+    private Dictionary<string, Vector2I> _inputActionToDirection = new Dictionary<string, Vector2I> {
+            {"ui_up", new Vector2I(0, -1)},
+            {"ui_down", new Vector2I(0, 1)},
+            {"ui_left", new Vector2I(-1, 0)},
+            {"ui_right", new Vector2I(1, 0)}
+        };
 
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
@@ -58,24 +65,17 @@ public partial class InventoryFrame : Control {
             return;
         }
 
-        Dictionary<string, Vector2I> keyToDirection = new Dictionary<string, Vector2I> {
-            {"ui_up", new Vector2I(SelectedPosition.X, SelectedPosition.Y - 1)},
-            {"ui_down", new Vector2I(SelectedPosition.X, SelectedPosition.Y + 1)},
-            {"ui_left", new Vector2I(SelectedPosition.X - 1, SelectedPosition.Y)},
-            {"ui_right", new Vector2I(SelectedPosition.X + 1, SelectedPosition.Y)}
-        };
-
         bool updated = false;
-        foreach (KeyValuePair<string, Vector2I> entry in keyToDirection) {
+        foreach (KeyValuePair<string, Vector2I> entry in _inputActionToDirection) {
             if (Input.IsActionJustPressed(entry.Key)) {
-                SelectedPosition = entry.Value;
+                SelectedPosition = SelectedPosition + entry.Value;
                 updated = true;
                 _inputRepeatDelayTimer.Start();
                 _inputRepeatDebounceTimer.Start();
                 break;
             }
             if (_inputRepeatDelayTimer.IsStopped() && _inputRepeatDebounceTimer.IsStopped() && Input.IsActionPressed(entry.Key)) {
-                SelectedPosition = entry.Value;
+                SelectedPosition = SelectedPosition + entry.Value;
                 updated = true;
                 _inputRepeatDebounceTimer.Start();
                 break;
