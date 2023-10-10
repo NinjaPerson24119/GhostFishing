@@ -13,13 +13,16 @@ public partial class InventoryItemTransportSelector : Node2D {
         Centered = true
     };
     private InventoryItemInstance? _item;
+    private string outlineImagePath = "res://artwork/generated/ui/Selector.png";
 
     public InventoryItemTransportSelector(int tileSize) {
         _tileSize = tileSize;
 
         AddChild(_sprite);
 
-        Texture2D outlineTexture = GD.Load<Texture2D>("res://artwork/generated/ui/Selector.png");
+        Texture2D outlineTexture = GD.Load<Texture2D>(outlineImagePath);
+        AssetManager.Ref().PersistImage(outlineImagePath);
+
         _outline.Texture = outlineTexture;
         _outlineDefaultScale = new Vector2(tileSize / outlineTexture.GetWidth(), tileSize / outlineTexture.GetHeight());
         _outline.Scale = _outlineDefaultScale;

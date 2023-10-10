@@ -6,11 +6,13 @@ public partial class InventoryItemTransport : Node2D {
         public Inventory From;
         public Inventory.Mutator FromMutator;
         public Vector2I TilePosition;
+        public InventoryItemRotation Rotation;
 
-        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, Vector2I tilePosition) {
+        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, InventoryItemInstance item) {
             From = from;
             FromMutator = fromMutator;
-            TilePosition = tilePosition;
+            TilePosition = new Vector2I(item.X, item.Y);
+            Rotation = item.Rotation;
         }
     }
 
@@ -38,6 +40,15 @@ public partial class InventoryItemTransport : Node2D {
         if (_mutator != null) {
             GD.PrintErr("InventoryItemTransport was not closed before being destroyed.");
             _mutator.Dispose();
+        }
+    }
+
+    public override void _Process(double delta) {
+        if (_inventory == null || _frame == null) {
+            return;
+        }
+        if (!_frame.HasFocus()) {
+            RevertTakeItem();
         }
     }
 
@@ -92,7 +103,9 @@ public partial class InventoryItemTransport : Node2D {
         if (_item == null || _inventory == null || _mutator == null) {
             return;
         }
-        bool result = _mutator.PlaceItem(_item, tilePosition.X, tilePosition.Y);
+        _item.X = tilePosition.X;
+        _item.Y = tilePosition.Y;
+        bool result = _mutator.PlaceItem(_item);
         if (!result) {
             GD.Print("Can't place item");
             return;
@@ -109,13 +122,13 @@ public partial class InventoryItemTransport : Node2D {
             GD.Print("Nothing to take");
             return;
         }
-        _lastTake = new TakeItemAction(_inventory, _mutator, TilePosition);
+        _lastTake = new TakeItemAction(_inventory, _mutator, _item);
 
-        _selector.AssignItem(_item);
-
-        SetItemTileAppearance();
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
         _frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_inventory.Width - itemDef.Space.Width, _inventory.Height - itemDef.Space.Height));
+
+        _selector.AssignItem(_item);
+        SetItemTileAppearance();
 
         GD.Print("Took item (transport)");
     }
@@ -129,7 +142,10 @@ public partial class InventoryItemTransport : Node2D {
         if (mutator == null) {
             throw new Exception("Failed to revert take because lastTake mutator is null.");
         }
-        bool result = mutator.PlaceItem(_item, _lastTake.TilePosition.X, _lastTake.TilePosition.Y);
+        _item.X = _lastTake.TilePosition.X;
+        _item.Y = _lastTake.TilePosition.Y;
+        _item.Rotation = _lastTake.Rotation;
+        bool result = mutator.PlaceItem(_item);
         if (!result) {
             throw new Exception("Failed to revert take. This should be impossible since we just took it.");
         }

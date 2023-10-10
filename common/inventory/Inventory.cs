@@ -116,7 +116,7 @@ public partial class Inventory : Node {
             _ignoreTouches = true;
             foreach (InventoryItemInstanceDTO item in dto.Items) {
                 InventoryItemInstance itemInstance = new InventoryItemInstance(item);
-                PlaceItem(itemInstance, item.X, item.Y);
+                PlaceItem(itemInstance);
             }
             _ignoreTouches = false;
         }
@@ -130,7 +130,9 @@ public partial class Inventory : Node {
         Items = new List<InventoryItemInstance>();
     }
 
-    public bool CanPlaceItem(InventoryItemInstance item, int x, int y) {
+    public bool CanPlaceItem(InventoryItemInstance item) {
+        int x = item.X;
+        int y = item.Y;
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
         if (x < 0 || y < 0 || x + itemDef.Space.Width > Width || y + itemDef.Space.Height > Height) {
             if (_printLogs) {
@@ -207,15 +209,13 @@ public partial class Inventory : Node {
         return Items[index];
     }
 
-    private bool PlaceItem(InventoryItemInstance item, int x, int y) {
-        if (!CanPlaceItem(item, x, y)) {
+    private bool PlaceItem(InventoryItemInstance item) {
+        if (!CanPlaceItem(item)) {
             if (_printLogs) {
-                GD.Print($"Can't place item {item.ItemDefinitionID} at ({x}, {y}) (CanPlaceItem() failed)");
+                GD.Print($"Can't place item {item.ItemDefinitionID} at ({item.X}, {item.Y}) (CanPlaceItem() failed)");
             }
             return false;
         }
-        item.X = x;
-        item.Y = y;
         Items.Add(item);
         UpdateItemMask();
         if (!_ignoreTouches) {
@@ -223,7 +223,7 @@ public partial class Inventory : Node {
             EmitSignal(SignalName.Updated, (int)UpdateType.Place, item.ItemInstanceID);
         }
         if (_printLogs) {
-            GD.Print($"Placed item {item.ItemInstanceID} with definition {item.ItemDefinitionID} at ({x}, {y})");
+            GD.Print($"Placed item {item.ItemInstanceID} with definition {item.ItemDefinitionID} at ({item.X}, {item.Y})");
         }
         return true;
     }
@@ -290,12 +290,12 @@ public partial class Inventory : Node {
             }
         }
 
-        public bool PlaceItem(InventoryItemInstance item, int x, int y) {
+        public bool PlaceItem(InventoryItemInstance item) {
             if (_released) {
                 GD.PrintErr("InventoryMutator.PlaceItem called after mutator was disposed");
                 return false;
             }
-            return _inventory.PlaceItem(item, x, y);
+            return _inventory.PlaceItem(item);
         }
 
         public InventoryItemInstance? TakeItem(int x, int y) {

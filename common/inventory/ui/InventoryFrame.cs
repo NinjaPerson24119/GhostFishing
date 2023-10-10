@@ -363,5 +363,7 @@ public partial class InventoryFrame : Control {
         }
         _selectionBoundTopLeft = topLeft;
         _selectionBoundBottomRight = bottomRight;
+        SelectedPosition = SelectedPosition.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
+        EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
     }
 }
