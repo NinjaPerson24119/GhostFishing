@@ -60,8 +60,30 @@ public partial class InventoryFrame : Control {
         }
     }
 
+    public override void _Input(InputEvent inputEvent) {
+        if (_inventoryGrid == null) {
+            return;
+        }
+        if (!HasFocus()) {
+            return;
+        }
+
+        InputEventMouse? mouseEvent = inputEvent as InputEventMouse;
+        if (mouseEvent != null) {
+            Vector2I? selectedPosition = _inventoryGrid.GetTilePositionFromGlobalPosition(mouseEvent.GlobalPosition);
+            if (selectedPosition != null) {
+                SelectedPosition = selectedPosition.Value;
+                SelectedPosition = SelectedPosition.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
+                EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
+            }
+        }
+    }
+
     public override void _Process(double delta) {
         if (_inventory == null) {
+            return;
+        }
+        if (!HasFocus()) {
             return;
         }
 
@@ -87,6 +109,18 @@ public partial class InventoryFrame : Control {
             EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
         }
     }
+
+    public override void _Notification(int what) {
+        switch (what) {
+            case (int)NotificationMouseEnter:
+                GrabFocus();
+                break;
+            case (int)NotificationMouseExit:
+                ReleaseFocus();
+                break;
+        }
+    }
+
     private void SetInventory(Inventory inventory, int tileSizePx) {
         if (_inventory != null) {
             _inventory.Updated -= OnInventoryUpdated;

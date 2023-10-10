@@ -139,7 +139,7 @@ public partial class InventoryItemTransport : Node2D {
 
     public void RotateClockwise() {
         if (_item == null) {
-            throw new Exception("Cannot rotate because item is null.");
+            return;
         }
         _item.RotateClockwise();
         _selector.OnItemUpdated();
@@ -148,7 +148,7 @@ public partial class InventoryItemTransport : Node2D {
 
     public void RotateCounterClockwise() {
         if (_item == null) {
-            throw new Exception("Cannot rotate because item is null.");
+            return;
         }
         _item.RotateCounterClockwise();
         _selector.OnItemUpdated();
@@ -171,8 +171,8 @@ public partial class InventoryItemTransport : Node2D {
 
         GD.Print($"Transport tilePosition changed: {tilePosition}");
         TilePosition = tilePosition;
-        _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
 
+        _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
         SetItemTileAppearance();
     }
 
