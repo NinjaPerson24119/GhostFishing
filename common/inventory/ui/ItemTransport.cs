@@ -112,6 +112,7 @@ public partial class InventoryItemTransport : Node2D {
         _lastTake = new TakeItemAction(_inventory, _mutator, TilePosition);
 
         _selector.AssignItem(_item);
+        SetItemTileAppearance();
         GD.Print("Took item (transport)");
     }
 
@@ -138,6 +139,7 @@ public partial class InventoryItemTransport : Node2D {
         }
         _item.RotateClockwise();
         _selector.OnItemUpdated();
+        SetItemTileAppearance();
     }
 
     public void RotateCounterClockwise() {
@@ -146,11 +148,15 @@ public partial class InventoryItemTransport : Node2D {
         }
         _item.RotateCounterClockwise();
         _selector.OnItemUpdated();
+        SetItemTileAppearance();
     }
 
     private void ClearItem() {
         _item = null;
         _selector.UnassignItem();
+        if (_frame != null) {
+            _frame.ClearItemTilesAppearance();
+        }
     }
 
     public void OnSelectedPositionChanged(Vector2I tilePosition) {
@@ -161,6 +167,18 @@ public partial class InventoryItemTransport : Node2D {
         GD.Print($"Transport tilePosition changed: {tilePosition}");
         TilePosition = tilePosition;
         _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
+
+        SetItemTileAppearance();
+    }
+
+    public void SetItemTileAppearance() {
+        if (_item == null || _frame == null) {
+            return;
+        }
+        _item.X = TilePosition.X;
+        _item.Y = TilePosition.Y;
+        _frame.ClearItemTilesAppearance();
+        _frame.SetItemTilesAppearance(_item);
     }
 
     public void OnInventoryFocused() {

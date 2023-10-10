@@ -2,11 +2,19 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class InventoryGrid : Node2D {
+    public struct TileAppearanceOverride {
+        public Vector2I Position;
+        public Color TileColor;
+        public bool Filled;
+        public bool Visible;
+    }
+
     private Inventory _inventory;
     private int _tileSizePx = 64;
     private Color _defaultTileColor;
     private Color _backgroundColor;
     private List<InventoryTile> _tiles = new List<InventoryTile>();
+    private List<TileAppearanceOverride> _tileAppearanceOverrides = new List<TileAppearanceOverride>();
 
     public InventoryGrid(Inventory inventory, int tileSizePx, Color defaultTileColor, Color backgroundColor) {
         _inventory = inventory;
@@ -49,14 +57,38 @@ public partial class InventoryGrid : Node2D {
     }
 
     private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
-        // update filled state of tiles
+        // fill states might have changed due to items moving
+        UpdateTileAppearances();
+    }
+
+    public void UpdateTileAppearances() {
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {
                 int idx = y * _inventory.Width + x;
                 InventoryTile tile = _tiles[idx];
                 tile.IsFilled = _inventory.SpaceFilled(x, y);
                 tile.TileColor = GetTileFillColor(x, y);
+                tile.Visible = _inventory.SpaceUsable(x, y);
             }
         }
+
+        foreach (TileAppearanceOverride overrideData in _tileAppearanceOverrides) {
+            int idx = overrideData.Position.Y * _inventory.Width + overrideData.Position.X;
+            InventoryTile tile = _tiles[idx];
+            tile.IsFilled = overrideData.Filled;
+            tile.TileColor = overrideData.TileColor;
+            tile.Visible = overrideData.Visible;
+        }
+    }
+
+    public void ClearTileAppearanceOverrides() {
+        _tileAppearanceOverrides.Clear();
+    }
+
+    public void SetTileAppearanceOverride(TileAppearanceOverride a) {
+        if (a.Position.X < 0 || a.Position.X >= _inventory.Width || a.Position.Y < 0 || a.Position.Y >= _inventory.Height) {
+            throw new System.Exception($"TileAppearanceOverride position {a.Position} is out of bounds");
+        }
+        _tileAppearanceOverrides.Add(a);
     }
 }

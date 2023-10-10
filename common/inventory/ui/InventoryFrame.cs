@@ -10,8 +10,10 @@ public partial class InventoryFrame : Control {
     // this is the margin between the container and the grid (only applies if FitContainerToGrid is true)
     public int GridMarginPx = 30;
     public int TileSizePx { get; private set; }
-    public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
-    public Color DefaultTileColor = new Color(0.72f, 0.44f, 0.10f, 0.5f);
+    public Color BackgroundColor = new Color(0.0f, 0.0f, 0.0f);
+    public Color DefaultTileColor = new Color(0.72f, 0.44f, 0.10f);
+    public Color CanPlaceItemTileColor = new Color(0.0f, 1.0f, 0.0f);
+    public Color CannotPlaceItemTileColor = new Color(1.0f, 0.0f, 0.0f);
 
     private Inventory? _inventory;
     private InventoryGrid? _inventoryGrid;
@@ -244,5 +246,46 @@ public partial class InventoryFrame : Control {
             throw new Exception("Cannot get grid global position because inventory grid is null.");
         }
         return _inventoryGrid.GlobalPosition + new Vector2(SelectedPosition.X, SelectedPosition.Y) * TileSizePx;
+    }
+
+    public void ClearItemTilesAppearance() {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot clear item tiles appearance because inventory grid is null.");
+        }
+
+        _inventoryGrid.ClearTileAppearanceOverrides();
+        _inventoryGrid.UpdateTileAppearances();
+    }
+
+    public void SetItemTilesAppearance(InventoryItemInstance item) {
+        if (_inventory == null) {
+            throw new Exception("Cannot set item tiles appearance because inventory is null.");
+        }
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot set item tiles appearance because inventory grid is null.");
+        }
+
+        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(item.ItemDefinitionID);
+        for (int y = 0; y < itemDef.Space.Height; y++) {
+            for (int x = 0; x < itemDef.Space.Width; x++) {
+                if (!itemDef.Space.GetFilledMask(item.Rotation)[y * itemDef.Space.Width + x]) {
+                    continue;
+                }
+
+                Vector2I tilePosition = new Vector2I(item.X + x, item.Y + y);
+                Color color = CanPlaceItemTileColor;
+                if (_inventory.SpaceFilled(tilePosition.X, tilePosition.Y) || !_inventory.SpaceUsable(tilePosition.X, tilePosition.Y)) {
+                    color = CannotPlaceItemTileColor;
+                }
+                var appearanceOverride = new InventoryGrid.TileAppearanceOverride() {
+                    Position = tilePosition,
+                    Filled = true,
+                    TileColor = color,
+                    Visible = true,
+                };
+                _inventoryGrid.SetTileAppearanceOverride(appearanceOverride);
+            };
+        }
+        _inventoryGrid.UpdateTileAppearances();
     }
 }

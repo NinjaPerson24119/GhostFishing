@@ -183,6 +183,12 @@ public partial class Inventory : Node {
     }
 
     public bool SpaceFilled(int x, int y) {
+        if (x < 0 || y < 0 || x >= Width || y >= Height) {
+            return false;
+        }
+        if (!SpaceUsable(x, y)) {
+            return false;
+        }
         return _itemMask[y * Width + x] != UNUSED_SPACE_PLACEHOLDER;
     }
 
