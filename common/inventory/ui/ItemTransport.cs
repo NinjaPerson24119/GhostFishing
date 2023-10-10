@@ -75,9 +75,7 @@ public partial class InventoryItemTransport : Node2D {
             throw new Exception("Cannot close inventory because inventory and/or mutator is null.");
         }
         // drop item if we have one
-        if (_item != null) {
-            RevertTakeItem();
-        }
+        RevertTakeItem();
         _mutator.Dispose();
         _mutator = null;
         _inventory = null;
@@ -99,9 +97,7 @@ public partial class InventoryItemTransport : Node2D {
             GD.Print("Can't place item");
             return;
         }
-        _item = null;
-
-        _selector.UnassignItem();
+        ClearItem();
     }
 
     public void TakeItem() {
@@ -133,6 +129,7 @@ public partial class InventoryItemTransport : Node2D {
             throw new Exception("Failed to revert take. This should be impossible since we just took it.");
         }
         _lastTake = null;
+        ClearItem();
     }
 
     public void RotateClockwise() {
@@ -149,6 +146,11 @@ public partial class InventoryItemTransport : Node2D {
         }
         _item.RotateCounterClockwise();
         _selector.OnItemUpdated();
+    }
+
+    private void ClearItem() {
+        _item = null;
+        _selector.UnassignItem();
     }
 
     public void OnSelectedPositionChanged(Vector2I tilePosition) {
