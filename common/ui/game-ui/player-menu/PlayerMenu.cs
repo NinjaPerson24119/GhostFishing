@@ -57,8 +57,7 @@ public partial class PlayerMenu : Menu {
         if (inputEvent.IsActionPressed("inventory_rotate_counterclockwise")) {
             _itemTransport.RotateCounterClockwise();
         }
-
-        CloseActionClosesMenu = _itemTransport.HasItem();
+        CloseActionClosesMenu = !_itemTransport.HasItem();
     }
 
     public override void Open() {
