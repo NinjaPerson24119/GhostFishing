@@ -2,6 +2,7 @@ public static class ConnectedArray {
     // checks if an array defining a space is connected
     public static bool IsArrayConnected(int width, int height, bool[] array) {
         DebugTools.Assert(width * height == array.Length, "Array size does not match width and height");
+        DebugTools.Assert(width * height < 100, "Array size is too large, we might get a stack overflow");
 
         // find the first filled tile
         int firstFilled = -1;
@@ -29,6 +30,9 @@ public static class ConnectedArray {
         int y = idx / width;
 
         if (x < 0 || x >= width || y < 0 || y >= height) {
+            return;
+        }
+        if (visited[idx]) {
             return;
         }
         visited[idx] = true;
