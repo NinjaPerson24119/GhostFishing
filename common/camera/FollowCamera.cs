@@ -1,18 +1,27 @@
 using Godot;
 
 public partial class FollowCamera : Camera3D {
+    private enum ZoomEnum {
+        In,
+        Out,
+    }
     [Export]
     public float Distance {
         get => _distance;
         set => _distance = Mathf.Clamp(value, MinDistance, MaxDistance);
     }
-    private float _distance = 5f;
+    private float _distance = 7f;
     [Export]
-    public float MinDistance = 1f;
+    public float MinDistance = 4f;
     [Export]
     public float MaxDistance = 15f;
     [Export]
-    public float DistanceStep = 0.5f;
+    public float ZoomPerSecond = 20f;
+    private ZoomEnum _zoom = ZoomEnum.In;
+    Timer _zoomTimer = new Timer() {
+        WaitTime = 0.1f,
+        OneShot = true,
+    };
 
     [Export]
     public float Height = 2f;
@@ -56,6 +65,7 @@ public partial class FollowCamera : Camera3D {
         _cameraBody = GetNode<CharacterBody3D>("CameraBody");
 
         AddChild(_cameraResetTimer);
+        AddChild(_zoomTimer);
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -67,10 +77,12 @@ public partial class FollowCamera : Camera3D {
         if (mouseButtonEvent != null && mouseButtonEvent.Pressed) {
             switch (mouseButtonEvent.ButtonIndex) {
                 case MouseButton.WheelUp:
-                    Distance -= DistanceStep;
+                    _zoom = ZoomEnum.In;
+                    _zoomTimer.Start();
                     break;
                 case MouseButton.WheelDown:
-                    Distance += DistanceStep;
+                    _zoom = ZoomEnum.Out;
+                    _zoomTimer.Start();
                     break;
             }
         }
@@ -84,6 +96,17 @@ public partial class FollowCamera : Camera3D {
             throw new System.Exception("CameraBody is null");
         }
 
+        if (!_zoomTimer.IsStopped()) {
+            switch (_zoom) {
+                case ZoomEnum.In:
+                    Distance -= (float)delta * ZoomPerSecond;
+                    break;
+                case ZoomEnum.Out:
+                    Distance += (float)delta * ZoomPerSecond;
+                    break;
+            }
+        }
+
         //_cameraBody.TestMove()
         //if (_cameraBody.)
         bool updated = false;
@@ -95,7 +118,7 @@ public partial class FollowCamera : Camera3D {
             _globalYaw -= (float)delta * _controllerRadiansPerSecond;
             updated = true;
         }
-        if (updated || _player.IsMoving()) {
+        if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
             _cameraResetTimer.Start();
         }
         if (_cameraResetTimer.IsStopped()) {
