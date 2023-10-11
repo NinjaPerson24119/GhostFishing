@@ -74,6 +74,9 @@ public partial class FollowCamera : Camera3D {
         Fov = 100f;
         Near = 0.1f;
         Far = 500f;
+
+        float[] zoomSteps = GetZoomSteps();
+        _distance = zoomSteps[_zoomStep];
     }
 
     public override void _Ready() {
