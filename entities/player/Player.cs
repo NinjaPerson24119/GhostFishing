@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
@@ -43,6 +44,13 @@ public partial class Player : RigidBody3D {
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
     private Vector3 _size;
+
+    private static readonly List<string> _moveActions = new List<string>() {
+            "move_forward",
+            "move_backward",
+            "turn_left",
+            "turn_right",
+        };
 
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
@@ -245,5 +253,16 @@ public partial class Player : RigidBody3D {
 
     public void SetControlsDisabled(bool controlsDisabled) {
         DisableControls = controlsDisabled;
+    }
+
+    public bool IsMoving() {
+        bool isMoving = false;
+        foreach (string action in _moveActions) {
+            if (Input.IsActionPressed(action)) {
+                isMoving = true;
+                break;
+            }
+        }
+        return isMoving;
     }
 }
