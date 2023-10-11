@@ -1,35 +1,25 @@
 using Godot;
 
 public partial class Main : Node {
-    private Player _player;
-    private Ocean _ocean;
-    private Controller _controller;
-    private TimeDisplay _timeDisplay;
-    private PlayerMenu _playerMenu;
-    private PauseMenu _pauseMenu;
-
     public override void _Ready() {
-        InjectDependencies();
         SetupSignals();
         AssignDefaults();
     }
 
-    private void InjectDependencies() {
-        _player = DependencyInjector.Ref().GetPlayer();
-        _ocean = DependencyInjector.Ref().GetOcean();
-        _controller = DependencyInjector.Ref().GetController();
-        _timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
-        _playerMenu = DependencyInjector.Ref().GetPlayerMenu();
-        _pauseMenu = DependencyInjector.Ref().GetPauseMenu();
-    }
-
     private void SetupSignals() {
-        GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += _ocean.ConfigureTileDebugVisuals;
+        Player player = DependencyInjector.Ref().GetPlayer();
+        Ocean ocean = DependencyInjector.Ref().GetOcean();
+        Controller controller = DependencyInjector.Ref().GetController();
+        TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
+        PlayerMenu playerMenu = DependencyInjector.Ref().GetPlayerMenu();
+        PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
 
-        GameClock.ConnectGameSecondsChanged(_timeDisplay.Update);
+        GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ocean.ConfigureTileDebugVisuals;
 
-        _player.PositionChangedSignificantly += _ocean.OnOriginChanged;
-        _controller.SetPlayerControlsDisabled += _player.SetControlsDisabled;
+        GameClock.ConnectGameSecondsChanged(timeDisplay.Update);
+
+        player.PositionChangedSignificantly += ocean.OnOriginChanged;
+        controller.SetPlayerControlsDisabled += player.SetControlsDisabled;
     }
 
     private void AssignDefaults() {

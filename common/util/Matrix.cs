@@ -3,6 +3,13 @@ public struct Matrix<T> {
     public int Height;
     public T[] Data;
 
+    public Matrix(int width, int height, T[] data) {
+        DebugTools.Assert(data.Length == width * height, "Matrix data length must match width * height");
+        Width = width;
+        Height = height;
+        Data = data;
+    }
+
     public void Transpose() {
         T[] newData = new T[Width * Height];
         for (int y = 0; y < Height; y++) {

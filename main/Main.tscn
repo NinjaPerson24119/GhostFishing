@@ -83,8 +83,6 @@ Damping = 0.7
 [node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
-ConstantLinearDrag = 0.7
-DebugLogs = true
 
 [node name="WaterTileCPU" type="MeshInstance3D" parent="Pausable"]
 process_mode = 4

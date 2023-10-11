@@ -1,0 +1,16 @@
+{
+    "ITEM-8350f715-4989-44b1-b7b6-381b050c3d70": {
+        "Name": "Gold",
+        "Description": "Used to trade for goods and services.",
+        "CurrencyValue": 1,
+        "ImagePath": "res://artwork/generated/collectibles/Gold.png",
+        "Space": {
+            "Width": 1,
+            "Height": 1,
+            "FilledMask": [
+                true
+            ]
+        },
+        "Flags": {}
+    }
+}

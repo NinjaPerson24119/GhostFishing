@@ -1,0 +1,20 @@
+{
+    "ITEM-22573c01-8e3b-4020-b540-cedb88b7875f": {
+        "Name": "Skeleton Fish",
+        "Description": "A skeleton fish drawn for testing",
+        "CurrencyValue": 5,
+        "ImagePath": "res://artwork/generated/fish/SkeletonFish.png",
+        "Space": {
+            "Width": 2,
+            "Height": 2,
+            "FilledMask": [
+                true,
+                true,
+                true,
+                false
+            ]
+        },
+        "Flags": {},
+        "CategoryID": "CATEGORY-b5d144e7-265a-4cd7-a87c-e831e730c8a2"
+    }
+}

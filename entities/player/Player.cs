@@ -5,7 +5,7 @@ public partial class Player : RigidBody3D {
     public float BuoyancyDamping = 0f;
 
     [Export(PropertyHint.Range, "0,100")]
-    public float ConstantLinearDrag = 0.5f;
+    public float ConstantLinearDrag = 0.7f;
     [Export(PropertyHint.Range, "0,100")]
     public float ConstantAngularDrag = 1f;
     [Export(PropertyHint.Range, "0,1")]
@@ -35,7 +35,7 @@ public partial class Player : RigidBody3D {
     [Export]
     public bool DebugLogs = false;
 
-    private Ocean _ocean;
+    private Ocean _ocean = null!;
 
     private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
     private float _waterDensity = 1000; // kg/m^3
@@ -61,7 +61,12 @@ public partial class Player : RigidBody3D {
         if (DebugLogs) {
             GD.Print($"Boat Size: {_size}. Horizontal slice area: {_horizontalSliceArea}");
         }
-        (GetNode<MeshInstance3D>("BoundingBox").Mesh as BoxMesh).Size = _size;
+
+        MeshInstance3D boundingBox = GetNode<MeshInstance3D>("BoundingBox");
+        if (boundingBox != null && boundingBox.Mesh is BoxMesh) {
+            BoxMesh boxMesh = (BoxMesh)boundingBox.Mesh;
+            boxMesh.Size = _size;
+        }
     }
 
     public override void _Process(double delta) {
@@ -116,7 +121,11 @@ public partial class Player : RigidBody3D {
         var children = waterContactPoints.GetChildren();
         float totalBuoyantForce = 0;
         for (int i = 0; i < children.Count; i++) {
-            Marker3D contactPoint = children[i] as Marker3D;
+            if (!(children[i] is Marker3D)) {
+                GD.PrintErr($"Expected Marker3D for water contact point, got {children[i].GetType()}");
+                continue;
+            }
+            Marker3D contactPoint = (Marker3D)children[i];
             // TODO: stop ignoring displacement on XZ plane
             // this should just call a GetHeight(), and the displacement should be internal to the Ocean
             Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));

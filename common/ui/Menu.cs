@@ -9,29 +9,38 @@ public partial class Menu : Control {
             return Visible;
         }
     }
+    public bool AcceptingInput {
+        get {
+            return !(Disabled || RequestedClose || !IsOpen);
+        }
+    }
     public bool RequestedClose { get; private set; } = false;
     public bool Disabled = false;
+    // use this in child classes to prevent the menu from closing when the cancel action is pressed
+    protected bool CloseActionClosesMenu = true;
 
     public override void _Input(InputEvent inputEvent) {
-        if (Disabled || RequestedClose || !IsOpen) {
+        if (!AcceptingInput) {
             return;
         }
-        foreach (string action in _closeActions) {
-            if (inputEvent.IsActionPressed(action)) {
-                RequestedClose = true;
-                break;
+        if (CloseActionClosesMenu) {
+            foreach (string action in _closeActions) {
+                if (inputEvent.IsActionPressed(action)) {
+                    RequestedClose = true;
+                    break;
+                }
             }
         }
     }
 
-    public void Open() {
+    public virtual void Open() {
         if (RequestedClose || IsOpen) {
             return;
         }
         Visible = true;
     }
 
-    public void Close() {
+    public virtual void Close() {
         Visible = false;
         RequestedClose = false;
     }

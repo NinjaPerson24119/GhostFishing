@@ -74,23 +74,23 @@ public partial class WaterTile : MeshInstance3D {
         }
     }
     private float _surfaceTimeScale = 0.025f;
-    private static Image _surfaceNoise;
+    private static Image? _surfaceNoise;
 
-    public WaveSet WavesConfig;
+    public WaveSet? WavesConfig;
 
     private bool _queueReconfigureShaders = false;
     private bool _queueReconfigureMesh = false;
 
     // load once and duplicate to avoid reloading the shader every time a new water tile is created
     private static ShaderMaterial _loadedMaterial = GD.Load<ShaderMaterial>("res://common/water/Water.material");
-    private ShaderMaterial _material = _loadedMaterial.Duplicate() as ShaderMaterial;
+    private ShaderMaterial _material = (ShaderMaterial)_loadedMaterial.Duplicate();
 
     // this must match the shader, do not adjust it to change the number of active waves
     // this represents the maximum supported number of waves in the shader
     private const int maxWaves = 12;
     private static RefCountedAssetSpectrum<int, PlaneMesh> refCountedMeshes = new RefCountedAssetSpectrum<int, PlaneMesh>(BuildMesh);
 
-    private RealClock _realClock;
+    private RealClock _realClock = null!;
 
     public override void _Ready() {
         _realClock = RealClock.Ref();
@@ -171,7 +171,8 @@ public partial class WaterTile : MeshInstance3D {
         float[] productOperandZ = new float[maxWaves];
 
         // h == 0 is a singularity in the Gerstner wave function, and negative values make no sense
-        if (WaterDepth > 0) {
+        DebugTools.Assert(WavesConfig != null, "WavesConfig must be set before configuring the shader");
+        if (WaterDepth > 0 && WavesConfig != null) {
             // only fill the first n waves
             // default k == 0 tells the shader to ignore the wave
             DebugTools.Assert(WavesConfig.waves.Count <= maxWaves, $"Too many waves configured. Max supported is {maxWaves}");
@@ -215,6 +216,11 @@ public partial class WaterTile : MeshInstance3D {
     // this always should match the vertex shader algorithm for physics to be visually consistent
     public Vector3 GetDisplacement(Vector2 globalXZ) {
         if (NoDisplacement) {
+            return Vector3.Zero;
+        }
+        DebugTools.Assert(WavesConfig != null, "WavesConfig must be set before getting displacement");
+        DebugTools.Assert(_surfaceNoise != null, "Surface noise must be set before getting displacement");
+        if (WavesConfig == null || _surfaceNoise == null) {
             return Vector3.Zero;
         }
 

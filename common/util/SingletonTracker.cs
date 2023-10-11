@@ -1,8 +1,7 @@
 public class SingletonTracker<T> {
-    private T _singleton;
-    private bool _singletonExists = false;
+    private T? _singleton;
     public T Ref() {
-        if (_singletonExists) {
+        if (_singleton != null) {
             return _singleton;
         }
         else {
@@ -11,10 +10,9 @@ public class SingletonTracker<T> {
     }
 
     public void Ready(T refToSingleton) {
-        if (_singletonExists) {
+        if (_singleton != null) {
             throw new System.Exception($"{typeof(T).Name} singleton already exists");
         }
         _singleton = refToSingleton;
-        _singletonExists = true;
     }
 }
