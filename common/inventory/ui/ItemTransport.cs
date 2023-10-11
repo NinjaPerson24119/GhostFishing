@@ -28,9 +28,6 @@ public partial class InventoryItemTransport : Node2D {
     private InventoryFrame? _frame;
     private InventoryItemTransportSelector _selector;
     private bool _inventoryFocused = false;
-    private Timer _inventoryJustOpenedTimer = new Timer() {
-        WaitTime = 0.1f
-    };
 
     public InventoryItemTransport(int TileSize) {
         Name = "ItemTransport";
@@ -42,7 +39,6 @@ public partial class InventoryItemTransport : Node2D {
 
     public override void _Ready() {
         DependencyInjector.Ref().GetController().InputTypeChanged += OnControllerInputTypeChanged;
-        AddChild(_inventoryJustOpenedTimer);
     }
 
     public override void _ExitTree() {
@@ -81,8 +77,11 @@ public partial class InventoryItemTransport : Node2D {
         _frame.FocusExited += OnInventoryUnfocused;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
 
-        _inventoryJustOpenedTimer.Start();
-        _frame.GrabFocus();
+
+        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
+        if (inputType == ControllerInputType.Joypad) {
+            _frame.GrabFocus();
+        }
     }
 
     public void CloseInventory() {
@@ -224,7 +223,7 @@ public partial class InventoryItemTransport : Node2D {
         _inventoryFocused = true;
 
         ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
-        if (inputType == ControllerInputType.KeyboardMouse && _inventoryJustOpenedTimer.IsStopped()) {
+        if (inputType == ControllerInputType.KeyboardMouse) {
             TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
         }
         else if (inputType == ControllerInputType.Joypad) {
@@ -251,6 +250,9 @@ public partial class InventoryItemTransport : Node2D {
         }
         if (inputType == ControllerInputType.Joypad && !_inventoryFocused) {
             _frame.GrabFocus();
+        }
+        else if (inputType == ControllerInputType.KeyboardMouse && _inventoryFocused) {
+            _frame.CheckMouseIsOver();
         }
     }
 }

@@ -413,4 +413,13 @@ public partial class InventoryFrame : Control {
         selectionBoundBottomRight = bottomRight;
         return SelectedPosition;
     }
+
+    public void CheckMouseIsOver() {
+        Vector2 globalMousePosition = GetGlobalMousePosition();
+        if (globalMousePosition < GetRect().Position || globalMousePosition > GetRect().Position + GetRect().Size) {
+            GD.Print("Mouse is not over inventory frame");
+            ReleaseFocus();
+            return;
+        }
+    }
 }
