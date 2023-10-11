@@ -22,7 +22,7 @@ public partial class FollowCamera : Camera3D {
         WaitTime = 0.1f,
         OneShot = true,
     };
-    private int _zoomStep = 0;
+    private int _zoomStep = 1;
 
     [Export]
     public float ControllerDegreesPerSecond {
@@ -179,12 +179,7 @@ public partial class FollowCamera : Camera3D {
             }
         }
 
-        if (Mathf.Abs(_followYaw - _player.GlobalRotation.Y) < 0.01) {
-            _followYaw = _player.GlobalRotation.Y;
-        }
-        else {
-            _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
-        }
+        _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
 
         // TODO: raycast towards player to adjust distance
 
