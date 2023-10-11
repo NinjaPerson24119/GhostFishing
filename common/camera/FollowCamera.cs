@@ -33,6 +33,7 @@ public partial class FollowCamera : Camera3D {
 
     [Export]
     public float Yaw { get; private set; } = 0f;
+    private float _followYaw = 0f;
 
     [Export]
     public float Pitch {
@@ -57,8 +58,8 @@ public partial class FollowCamera : Camera3D {
     private bool IsCameraDefault {
         get => _isCameraDefault;
         set {
-            if (value != _isCameraDefault && _player != null) {
-                Yaw = _player.GlobalRotation.Y;
+            if (value != IsCameraDefault && _player != null) {
+                Yaw = _followYaw;
             }
             _isCameraDefault = value;
         }
@@ -178,17 +179,20 @@ public partial class FollowCamera : Camera3D {
             }
         }
 
+        if (Mathf.Abs(_followYaw - _player.GlobalRotation.Y) < 0.01) {
+            _followYaw = _player.GlobalRotation.Y;
+        }
+        else {
+            _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
+        }
+
         // TODO: raycast towards player to adjust distance
 
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
         tf = tf.Translated(-Vector3.Forward * Distance);
         tf = tf.Rotated(Vector3.Left, Pitch);
 
-        float yaw = Yaw;
-        GD.Print($"Is camera default: {IsCameraDefault}");
-        if (IsCameraDefault) {
-            yaw = _player.GlobalRotation.Y;
-        }
+        float yaw = IsCameraDefault ? _followYaw : Yaw;
         tf = tf.Rotated(Vector3.Up, yaw);
 
         tf = tf.Translated(_player.GlobalTransform.Origin);
