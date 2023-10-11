@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class FollowCamera : Camera3D {
     [Export]
@@ -25,10 +26,12 @@ public partial class FollowCamera : Camera3D {
     private Player? _player;
     private CharacterBody3D? _cameraBody;
     private float _yawOffset = 0f;
+    private float _yawSlackRadians = Mathf.DegToRad(60f);
     private Timer _cameraResetTimer = new Timer() {
         WaitTime = 3f,
         OneShot = true,
     };
+    private float _lookDirection = 1f;
 
     public FollowCamera() {
         Projection = ProjectionType.Perspective;
@@ -41,11 +44,13 @@ public partial class FollowCamera : Camera3D {
         _player = DependencyInjector.Ref().GetPlayer();
         _cameraBody = GetNode<CharacterBody3D>("CameraBody");
         AddChild(_cameraResetTimer);
+
+        _yawOffset = _player.GlobalRotation.Y;
     }
 
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent is InputEventMouseMotion mouseMotion) {
-            _yawOffset += mouseMotion.Relative.X * MouseSensitivity;
+            _yawOffset -= mouseMotion.Relative.X * MouseSensitivity * Mathf.Sign(_lookDirection);
             _cameraResetTimer.Start();
         }
     }
@@ -60,12 +65,34 @@ public partial class FollowCamera : Camera3D {
 
         //_cameraBody.TestMove()
         //if (_cameraBody.)
+        bool updated = false;
         if (Input.IsActionPressed("rotate_camera_left")) {
-            _yawOffset += (float)delta * _controllerRadiansPerSecond;
-            _cameraResetTimer.Start();
+            _yawOffset += (float)delta * _controllerRadiansPerSecond * Mathf.Sign(_lookDirection);
+            updated = true;
+
         }
         else if (Input.IsActionPressed("rotate_camera_right")) {
-            _yawOffset -= (float)delta * _controllerRadiansPerSecond;
+            _yawOffset -= (float)delta * _controllerRadiansPerSecond * Mathf.Sign(_lookDirection);
+            updated = true;
+        }
+
+        List<string> movementActions = new List<string>() {
+            "move_forward",
+            "move_backward",
+            "turn_left",
+            "turn_right",
+        };
+        bool playerMoving = false;
+        foreach (string action in movementActions) {
+            if (Input.IsActionPressed(action)) {
+                playerMoving = true;
+                break;
+            }
+        }
+
+        GD.Print($"_yawOffset: {_yawOffset}, playerMoving: {playerMoving}");
+        if (updated && !playerMoving) {
+            GD.Print("Starting timer");
             _cameraResetTimer.Start();
         }
         if (_cameraResetTimer.IsStopped()) {
@@ -73,6 +100,9 @@ public partial class FollowCamera : Camera3D {
             if (Mathf.Abs(_yawOffset) < 0.01f) {
                 _yawOffset = 0f;
             }
+        }
+        if (playerMoving && Mathf.Abs(_yawOffset) > _yawSlackRadians) {
+            _yawOffset += -Mathf.Sign(_yawOffset) * (float)delta * ResetRadiansPerSecond;
         }
 
         // TODO: raycast towards player to adjust distance
