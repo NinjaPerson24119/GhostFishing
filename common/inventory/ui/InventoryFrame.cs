@@ -191,6 +191,13 @@ public partial class InventoryFrame : Control {
         }
         CustomMinimumSize = new Vector2(ContainerWidthPx, ContainerHeightPx);
 
+        ColorRect containerBackgroundColor = new ColorRect() {
+            Name = "ContainerBackgroundColor",
+            Color = BackgroundColor,
+            Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+        };
+        CallDeferred("add_child", containerBackgroundColor);
+
         if (_inventory.BackgroundImagePath != null) {
             TextureRect backgroundImage = new TextureRect() {
                 Name = "BackgroundImage",
@@ -199,13 +206,6 @@ public partial class InventoryFrame : Control {
             };
             CallDeferred("add_child", backgroundImage);
         }
-
-        ColorRect containerBackgroundColor = new ColorRect() {
-            Name = "ContainerBackgroundColor",
-            Color = BackgroundColor,
-            Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
-        };
-        CallDeferred("add_child", containerBackgroundColor);
 
         // this is the outline of the frame
         TextureRect containerFrameImage = new TextureRect() {
