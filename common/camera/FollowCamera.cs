@@ -22,21 +22,28 @@ public partial class FollowCamera : Camera3D {
         WaitTime = 0.1f,
         OneShot = true,
     };
+    private int _zoomStep = 0;
 
-    [Export]
-    public float Height = 2f;
     [Export]
     public float ControllerDegreesPerSecond {
         get => Mathf.RadToDeg(_controllerRadiansPerSecond);
         set => _controllerRadiansPerSecond = Mathf.DegToRad(value);
     }
     private float _controllerRadiansPerSecond = Mathf.DegToRad(120f);
+
     [Export]
-    public float CameraPitchDegrees {
-        get => Mathf.RadToDeg(_cameraPitchRadians);
-        set => _cameraPitchRadians = Mathf.DegToRad(value);
+    public float Yaw { get; private set; } = 0f;
+
+    [Export]
+    public float Pitch {
+        get => _pitch;
+        set => _pitch = Mathf.Clamp(value, MinPitch, MaxPitch);
     }
-    private float _cameraPitchRadians = Mathf.DegToRad(-20f);
+    private float _pitch = 7f;
+    [Export]
+    public float MinPitch = 4f;
+    [Export]
+    public float MaxPitch = 15f;
 
     [Export]
     public float MouseSensitivity = 0.005f;
@@ -45,7 +52,6 @@ public partial class FollowCamera : Camera3D {
 
     private Player? _player;
     private CharacterBody3D? _cameraBody;
-    private float _globalYaw;
     private Timer _cameraResetTimer = new Timer() {
         WaitTime = 3f,
         OneShot = true,
@@ -60,7 +66,7 @@ public partial class FollowCamera : Camera3D {
 
     public override void _Ready() {
         _player = DependencyInjector.Ref().GetPlayer();
-        _globalYaw = _player.GlobalRotation.Y;
+        Yaw = _player.GlobalRotation.Y;
 
         _cameraBody = GetNode<CharacterBody3D>("CameraBody");
 
@@ -70,7 +76,7 @@ public partial class FollowCamera : Camera3D {
 
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent is InputEventMouseMotion mouseMotion) {
-            _globalYaw -= mouseMotion.Relative.X * MouseSensitivity;
+            Yaw -= mouseMotion.Relative.X * MouseSensitivity;
             _cameraResetTimer.Start();
         }
         var mouseButtonEvent = inputEvent as InputEventMouseButton;
@@ -86,6 +92,22 @@ public partial class FollowCamera : Camera3D {
                     break;
             }
         }
+
+        if (inputEvent.IsActionPressed("cycle_zoom")) {
+            _zoomTimer.Stop();
+            float[] zoomSteps = GetZoomSteps();
+            _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
+            _distance = zoomSteps[_zoomStep];
+            _cameraResetTimer.Start();
+        }
+    }
+
+    public float[] GetZoomSteps() {
+        return new float[] {
+            MinDistance,
+            (MaxDistance + MinDistance) / 2f,
+            MaxDistance,
+        };
     }
 
     public override void _Process(double delta) {
@@ -111,19 +133,19 @@ public partial class FollowCamera : Camera3D {
         //if (_cameraBody.)
         bool updated = false;
         if (Input.IsActionPressed("rotate_camera_left")) {
-            _globalYaw += (float)delta * _controllerRadiansPerSecond;
+            Yaw += (float)delta * _controllerRadiansPerSecond;
             updated = true;
         }
         else if (Input.IsActionPressed("rotate_camera_right")) {
-            _globalYaw -= (float)delta * _controllerRadiansPerSecond;
+            Yaw -= (float)delta * _controllerRadiansPerSecond;
             updated = true;
         }
         if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
             _cameraResetTimer.Start();
         }
         if (_cameraResetTimer.IsStopped()) {
-            if (Mathf.Abs(_globalYaw - _player.GlobalRotation.Y) > 0.01f) {
-                _globalYaw += -Mathf.Sign(_globalYaw - _player.GlobalRotation.Y) * (float)delta * ResetRadiansPerSecond;
+            if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) > 0.01f) {
+                Yaw += -Mathf.Sign(Yaw - _player.GlobalRotation.Y) * (float)delta * ResetRadiansPerSecond;
             }
         }
 
@@ -131,11 +153,9 @@ public partial class FollowCamera : Camera3D {
 
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
         tf = tf.Translated(-Vector3.Forward * Distance);
-        tf = tf.Rotated(Vector3.Up, _player.GlobalRotation.Y + _globalYaw);
-        tf = tf.Rotated(Vector3.Right, Mathf.DegToRad(_cameraPitchRadians));
+        tf = tf.Rotated(Vector3.Up, _player.GlobalRotation.Y + Yaw);
+        tf = tf.Rotated(Vector3.Right, Mathf.DegToRad(Pitch));
         tf = tf.Translated(_player.GlobalTransform.Origin);
-        tf = tf.Translated(Vector3.Up * Height);
-        //tf.
         GlobalTransform = tf;
     }
 }
