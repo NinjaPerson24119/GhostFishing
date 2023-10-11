@@ -165,7 +165,7 @@ public partial class FollowCamera : Camera3D {
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
         tf = tf.Translated(-Vector3.Forward * Distance);
         tf = tf.Rotated(Vector3.Left, Pitch);
-        tf = tf.Rotated(Vector3.Up, _player.GlobalRotation.Y + Yaw);
+        tf = tf.Rotated(Vector3.Up, Yaw);
         tf = tf.Translated(_player.GlobalTransform.Origin);
         GlobalTransform = tf;
     }
