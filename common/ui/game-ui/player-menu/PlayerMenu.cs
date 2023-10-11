@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Godot;
 
 public partial class PlayerMenu : Menu {
@@ -19,14 +20,8 @@ public partial class PlayerMenu : Menu {
             Name = "BoatInventoryFrame"
         };
         _boatInventoryFrame.SetAnchorsPreset(LayoutPreset.TopRight);
-
-        Control inventoryContainer = new Control() {
-            Name = "InventoryLayout"
-        };
-        // TODO: figure out how to align to top-right, why is this rocket science?
-        inventoryContainer.SetAnchor(Side.Left, 0.75f);
-        inventoryContainer.AddChild(_boatInventoryFrame);
-        AddChild(inventoryContainer);
+        _boatInventoryFrame.Resized += OnInventoryFrameResized;
+        AddChild(_boatInventoryFrame);
 
         _itemTransport = new InventoryItemTransport(TileSizePx);
         AddChild(_itemTransport);
@@ -40,11 +35,9 @@ public partial class PlayerMenu : Menu {
 
         if (inputEvent.IsActionPressed("select")) {
             if (!_itemTransport.HasItem()) {
-                GD.Print("Taking item.");
                 _itemTransport.TakeItem();
             }
             else {
-                GD.Print("Placing item.");
                 _itemTransport.PlaceItem();
             }
         }
@@ -74,5 +67,9 @@ public partial class PlayerMenu : Menu {
         _itemTransport.CloseInventory();
         base.Close();
         GD.Print("Closed inventory.");
+    }
+
+    private void OnInventoryFrameResized() {
+        _boatInventoryFrame.OffsetLeft = -_boatInventoryFrame.Size.X;
     }
 }

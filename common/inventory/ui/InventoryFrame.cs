@@ -189,6 +189,7 @@ public partial class InventoryFrame : Control {
             ContainerWidthPx = gridSize.X + GridMarginPx * 2;
             ContainerHeightPx = gridSize.Y + GridMarginPx * 2;
         }
+        CustomMinimumSize = new Vector2(ContainerWidthPx, ContainerHeightPx);
 
         if (_inventory.BackgroundImagePath != null) {
             TextureRect backgroundImage = new TextureRect() {
@@ -299,8 +300,6 @@ public partial class InventoryFrame : Control {
                 if (result == 0) {
                     throw new Exception("Failed to remove item from list.");
                 }
-                GD.Print($"Item sprites remaining: {_itemSprites.Count}");
-                GD.Print($"Freed {itemToRemove.ItemInstanceID}");
                 itemToRemove.CallDeferred("free");
                 break;
         }

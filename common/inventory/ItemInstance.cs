@@ -20,7 +20,7 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
     }
 
     public string Stringify() {
-        string str = $"ItemInstanceID: {ItemInstanceID}\n";
+        string str = $"ItemInstanceID (this may be empty until DTO is instanced): {ItemInstanceID}\n";
         str += $"ItemDefinitionID: {ItemDefinitionID}\n";
         str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";
         if (FlagOverrides != null) {
