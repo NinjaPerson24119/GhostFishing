@@ -2,7 +2,18 @@ using Godot;
 
 public partial class FollowCamera : Camera3D {
     [Export]
-    public float Distance = 5f;
+    public float Distance {
+        get => _distance;
+        set => _distance = Mathf.Clamp(value, MinDistance, MaxDistance);
+    }
+    private float _distance = 5f;
+    [Export]
+    public float MinDistance = 1f;
+    [Export]
+    public float MaxDistance = 15f;
+    [Export]
+    public float DistanceStep = 0.5f;
+
     [Export]
     public float Height = 2f;
     [Export]
@@ -17,6 +28,7 @@ public partial class FollowCamera : Camera3D {
         set => _cameraPitchRadians = Mathf.DegToRad(value);
     }
     private float _cameraPitchRadians = Mathf.DegToRad(-20f);
+
     [Export]
     public float MouseSensitivity = 0.005f;
     [Export]
@@ -50,6 +62,17 @@ public partial class FollowCamera : Camera3D {
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             _globalYaw -= mouseMotion.Relative.X * MouseSensitivity;
             _cameraResetTimer.Start();
+        }
+        var mouseButtonEvent = inputEvent as InputEventMouseButton;
+        if (mouseButtonEvent != null && mouseButtonEvent.Pressed) {
+            switch (mouseButtonEvent.ButtonIndex) {
+                case MouseButton.WheelUp:
+                    Distance -= DistanceStep;
+                    break;
+                case MouseButton.WheelDown:
+                    Distance += DistanceStep;
+                    break;
+            }
         }
     }
 
