@@ -34,6 +34,13 @@ public partial class DebugMode : Node {
 
     public override void _Process(double delta) {
         string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
+        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
+        if (inputType == ControllerInputType.KeyboardMouse) {
+            text += "\nKEYBOARD/MOUSE INPUT";
+        }
+        else if (inputType == ControllerInputType.Joypad) {
+            text += "\nJOYPAD INPUT";
+        }
         if (GameClock.Paused) {
             text += "\nPAUSED GAME TIME";
         }

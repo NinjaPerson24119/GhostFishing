@@ -307,6 +307,7 @@ public partial class InventoryFrame : Control {
     }
 
     public void SelectDefaultPosition() {
+        GD.Print("Selecting default position");
         if (_inventory == null) {
             throw new Exception("Cannot select default position because inventory is null.");
         }
@@ -321,6 +322,7 @@ public partial class InventoryFrame : Control {
     }
 
     public Vector2I SelectNearestTile(Vector2 globalPosition) {
+        GD.Print($"Selecting nearest tile to {globalPosition}");
         if (_inventoryGrid == null) {
             throw new Exception("Cannot get nearest global position because inventory grid is null.");
         }

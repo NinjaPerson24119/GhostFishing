@@ -1,5 +1,10 @@
 using Godot;
 
+public enum ControllerInputType {
+    KeyboardMouse = 0,
+    Joypad = 1,
+}
+
 public partial class Controller : Node {
     private enum ControlsContextType {
         // player can open menus
@@ -31,6 +36,14 @@ public partial class Controller : Node {
     }
     private ControlsContextType _controlsContext = ControlsContextType.Player;
 
+    public ControllerInputType InputType {
+        get => _inputType;
+        private set {
+            _inputType = value;
+        }
+    }
+    private ControllerInputType _inputType = ControllerInputType.KeyboardMouse;
+
     [Signal]
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
 
@@ -40,6 +53,13 @@ public partial class Controller : Node {
     }
 
     public override void _Input(InputEvent inputEvent) {
+        if (inputEvent is InputEventJoypadButton || inputEvent is InputEventJoypadMotion) {
+            InputType = ControllerInputType.Joypad;
+        }
+        else if (inputEvent is InputEventKey || inputEvent is InputEventMouse || inputEvent is InputEventMouseMotion || inputEvent is InputEventMouseButton) {
+            InputType = ControllerInputType.KeyboardMouse;
+        }
+
         TryOpenPlayerMenu(inputEvent);
         TryOpenPauseMenu(inputEvent);
     }
