@@ -39,11 +39,11 @@ public partial class FollowCamera : Camera3D {
         get => _pitch;
         set => _pitch = Mathf.Clamp(value, MinPitch, MaxPitch);
     }
-    private float _pitch = 7f;
+    private float _pitch = Mathf.DegToRad(30f);
     [Export]
-    public float MinPitch = 4f;
+    public float MinPitch = Mathf.DegToRad(15f);
     [Export]
-    public float MaxPitch = 15f;
+    public float MaxPitch = Mathf.DegToRad(85f);
 
     [Export]
     public float MouseSensitivity = 0.005f;
@@ -105,7 +105,8 @@ public partial class FollowCamera : Camera3D {
     public float[] GetZoomSteps() {
         return new float[] {
             MinDistance,
-            (MaxDistance + MinDistance) / 2f,
+            MinDistance + (MaxDistance - MinDistance) / 3f,
+            MinDistance + (MaxDistance - MinDistance) * 2f / 3f,
             MaxDistance,
         };
     }
@@ -129,8 +130,10 @@ public partial class FollowCamera : Camera3D {
             }
         }
 
+        // TODO: camera collides with terrain (avoid clipping)
         //_cameraBody.TestMove()
         //if (_cameraBody.)
+
         bool updated = false;
         if (Input.IsActionPressed("rotate_camera_left")) {
             Yaw += (float)delta * _controllerRadiansPerSecond;
@@ -138,6 +141,14 @@ public partial class FollowCamera : Camera3D {
         }
         else if (Input.IsActionPressed("rotate_camera_right")) {
             Yaw -= (float)delta * _controllerRadiansPerSecond;
+            updated = true;
+        }
+        else if (Input.IsActionPressed("rotate_camera_up")) {
+            Pitch += (float)delta * _controllerRadiansPerSecond;
+            updated = true;
+        }
+        else if (Input.IsActionPressed("rotate_camera_down")) {
+            Pitch -= (float)delta * _controllerRadiansPerSecond;
             updated = true;
         }
         if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
@@ -153,8 +164,8 @@ public partial class FollowCamera : Camera3D {
 
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
         tf = tf.Translated(-Vector3.Forward * Distance);
+        tf = tf.Rotated(Vector3.Left, Pitch);
         tf = tf.Rotated(Vector3.Up, _player.GlobalRotation.Y + Yaw);
-        tf = tf.Rotated(Vector3.Right, Mathf.DegToRad(Pitch));
         tf = tf.Translated(_player.GlobalTransform.Origin);
         GlobalTransform = tf;
     }
