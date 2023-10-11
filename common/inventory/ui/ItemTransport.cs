@@ -212,7 +212,15 @@ public partial class InventoryItemTransport : Node2D {
             throw new Exception("Cannot change inventory focus because frame is null.");
         }
         _inventoryFocused = true;
-        TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
+
+        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
+        if (inputType == ControllerInputType.KeyboardMouse) {
+            TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
+        }
+        else if (inputType == ControllerInputType.Joypad) {
+            TilePosition = _frame.SelectedPosition;
+        }
+
         _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
         _selector.SetHoveringInventory(true);
         SetItemTileAppearance();
