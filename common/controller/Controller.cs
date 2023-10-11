@@ -39,11 +39,16 @@ public partial class Controller : Node {
     public ControllerInputType InputType {
         get => _inputType;
         private set {
+            if (value != _inputType) {
+                EmitSignal(SignalName.InputTypeChanged, (int)value);
+            }
             _inputType = value;
         }
     }
     private ControllerInputType _inputType = ControllerInputType.KeyboardMouse;
 
+    [Signal]
+    public delegate void InputTypeChangedEventHandler(ControllerInputType inputType);
     [Signal]
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
 
