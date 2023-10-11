@@ -95,7 +95,6 @@ public partial class InventoryGrid : Node2D {
     public Vector2I? GetTilePositionFromGlobalPosition(Vector2 globalPosition) {
         Vector2 topLeft = GlobalPosition;
         Vector2 bottomRight = topLeft + _tileSizePx * new Vector2(_inventory.Width, _inventory.Height);
-        GD.Print($"Tile size px: {_tileSizePx}, bottomRight: {bottomRight}");
         if (globalPosition.X < topLeft.X || globalPosition.X >= bottomRight.X || globalPosition.Y < topLeft.Y || globalPosition.Y >= bottomRight.Y) {
             return null;
         }
@@ -103,7 +102,6 @@ public partial class InventoryGrid : Node2D {
         int x = (int)(localPosition.X / _tileSizePx);
         int y = (int)(localPosition.Y / _tileSizePx);
         if (x < 0 || x >= _inventory.Width || y < 0 || y >= _inventory.Height) {
-            GD.Print($"Global position {globalPosition.X}, {globalPosition.Y} is out of bounds ({_inventory.Width},{_inventory.Height})");
             throw new System.Exception($"Tile position {x}, {y} is out of bounds ({_inventory.Width},{_inventory.Height}), but this should be impossible by construction");
         }
         return new Vector2I(x, y);

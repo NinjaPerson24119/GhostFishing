@@ -27,6 +27,7 @@ public partial class InventoryItemTransport : Node2D {
     // visual representation of inventory we need to send updates to
     private InventoryFrame? _frame;
     private InventoryItemTransportSelector _selector;
+    private bool _inventoryFocused = false;
 
     public InventoryItemTransport(int TileSize) {
         Name = "ItemTransport";
@@ -43,12 +44,15 @@ public partial class InventoryItemTransport : Node2D {
         }
     }
 
-    public override void _Process(double delta) {
+    public override void _Input(InputEvent inputEvent) {
         if (_inventory == null || _frame == null) {
             return;
         }
         if (!_frame.HasFocus()) {
-            RevertTakeItem();
+            InputEventMouse? mouseEvent = inputEvent as InputEventMouse;
+            if (mouseEvent != null) {
+                _selector.GlobalPosition = mouseEvent.GlobalPosition;
+            }
         }
     }
 
@@ -64,8 +68,6 @@ public partial class InventoryItemTransport : Node2D {
         }
         _frame = inventoryFrame;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
-
-        _selector.Visible = true;
 
         _frame.FocusEntered += OnInventoryFocused;
         _frame.FocusExited += OnInventoryUnfocused;
@@ -100,7 +102,7 @@ public partial class InventoryItemTransport : Node2D {
         PlaceItem(TilePosition);
     }
     private void PlaceItem(Vector2I tilePosition) {
-        if (_item == null || _inventory == null || _mutator == null) {
+        if (_item == null || _inventory == null || _mutator == null || !_inventoryFocused) {
             return;
         }
         _item.X = tilePosition.X;
@@ -114,7 +116,7 @@ public partial class InventoryItemTransport : Node2D {
     }
 
     public void TakeItem() {
-        if (_item != null || _inventory == null || _mutator == null || _frame == null) {
+        if (_item != null || _inventory == null || _mutator == null || _frame == null || !_inventoryFocused) {
             return;
         }
         _item = _mutator.TakeItem(TilePosition.X, TilePosition.Y);
@@ -125,7 +127,7 @@ public partial class InventoryItemTransport : Node2D {
         _lastTake = new TakeItemAction(_inventory, _mutator, _item);
 
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
-        _frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_inventory.Width - itemDef.Space.Width, _inventory.Height - itemDef.Space.Height));
+        TilePosition = _frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_inventory.Width - itemDef.Space.Width, _inventory.Height - itemDef.Space.Height));
 
         _selector.AssignItem(_item);
         SetItemTileAppearance();
@@ -159,7 +161,9 @@ public partial class InventoryItemTransport : Node2D {
         }
         _item.RotateClockwise();
         _selector.OnItemUpdated();
-        SetItemTileAppearance();
+        if (_inventoryFocused) {
+            SetItemTileAppearance();
+        }
     }
 
     public void RotateCounterClockwise() {
@@ -168,7 +172,9 @@ public partial class InventoryItemTransport : Node2D {
         }
         _item.RotateCounterClockwise();
         _selector.OnItemUpdated();
-        SetItemTileAppearance();
+        if (_inventoryFocused) {
+            SetItemTileAppearance();
+        }
     }
 
     private void ClearItem() {
@@ -185,7 +191,6 @@ public partial class InventoryItemTransport : Node2D {
             throw new Exception("Cannot change selected position because frame is null.");
         }
 
-        GD.Print($"Transport tilePosition changed: {tilePosition}");
         TilePosition = tilePosition;
 
         _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
@@ -203,17 +208,22 @@ public partial class InventoryItemTransport : Node2D {
     }
 
     public void OnInventoryFocused() {
-        InventoryFocused(true);
-    }
-    public void OnInventoryUnfocused() {
-        InventoryFocused(false);
-    }
-    private void InventoryFocused(bool isFocused) {
         if (_frame == null) {
             throw new Exception("Cannot change inventory focus because frame is null.");
         }
-        GD.Print($"Selector pos: {_frame.GetSelectorGlobalPosition()}");
+        _inventoryFocused = true;
+        TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
         _selector.GlobalPosition = _frame.GetSelectorGlobalPosition();
-        _selector.Visible = isFocused;
+        _selector.SetHoveringInventory(true);
+        SetItemTileAppearance();
+    }
+
+    public void OnInventoryUnfocused() {
+        if (_frame == null) {
+            throw new Exception("Cannot change inventory focus because frame is null.");
+        }
+        _inventoryFocused = false;
+        _selector.SetHoveringInventory(false);
+        _frame.ClearItemTilesAppearance();
     }
 }

@@ -27,6 +27,9 @@ public partial class InventoryItemTransportSelector : Node2D {
         _outlineDefaultScale = new Vector2(tileSize / outlineTexture.GetWidth(), tileSize / outlineTexture.GetHeight());
         _outline.Scale = _outlineDefaultScale;
         AddChild(_outline);
+
+        _sprite.Visible = false;
+        _outline.Visible = false;
     }
 
     public void UnassignItem() {
@@ -40,6 +43,10 @@ public partial class InventoryItemTransportSelector : Node2D {
     public void AssignItem(InventoryItemInstance item) {
         _item = item;
         OnItemUpdated();
+    }
+
+    public void SetHoveringInventory(bool hoveringInventory) {
+        _outline.Visible = hoveringInventory;
     }
 
     public void OnItemUpdated() {

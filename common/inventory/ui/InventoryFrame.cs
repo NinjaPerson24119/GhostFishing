@@ -14,13 +14,47 @@ public partial class InventoryFrame : Control {
     public Color DefaultTileColor = new Color(0.72f, 0.44f, 0.10f);
     public Color CanPlaceItemTileColor = new Color(0.0f, 1.0f, 0.0f);
     public Color CannotPlaceItemTileColor = new Color(1.0f, 0.0f, 0.0f);
-    public Vector2I SelectedPosition { get; private set; } = new Vector2I(0, 0);
+    public Vector2I SelectedPosition {
+        get {
+            return _selectedPosition;
+        }
+        private set {
+            Vector2I clampedPosition = value.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
+            if (clampedPosition == _selectedPosition) {
+                return;
+            }
+            _selectedPosition = clampedPosition;
+            EmitSignal(SignalName.SelectedPositionChanged, _selectedPosition);
+        }
+    }
+    private Vector2I _selectedPosition = Vector2I.Zero;
+    public Vector2I selectionBoundTopLeft {
+        get {
+            return _selectionBoundTopLeft;
+        }
+        set {
+            _selectionBoundTopLeft = value;
+            // reassign selected position to clamp it
+            SelectedPosition = SelectedPosition;
+        }
+    }
+    private Vector2I _selectionBoundTopLeft = new Vector2I(0, 0);
+    public Vector2I selectionBoundBottomRight {
+        get {
+            return _selectionBoundBottomRight;
+        }
+        set {
+            _selectionBoundBottomRight = value;
+            // reassign selected position to clamp it
+            SelectedPosition = SelectedPosition;
+        }
+    }
+    private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
 
     private Inventory? _inventory;
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
-    private Vector2I _selectionBoundTopLeft = new Vector2I(0, 0);
-    private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
+
 
     private Timer _inputRepeatDebounceTimer = new Timer() {
         WaitTime = 0.1f,
@@ -73,8 +107,6 @@ public partial class InventoryFrame : Control {
             Vector2I? selectedPosition = _inventoryGrid.GetTilePositionFromGlobalPosition(mouseEvent.GlobalPosition);
             if (selectedPosition != null) {
                 SelectedPosition = selectedPosition.Value;
-                SelectedPosition = SelectedPosition.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
-                EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
             }
         }
     }
@@ -87,26 +119,18 @@ public partial class InventoryFrame : Control {
             return;
         }
 
-        bool updated = false;
         foreach (KeyValuePair<string, Vector2I> entry in _inputActionToDirection) {
             if (Input.IsActionJustPressed(entry.Key)) {
                 SelectedPosition = SelectedPosition + entry.Value;
-                updated = true;
                 _inputRepeatDelayTimer.Start();
                 _inputRepeatDebounceTimer.Start();
                 break;
             }
             if (_inputRepeatDelayTimer.IsStopped() && _inputRepeatDebounceTimer.IsStopped() && Input.IsActionPressed(entry.Key)) {
                 SelectedPosition = SelectedPosition + entry.Value;
-                updated = true;
                 _inputRepeatDebounceTimer.Start();
                 break;
             }
-        }
-
-        if (updated) {
-            SelectedPosition = SelectedPosition.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
-            EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
         }
     }
 
@@ -291,11 +315,35 @@ public partial class InventoryFrame : Control {
             for (int x = 0; x < _inventory.Width; x++) {
                 if (_inventory.SpaceUsable(x, y)) {
                     SelectedPosition = new Vector2I(x, y);
-                    EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
                     return;
                 }
             }
         }
+    }
+
+    public Vector2I SelectNearestTile(Vector2 globalPosition) {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot get nearest global position because inventory grid is null.");
+        }
+        if (_inventory == null) {
+            throw new Exception("Cannot get nearest global position because inventory is null.");
+        }
+
+        // this really does need to be O(n^2) because the inventory shape isn't necessarily a rectangle
+        Vector2I nearestTile = Vector2I.Zero;
+        float nearestDistance = float.MaxValue;
+        for (int y = 0; y < _inventory.Height; y++) {
+            for (int x = 0; x < _inventory.Width; x++) {
+                // shift to tile center
+                Vector2 tileGlobalPosition = _inventoryGrid.GlobalPosition + new Vector2(x, y) * TileSizePx + Vector2.One * TileSizePx / 2;
+                if (globalPosition.DistanceTo(tileGlobalPosition) < nearestDistance) {
+                    nearestTile = new Vector2I(x, y);
+                    nearestDistance = globalPosition.DistanceTo(tileGlobalPosition);
+                }
+            }
+        }
+        SelectedPosition = nearestTile;
+        return SelectedPosition;
     }
 
     public Vector2 GetSelectorGlobalPosition() {
@@ -354,16 +402,16 @@ public partial class InventoryFrame : Control {
         _selectionBoundBottomRight = new Vector2I(_inventory.Width - 1, _inventory.Height - 1);
     }
 
-    public void SetSelectionBound(Vector2I topLeft, Vector2I bottomRight) {
+    // changing the bound may change the selected position so return it
+    public Vector2I SetSelectionBound(Vector2I topLeft, Vector2I bottomRight) {
         if (_inventory == null) {
             throw new Exception("Cannot set selection bound because inventory is null.");
         }
         if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width || bottomRight.Y >= _inventory.Height) {
             throw new Exception("Cannot set selections bound beyond inventory bounds.");
         }
-        _selectionBoundTopLeft = topLeft;
-        _selectionBoundBottomRight = bottomRight;
-        SelectedPosition = SelectedPosition.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
-        EmitSignal(SignalName.SelectedPositionChanged, SelectedPosition);
+        selectionBoundTopLeft = topLeft;
+        selectionBoundBottomRight = bottomRight;
+        return SelectedPosition;
     }
 }
