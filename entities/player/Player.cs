@@ -6,7 +6,7 @@ public partial class Player : RigidBody3D {
     public float BuoyancyDamping = 0f;
 
     [Export(PropertyHint.Range, "0,100")]
-    public float ConstantLinearDrag = 0.7f;
+    public float ConstantLinearDrag = 1.5f;
     [Export(PropertyHint.Range, "0,100")]
     public float ConstantAngularDrag = 1f;
     [Export(PropertyHint.Range, "0,1")]
@@ -21,12 +21,11 @@ public partial class Player : RigidBody3D {
     public float SubmergedProportionOffset = 0.7f;
 
     // F = ma, for a in m/s^2
-    // 150kg, just want this to be constant
     [Export]
-    public float EngineForce = 0.06f * 150;
+    public float EngineForce = 9f;
     // rad/s^2
     [Export]
-    public float TurnForce = Mathf.DegToRad(2f) * 150;
+    public float TurnForce = 2.5f;
 
     [Export]
     public bool DisableControls = false;
