@@ -1,10 +1,6 @@
-[gd_scene load_steps=6 format=3 uid="uid://dpabijl3uxatr"]
+[gd_scene load_steps=5 format=3 uid="uid://dpabijl3uxatr"]
 
 [ext_resource type="PackedScene" uid="uid://byfuil0lya5ei" path="res://common/boats/SimpleBoat.tscn" id="1_yv4ua"]
-
-[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_0o55t"]
-dof_blur_far_distance = 500.0
-dof_blur_amount = 0.01
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rweyy"]
 albedo_color = Color(1, 0.443137, 1, 0.313726)
@@ -23,13 +19,6 @@ center_of_mass = Vector3(0, -0.5, 0)
 can_sleep = false
 
 [node name="Boat" parent="." instance=ExtResource("1_yv4ua")]
-
-[node name="Camera3DWithAttributes2" type="Camera3D" parent="."]
-transform = Transform3D(1, 6.80455e-14, -1.86954e-13, -4.4839e-14, 0.992599, 0.121436, 1.93834e-13, -0.121436, 0.992599, -5.68434e-14, 1.90524, 4.06962)
-attributes = SubResource("CameraAttributesPractical_0o55t")
-fov = 100.0
-near = 1.0
-far = 1000.0
 
 [node name="BoundingBox" type="MeshInstance3D" parent="."]
 visible = false

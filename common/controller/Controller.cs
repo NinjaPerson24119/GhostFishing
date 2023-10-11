@@ -42,6 +42,7 @@ public partial class Controller : Node {
             if (value != _inputType) {
                 EmitSignal(SignalName.InputTypeChanged, (int)value);
             }
+            OnInputTypeChanged(value);
             _inputType = value;
         }
     }
@@ -125,5 +126,15 @@ public partial class Controller : Node {
     public void UnpauseGame() {
         RealClock.Ref().Paused = false;
         GetTree().Paused = false;
+    }
+
+    public void OnInputTypeChanged(ControllerInputType inputType) {
+        if (inputType == ControllerInputType.KeyboardMouse) {
+            // TODO: set this to confined once I'm OK with the mouse getting locked constantly
+            Input.MouseMode = ControlsContext == ControlsContextType.Player ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Visible;
+        }
+        else if (inputType == ControllerInputType.Joypad) {
+            //Input.MouseMode = Input.MouseModeEnum.ConfinedHidden;
+        }
     }
 }
