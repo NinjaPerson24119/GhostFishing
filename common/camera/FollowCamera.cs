@@ -50,12 +50,23 @@ public partial class FollowCamera : Camera3D {
     [Export]
     public float ResetRadiansPerSecond = Mathf.DegToRad(90f);
 
-    private Player? _player;
-    private CharacterBody3D? _cameraBody;
     private Timer _cameraResetTimer = new Timer() {
         WaitTime = 3f,
         OneShot = true,
     };
+    private bool IsCameraDefault {
+        get => _isCameraDefault;
+        set {
+            if (value != _isCameraDefault && _player != null) {
+                Yaw = _player.GlobalRotation.Y;
+            }
+            _isCameraDefault = value;
+        }
+    }
+    private bool _isCameraDefault = true;
+
+    private Player? _player;
+    private CharacterBody3D? _cameraBody;
 
     public FollowCamera() {
         Projection = ProjectionType.Perspective;
@@ -77,6 +88,7 @@ public partial class FollowCamera : Camera3D {
     public override void _Input(InputEvent inputEvent) {
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             Yaw -= mouseMotion.Relative.X * MouseSensitivity;
+            IsCameraDefault = false;
             _cameraResetTimer.Start();
         }
         var mouseButtonEvent = inputEvent as InputEventMouseButton;
@@ -138,10 +150,12 @@ public partial class FollowCamera : Camera3D {
         if (Input.IsActionPressed("rotate_camera_left")) {
             Yaw += (float)delta * _controllerRadiansPerSecond;
             updated = true;
+            IsCameraDefault = false;
         }
         else if (Input.IsActionPressed("rotate_camera_right")) {
             Yaw -= (float)delta * _controllerRadiansPerSecond;
             updated = true;
+            IsCameraDefault = false;
         }
         else if (Input.IsActionPressed("rotate_camera_up")) {
             Pitch += (float)delta * _controllerRadiansPerSecond;
@@ -151,12 +165,16 @@ public partial class FollowCamera : Camera3D {
             Pitch -= (float)delta * _controllerRadiansPerSecond;
             updated = true;
         }
+
         if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
             _cameraResetTimer.Start();
         }
         if (_cameraResetTimer.IsStopped()) {
             if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) > 0.01f) {
                 Yaw += -Mathf.Sign(Yaw - _player.GlobalRotation.Y) * (float)delta * ResetRadiansPerSecond;
+            }
+            else {
+                IsCameraDefault = true;
             }
         }
 
@@ -165,7 +183,14 @@ public partial class FollowCamera : Camera3D {
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
         tf = tf.Translated(-Vector3.Forward * Distance);
         tf = tf.Rotated(Vector3.Left, Pitch);
-        tf = tf.Rotated(Vector3.Up, Yaw);
+
+        float yaw = Yaw;
+        GD.Print($"Is camera default: {IsCameraDefault}");
+        if (IsCameraDefault) {
+            yaw = _player.GlobalRotation.Y;
+        }
+        tf = tf.Rotated(Vector3.Up, yaw);
+
         tf = tf.Translated(_player.GlobalTransform.Origin);
         GlobalTransform = tf;
     }
