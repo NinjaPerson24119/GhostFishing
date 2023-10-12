@@ -18,7 +18,15 @@ public partial class FollowCamera : Node3D {
         }
         private float _distance = 5;
         // sets the maximum distance based on a collision
-        public float CollidingMaxDistance = float.MaxValue;
+        public float CollidingMaxDistance {
+            get {
+                return _collidingMaxDistance;
+            }
+            set {
+                _collidingMaxDistance = Mathf.Max(_followCamera._rayNearDistance, value);
+            }
+        }
+        private float _collidingMaxDistance = float.MaxValue;
 
         private FollowCamera _followCamera;
         public CameraState(FollowCamera followCamera, float distance) {
@@ -32,7 +40,7 @@ public partial class FollowCamera : Node3D {
     [Export]
     public float MaxDistance = 15f;
     [Export]
-    private float CollidingDistanceBuffer = 0.2f;
+    private float CollidingDistanceBuffer = 0f;
     [Export]
     public float ZoomPerSecond = 20f;
     private enum ZoomEnum {
@@ -83,6 +91,7 @@ public partial class FollowCamera : Node3D {
 
     private Node3D? _rayCastGroup;
     private float _rayExtraDistance = 0.2f;//1f;
+    private float _rayNearDistance = 1f;
 
     private CameraState _cameraState;
 
@@ -100,6 +109,7 @@ public partial class FollowCamera : Node3D {
         float backAdjust = 0.1f;
         _rayCastGroup.AddChild(new RayCast3D() {
             Position = Vector3.Zero,
+            HitFromInside = true,
         });
         Vector3[] offsets = new Vector3[] {
             Vector3.Right + Vector3.Up,
@@ -114,6 +124,7 @@ public partial class FollowCamera : Node3D {
         foreach (Vector3 offset in offsets) {
             RayCast3D ray = new RayCast3D() {
                 Position = offset * radius + Vector3.Back * backAdjust,
+                HitFromInside = true,
             };
             _rayCastGroup.AddChild(ray);
         }
@@ -175,27 +186,37 @@ public partial class FollowCamera : Node3D {
             throw new System.Exception("Player is null");
         }
 
-        float minCollidingDistance = float.MaxValue;
-        var rayCastGroupChildren = _rayCastGroup.GetChildren();
-        for (int i = 0; i < rayCastGroupChildren.Count; i++) {
-            RayCast3D ray = (RayCast3D)rayCastGroupChildren[i];
-            float targetRadius = 0.1f;
-            float xRand = (GD.Randf() - 0.5f) * 2f;
-            float yRand = (GD.Randf() - 0.5f) * 2f;
-            ray.TargetPosition = ray.ToLocal(_player.GlobalPosition) + xRand * Vector3.Right * targetRadius + yRand * Vector3.Forward * targetRadius;
-            Rid rid = ray.GetColliderRid();
-            if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
-                minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
+        _cameraState.CollidingMaxDistance = float.MaxValue;
+        int maxRaycastIters = 2;
+        int raycastIters = 0;
+        while (raycastIters < maxRaycastIters) {
+            float minCollidingDistance = float.MaxValue;
+            var rayCastGroupChildren = _rayCastGroup.GetChildren();
+            bool hitsThisIter = false;
+            for (int i = 0; i < rayCastGroupChildren.Count; i++) {
+                RayCast3D ray = (RayCast3D)rayCastGroupChildren[i];
+                ray.TargetPosition = ray.ToLocal(_player.GlobalPosition);
+                ray.ForceRaycastUpdate();
+                Rid rid = ray.GetColliderRid();
+                if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
+                    minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
+                    GD.Print("Did not hit player");
+                    hitsThisIter = true;
+                }
             }
-        }
-        if (minCollidingDistance < float.MaxValue) {
-            GD.Print($"Hitting {minCollidingDistance}");
-            _cameraState.CollidingMaxDistance = minCollidingDistance - CollidingDistanceBuffer;
-            _cameraState.CollidingMaxDistance = Mathf.Max(_cameraState.CollidingMaxDistance, 0f);
-        }
-        else {
-            GD.Print("Not hitting");
-            _cameraState.CollidingMaxDistance = float.MaxValue;
+            if (minCollidingDistance < float.MaxValue && hitsThisIter) {
+                GD.Print($"Hitting {minCollidingDistance}");
+                _cameraState.CollidingMaxDistance = minCollidingDistance - CollidingDistanceBuffer;
+                _cameraState.CollidingMaxDistance = Mathf.Max(_cameraState.CollidingMaxDistance, 0f);
+            }
+            else {
+                GD.Print("Not hitting");
+                // not hitting anything
+                break;
+            }
+            UpdateRaycastGroupTransform(_cameraState.CollidingMaxDistance);
+            GD.Print($"Recast {raycastIters + 1}");
+            raycastIters++;
         }
 
         // smooth zoom
@@ -245,10 +266,10 @@ public partial class FollowCamera : Node3D {
             }
         }
 
-        UpdateCamera();
+        UpdateCameraTransform();
     }
 
-    private void UpdateCamera() {
+    private void UpdateCameraTransform() {
         if (_rayCastGroup == null) {
             throw new System.Exception("Ray cast group is null");
         }
@@ -256,18 +277,14 @@ public partial class FollowCamera : Node3D {
         float _uncollidingDistance = Mathf.Min(_cameraState.Distance, _cameraState.CollidingMaxDistance);
         GlobalTransform = CameraTransform(_uncollidingDistance, _cameraState.Yaw, _cameraState.Pitch);
 
-        _rayCastGroup.GlobalTransform = CameraTransform(_cameraState.Distance + _rayExtraDistance, _cameraState.Yaw, _cameraState.Pitch);
+        UpdateRaycastGroupTransform(_cameraState.Distance);
     }
 
-    private void ForceRaycastGroupUpdate() {
+    private void UpdateRaycastGroupTransform(float distance) {
         if (_rayCastGroup == null) {
             throw new System.Exception("Ray cast group is null");
         }
-        var rayCastGroupChildren = _rayCastGroup.GetChildren();
-        for (int i = 0; i < rayCastGroupChildren.Count; i++) {
-            RayCast3D ray = (RayCast3D)rayCastGroupChildren[i];
-            ray.ForceRaycastUpdate();
-        }
+        _rayCastGroup.GlobalTransform = CameraTransform(distance + _rayExtraDistance, _cameraState.Yaw, _cameraState.Pitch);
     }
 
     private Transform3D CameraTransform(float distance, float yaw, float pitch) {
