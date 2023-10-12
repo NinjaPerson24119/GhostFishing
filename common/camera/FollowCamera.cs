@@ -150,6 +150,7 @@ public partial class FollowCamera : Node3D {
         if (_player == null) {
             throw new System.Exception("Player is null");
         }
+
         _ray.TargetPosition = _ray.ToLocal(_player.GlobalPosition);
         _ray.ForceRaycastUpdate();
         Rid rid = _ray.GetColliderRid();
@@ -159,15 +160,6 @@ public partial class FollowCamera : Node3D {
         }
         else {
             _cameraState.CollidingMaxDistance = float.MaxValue;
-        }
-    }
-
-    public override void _Process(double delta) {
-        if (_player == null) {
-            throw new System.Exception("Player is null");
-        }
-        if (_ray == null) {
-            throw new System.Exception("Ray is null");
         }
 
         if (!_zoomTimer.IsStopped()) {
