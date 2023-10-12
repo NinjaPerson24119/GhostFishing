@@ -1,30 +1,48 @@
 using Godot;
 
-public partial class FollowCamera : Camera3D {
-    private enum ZoomEnum {
-        In,
-        Out,
+public partial class FollowCamera : Node3D {
+    private struct CameraState {
+        public float Yaw = 0f;
+
+        public float Pitch {
+            get => _pitch;
+            set => _pitch = Mathf.Clamp(value, _followCamera.MinPitch, _followCamera.MaxPitch);
+        }
+        private float _pitch = Mathf.DegToRad(30f);
+
+        public float Distance {
+            get => _distance;
+            set => _distance = Mathf.Clamp(value, _followCamera.MinDistance, _followCamera.MaxDistance);
+        }
+        private float _distance = 5;
+        // sets the maximum distance based on a collision
+        public float CollidingMaxDistance = float.MaxValue;
+
+        private FollowCamera _followCamera;
+        public CameraState(FollowCamera followCamera, float distance) {
+            _followCamera = followCamera;
+            Distance = distance;
+        }
     }
-    [Export]
-    public float Distance {
-        get => _distance;
-        set => _distance = Mathf.Clamp(value, MinDistance, MaxDistance);
-    }
-    private float _distance = 7f;
+
     [Export]
     public float MinDistance = 4f;
     [Export]
     public float MaxDistance = 15f;
     [Export]
+    private float CollidingDistanceBuffer = 0.2f;
+    [Export]
     public float ZoomPerSecond = 20f;
+    private enum ZoomEnum {
+        In,
+        Out,
+    }
     private ZoomEnum _zoom = ZoomEnum.In;
     Timer _zoomTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
     };
     private int _zoomStep = 1;
-    private float _collidingMaxDistance = float.MaxValue;
-    private float _collidingDistanceBuffer = 0.2f;
 
     [Export]
     public float ControllerDegreesPerSecond {
@@ -33,16 +51,6 @@ public partial class FollowCamera : Camera3D {
     }
     private float _controllerRadiansPerSecond = Mathf.DegToRad(120f);
 
-    [Export]
-    public float Yaw { get; private set; } = 0f;
-    private float _followYaw = 0f;
-
-    [Export]
-    public float Pitch {
-        get => _pitch;
-        set => _pitch = Mathf.Clamp(value, MinPitch, MaxPitch);
-    }
-    private float _pitch = Mathf.DegToRad(30f);
     [Export]
     public float MinPitch = Mathf.DegToRad(15f);
     [Export]
@@ -63,32 +71,30 @@ public partial class FollowCamera : Camera3D {
     private bool IsCameraDefault {
         get => _isCameraDefault;
         set {
-            if (value != IsCameraDefault && _player != null) {
-                Yaw = _followYaw;
-            }
             _isCameraDefault = value;
         }
     }
     private bool _isCameraDefault = true;
 
     private Player? _player;
-    RayCast3D? _ray;
+    private RayCast3D? _ray;
+    private Area3D? _area3D;
+
+    private CameraState _cameraState;
+    private CameraState _lastCameraState;
 
     public FollowCamera() {
-        Projection = ProjectionType.Perspective;
-        Fov = 100f;
-        Near = 0.1f;
-        Far = 500f;
-
         float[] zoomSteps = GetZoomSteps();
-        _distance = zoomSteps[_zoomStep];
+        _cameraState = new CameraState(this, zoomSteps[_zoomStep]);
+        _lastCameraState = _cameraState;
     }
 
     public override void _Ready() {
         _player = DependencyInjector.Ref().GetPlayer();
-        Yaw = _player.GlobalRotation.Y;
+        _cameraState.Yaw = _player.GlobalRotation.Y;
 
         _ray = GetNode<RayCast3D>("RayCast3D");
+        _area3D = GetNode<Area3D>("Area3D");
 
         AddChild(_cameraResetTimer);
         AddChild(_zoomTimer);
@@ -100,8 +106,8 @@ public partial class FollowCamera : Camera3D {
         }
 
         if (inputEvent is InputEventMouseMotion mouseMotion) {
-            Yaw -= mouseMotion.Relative.X * MouseSensitivity;
-            Pitch += mouseMotion.Relative.Y * MouseSensitivity;
+            _cameraState.Yaw -= mouseMotion.Relative.X * MouseSensitivity;
+            _cameraState.Pitch += mouseMotion.Relative.Y * MouseSensitivity;
             IsCameraDefault = false;
             _cameraResetTimer.Start();
         }
@@ -123,7 +129,7 @@ public partial class FollowCamera : Camera3D {
             _zoomTimer.Stop();
             float[] zoomSteps = GetZoomSteps();
             _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
-            _distance = zoomSteps[_zoomStep];
+            _cameraState.Distance = zoomSteps[_zoomStep];
             _cameraResetTimer.Start();
         }
     }
@@ -148,11 +154,11 @@ public partial class FollowCamera : Camera3D {
         _ray.ForceRaycastUpdate();
         Rid rid = _ray.GetColliderRid();
         if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
-            _collidingMaxDistance = _ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition) - _collidingDistanceBuffer;
-            _collidingMaxDistance = Mathf.Max(_collidingMaxDistance, 0f);
+            _cameraState.CollidingMaxDistance = _ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition) - CollidingDistanceBuffer;
+            _cameraState.CollidingMaxDistance = Mathf.Max(_cameraState.CollidingMaxDistance, 0f);
         }
         else {
-            _collidingMaxDistance = float.MaxValue;
+            _cameraState.CollidingMaxDistance = float.MaxValue;
         }
     }
 
@@ -167,10 +173,10 @@ public partial class FollowCamera : Camera3D {
         if (!_zoomTimer.IsStopped()) {
             switch (_zoom) {
                 case ZoomEnum.In:
-                    Distance -= (float)delta * ZoomPerSecond;
+                    _cameraState.Distance -= (float)delta * ZoomPerSecond;
                     break;
                 case ZoomEnum.Out:
-                    Distance += (float)delta * ZoomPerSecond;
+                    _cameraState.Distance += (float)delta * ZoomPerSecond;
                     break;
             }
         }
@@ -180,31 +186,43 @@ public partial class FollowCamera : Camera3D {
             bool updated = controlDirection != Vector2.Zero;
             if (controlDirection.X != 0) {
                 IsCameraDefault = false;
-                Yaw -= (float)delta * _controllerRadiansPerSecond * controlDirection.X;
+                _cameraState.Yaw -= (float)delta * _controllerRadiansPerSecond * controlDirection.X;
             }
             if (controlDirection.Y != 0) {
-                Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
+                _cameraState.Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
             }
             if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
                 _cameraResetTimer.Start();
             }
             if (_cameraResetTimer.IsStopped()) {
-                if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) % Mathf.Tau > 0.01f) {
-                    Yaw += -Mathf.Sign((Yaw - _player.GlobalRotation.Y) % Mathf.Tau) * (float)delta * ResetRadiansPerSecond;
+                if (Mathf.Abs(_cameraState.Yaw - _player.GlobalRotation.Y) % Mathf.Tau > 0.01f) {
+                    _cameraState.Yaw += -Mathf.Sign((_cameraState.Yaw - _player.GlobalRotation.Y) % Mathf.Tau) * (float)delta * ResetRadiansPerSecond;
                 }
                 else {
                     IsCameraDefault = true;
                 }
             }
-            _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
+            if (IsCameraDefault) {
+                _cameraState.Yaw = Mathf.LerpAngle(_cameraState.Yaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
+            }
         }
 
-        float _uncollidingDistance = Mathf.Min(Distance, _collidingMaxDistance);
-        GlobalTransform = CameraTransform(_uncollidingDistance);
-        _ray.GlobalTransform = CameraTransform(Distance);
+
+        if (_area3D == null) {
+            throw new System.Exception("Area3D is null");
+        }
+        if (_area3D.HasOverlappingBodies()) {
+            _cameraState = _lastCameraState;
+        }
+        else {
+            float _uncollidingDistance = Mathf.Min(_cameraState.Distance, _cameraState.CollidingMaxDistance);
+            GlobalTransform = CameraTransform(_uncollidingDistance, _cameraState.Yaw, _cameraState.Pitch);
+            _ray.GlobalTransform = CameraTransform(_cameraState.Distance, _cameraState.Yaw, _cameraState.Pitch);
+            _lastCameraState = _cameraState;
+        }
     }
 
-    private Transform3D CameraTransform(float distance) {
+    private Transform3D CameraTransform(float distance, float yaw, float pitch) {
         if (_player == null) {
             throw new System.Exception("Player is null");
         }
@@ -212,9 +230,7 @@ public partial class FollowCamera : Camera3D {
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
 
         tf = tf.Translated(-Vector3.Forward * distance);
-        tf = tf.Rotated(Vector3.Left, Pitch);
-
-        float yaw = IsCameraDefault ? _followYaw : Yaw;
+        tf = tf.Rotated(Vector3.Left, pitch);
         tf = tf.Rotated(Vector3.Up, yaw);
 
         tf = tf.Translated(_player.GlobalTransform.Origin);

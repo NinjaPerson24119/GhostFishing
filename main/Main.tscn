@@ -98,14 +98,19 @@ mesh = SubResource("PlaneMesh_us5c3")
 skeleton = NodePath("../..")
 script = ExtResource("9_sht6q")
 
-[node name="FollowCamera" type="Camera3D" parent="Pausable"]
+[node name="FollowCamera" type="Node3D" parent="Pausable"]
 script = ExtResource("12_4qwtb")
-
-[node name="RayCast3D" type="RayCast3D" parent="Pausable/FollowCamera"]
-collision_mask = 3
-hit_from_inside = true
 
 [node name="Area3D" type="Area3D" parent="Pausable/FollowCamera"]
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/FollowCamera/Area3D"]
 shape = SubResource("SphereShape3D_no4lg")
+
+[node name="RayCast3D" type="RayCast3D" parent="Pausable/FollowCamera"]
+collision_mask = 3
+hit_from_inside = true
+
+[node name="Camera3D" type="Camera3D" parent="Pausable/FollowCamera"]
+fov = 100.0
+near = 0.1
+far = 500.0
