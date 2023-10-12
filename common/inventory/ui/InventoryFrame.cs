@@ -51,10 +51,9 @@ public partial class InventoryFrame : Control {
     }
     private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
 
-    private Inventory? _inventory;
+    private Inventory _inventory;
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
-
 
     private Timer _inputRepeatDebounceTimer = new Timer() {
         WaitTime = 0.1f,
@@ -79,19 +78,25 @@ public partial class InventoryFrame : Control {
     public InventoryFrame(Inventory inventory, int tileSizePx) {
         FocusMode = FocusModeEnum.All;
         TileSizePx = tileSizePx;
-        SetInventory(inventory, tileSizePx);
+
+        _inventory = inventory;
+        _inventory.Updated += OnInventoryUpdated;
+
+        TileSizePx = tileSizePx;
+
+        AddChild(_inputRepeatDebounceTimer);
+        AddChild(_inputRepeatDelayTimer);
+        SpawnFrame();
+        SpawnItems();
+
+        ResetSelectionBound();
+        SelectDefaultPosition();
+
         AssetManager.Ref().PersistImage(_containerFrameImagePath);
     }
 
-    public override void _Ready() {
-        AddChild(_inputRepeatDebounceTimer);
-        AddChild(_inputRepeatDelayTimer);
-    }
-
     public override void _ExitTree() {
-        if (_inventory != null) {
-            _inventory.Updated -= OnInventoryUpdated;
-        }
+        _inventory.Updated -= OnInventoryUpdated;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -112,10 +117,10 @@ public partial class InventoryFrame : Control {
     }
 
     public override void _Process(double delta) {
-        if (_inventory == null) {
+        if (!HasFocus()) {
             return;
         }
-        if (!HasFocus()) {
+        if (_inputRepeatDelayTimer == null || _inputRepeatDebounceTimer == null) {
             return;
         }
 
@@ -145,42 +150,7 @@ public partial class InventoryFrame : Control {
         }
     }
 
-    private void SetInventory(Inventory inventory, int tileSizePx) {
-        if (_inventory != null) {
-            _inventory.Updated -= OnInventoryUpdated;
-        }
-        _inventory = inventory;
-        _inventory.Updated += OnInventoryUpdated;
-
-        TileSizePx = tileSizePx;
-
-        RespawnChildren();
-        ResetSelectionBound();
-        SelectDefaultPosition();
-    }
-
-    public void RespawnChildren() {
-        FreeChildren();
-        foreach (InventoryItemSprite itemSprite in _itemSprites) {
-            itemSprite.QueueFree();
-        }
-        _itemSprites.Clear();
-
-        SpawnFrame();
-        SpawnItems();
-    }
-
-    private void FreeChildren() {
-        foreach (Node child in GetChildren()) {
-            RemoveChild(child);
-            child.QueueFree();
-        }
-    }
-
     public void SpawnFrame() {
-        if (_inventory == null) {
-            throw new Exception("Cannot spawn children because inventory is null.");
-        }
         GD.Print("Spawning inventory frame");
         DebugTools.Assert(TileSizePx > 0, "TileSizePx must be greater than 0");
 
@@ -228,9 +198,6 @@ public partial class InventoryFrame : Control {
     }
 
     public void SpawnItems() {
-        if (_inventory == null) {
-            throw new Exception("Cannot add items because inventory is null.");
-        }
         if (_inventoryGrid == null) {
             throw new Exception("Cannot add items because inventory grid is null.");
         }
@@ -268,9 +235,6 @@ public partial class InventoryFrame : Control {
     }
 
     private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
-        if (_inventory == null) {
-            throw new Exception("Cannot update inventory because inventory is null.");
-        }
         if (_inventoryGrid == null) {
             throw new Exception("Cannot update inventory because inventory grid is null.");
         }
@@ -307,9 +271,6 @@ public partial class InventoryFrame : Control {
     }
 
     public void SelectDefaultPosition() {
-        if (_inventory == null) {
-            throw new Exception("Cannot select default position because inventory is null.");
-        }
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {
                 if (_inventory.SpaceUsable(x, y)) {
@@ -323,9 +284,6 @@ public partial class InventoryFrame : Control {
     public Vector2I SelectNearestTile(Vector2 globalPosition) {
         if (_inventoryGrid == null) {
             throw new Exception("Cannot get nearest global position because inventory grid is null.");
-        }
-        if (_inventory == null) {
-            throw new Exception("Cannot get nearest global position because inventory is null.");
         }
 
         // this really does need to be O(n^2) because the inventory shape isn't necessarily a rectangle
@@ -362,9 +320,6 @@ public partial class InventoryFrame : Control {
     }
 
     public void SetItemTilesAppearance(InventoryItemInstance item) {
-        if (_inventory == null) {
-            throw new Exception("Cannot set item tiles appearance because inventory is null.");
-        }
         if (_inventoryGrid == null) {
             throw new Exception("Cannot set item tiles appearance because inventory grid is null.");
         }
@@ -394,18 +349,12 @@ public partial class InventoryFrame : Control {
     }
 
     public void ResetSelectionBound() {
-        if (_inventory == null) {
-            throw new Exception("Cannot reset selection bound because inventory is null.");
-        }
         _selectionBoundTopLeft = new Vector2I(0, 0);
         _selectionBoundBottomRight = new Vector2I(_inventory.Width - 1, _inventory.Height - 1);
     }
 
     // changing the bound may change the selected position so return it
     public Vector2I SetSelectionBound(Vector2I topLeft, Vector2I bottomRight) {
-        if (_inventory == null) {
-            throw new Exception("Cannot set selection bound because inventory is null.");
-        }
         if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width || bottomRight.Y >= _inventory.Height) {
             throw new Exception("Cannot set selections bound beyond inventory bounds.");
         }

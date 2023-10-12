@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=16 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
@@ -26,9 +26,6 @@ material = SubResource("StandardMaterial3D_qugdi")
 size = Vector2(1, 1)
 subdivide_width = 50
 subdivide_depth = 50
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_no4lg"]
-radius = 2.0
 
 [node name="Main" type="Node"]
 process_mode = 3
@@ -100,11 +97,6 @@ script = ExtResource("9_sht6q")
 
 [node name="FollowCamera" type="Node3D" parent="Pausable"]
 script = ExtResource("12_4qwtb")
-
-[node name="Area3D" type="Area3D" parent="Pausable/FollowCamera"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/FollowCamera/Area3D"]
-shape = SubResource("SphereShape3D_no4lg")
 
 [node name="Camera3D" type="Camera3D" parent="Pausable/FollowCamera"]
 current = true

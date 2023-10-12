@@ -46,6 +46,7 @@ public partial class InventoryItemTransport : Node2D {
             GD.PrintErr("InventoryItemTransport was not closed before being destroyed.");
             _mutator.Dispose();
         }
+        DependencyInjector.Ref().GetController().InputTypeChanged -= OnControllerInputTypeChanged;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -61,8 +62,11 @@ public partial class InventoryItemTransport : Node2D {
     }
 
     public void OpenInventory(Inventory inventory, InventoryFrame inventoryFrame) {
-        if (_inventory != null || _mutator != null) {
-            throw new Exception("Cannot open inventory because inventory and/or mutator is not null.");
+        if (_inventory != null) {
+            throw new Exception("Cannot open inventory because inventory is not null.");
+        }
+        if (_mutator != null) {
+            throw new Exception("Cannot open inventory because mutator is not null.");
         }
 
         _inventory = inventory;
@@ -84,23 +88,26 @@ public partial class InventoryItemTransport : Node2D {
         }
     }
 
+    public bool IsOpen() {
+        return _inventory != null;
+    }
+
     public void CloseInventory() {
-        if (_frame == null) {
-            throw new Exception("Cannot close inventory because frame is null.");
+        if (_frame != null) {
+            _frame.FocusEntered -= OnInventoryFocused;
+            _frame.FocusExited -= OnInventoryUnfocused;
+            _frame.SelectedPositionChanged -= OnSelectedPositionChanged;
+            _frame = null;
         }
-
-        _frame.FocusEntered -= OnInventoryFocused;
-        _frame.FocusExited -= OnInventoryUnfocused;
-        _frame.SelectedPositionChanged -= OnSelectedPositionChanged;
-
-        if (_inventory == null || _mutator == null) {
-            throw new Exception("Cannot close inventory because inventory and/or mutator is null.");
+        if (_mutator != null) {
+            RevertTakeItem();
+            _mutator.Dispose();
+            _mutator = null;
         }
-        // drop item if we have one
-        RevertTakeItem();
-        _mutator.Dispose();
-        _mutator = null;
         _inventory = null;
+        if (_item != null) {
+            throw new Exception("Item is not null when closing inventory.");
+        }
     }
 
     public bool HasItem() {

@@ -1,8 +1,32 @@
 using System.Text.Json;
 using System.IO;
 using Godot;
+using System;
 
 public partial class SaveStateManager : Node {
+    public class Lock : IDisposable {
+        private SaveStateManager _saveStateManager;
+        private bool _released;
+        public Lock(SaveStateManager saveStateManager) {
+            _saveStateManager = saveStateManager;
+            saveStateManager._locks++;
+        }
+
+        ~Lock() {
+            if (!_released) {
+                GD.PrintErr("SaveStateManagerLock was not released before being destroyed.");
+                Dispose();
+            }
+        }
+
+        public void Dispose() {
+            if (!_released) {
+                _saveStateManager._locks--;
+                _released = true;
+            }
+        }
+    }
+
     static SingletonTracker<SaveStateManager> _singletonTracker = new SingletonTracker<SaveStateManager>();
     public static SaveStateManager Ref() {
         return _singletonTracker.Ref();
@@ -10,12 +34,19 @@ public partial class SaveStateManager : Node {
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
     private int _noPlayers;
+    private int _locks = 0;
 
     [Signal]
     public delegate void LoadedSaveStateEventHandler();
 
     public SaveStateManager() {
         ProcessMode = ProcessModeEnum.Always;
+    }
+
+    ~SaveStateManager() {
+        if (_locks > 0) {
+            GD.PrintErr("SaveStateManager was not closed before being destroyed.");
+        }
     }
 
     public override void _Ready() {
@@ -53,6 +84,11 @@ public partial class SaveStateManager : Node {
     }
 
     void Save() {
+        if (_locks > 0) {
+            GD.Print("Cannot save. SaveStateManager is locked.");
+            return;
+        }
+
         SaveState saveState = CaptureState();
         if (saveState.PlayerSaveState == null) {
             GD.Print("PlayerSaveState is null");
@@ -84,6 +120,11 @@ public partial class SaveStateManager : Node {
     }
 
     void Load() {
+        if (_locks > 0) {
+            GD.Print("Cannot load save. SaveStateManager is locked.");
+            return;
+        }
+
         string jsonString = File.ReadAllText(_saveStatePath);
         SaveState? saveState = JsonSerializer.Deserialize<SaveState>(jsonString);
         if (saveState == null) {
@@ -93,5 +134,9 @@ public partial class SaveStateManager : Node {
         SetState(saveState);
         GD.Print($"Loaded state from {_saveStatePath}");
         EmitSignal(SignalName.LoadedSaveState);
+    }
+
+    public Lock GetLock() {
+        return new Lock(this);
     }
 }
