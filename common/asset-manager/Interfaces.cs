@@ -6,3 +6,7 @@ public interface IGameAssetDTO {
 public interface IGameAssetDTOWithImages {
     string[] ImageAssetPaths();
 }
+
+public interface IGameAssetWritable<DTO> where DTO : IGameAssetDTO {
+    DTO ToDTO();
+}

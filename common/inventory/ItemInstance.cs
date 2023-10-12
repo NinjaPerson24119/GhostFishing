@@ -7,7 +7,6 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
     public int X { get; set; }
     public int Y { get; set; }
     public InventoryItemRotation Rotation { get; set; }
-    public InventoryItemFlagsDTO? FlagOverrides { get; set; }
 
     public bool IsValid() {
         if (string.IsNullOrEmpty(ItemDefinitionID)) {
@@ -23,14 +22,11 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
         string str = $"ItemInstanceID (this may be empty until DTO is instanced): {ItemInstanceID}\n";
         str += $"ItemDefinitionID: {ItemDefinitionID}\n";
         str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";
-        if (FlagOverrides != null) {
-            str += $"FlagOverrides (object):\n{FlagOverrides.Stringify()}\n";
-        }
         return str;
     }
 }
 
-public class InventoryItemInstance {
+public class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO> {
     public string ItemInstanceID { get; set; }
     public string ItemDefinitionID { get; set; }
     public int X { get; set; }
@@ -41,7 +37,6 @@ public class InventoryItemInstance {
             return Mathf.Pi / 2 * (int)Rotation;
         }
     }
-    public InventoryItemFlags? FlagOverrides { get; set; }
     public Color? BackgroundColor;
 
     public InventoryItemInstance(InventoryItemInstanceDTO dto) {
@@ -58,9 +53,6 @@ public class InventoryItemInstance {
         X = dto.X;
         Y = dto.Y;
         Rotation = dto.Rotation;
-        if (dto.FlagOverrides != null) {
-            FlagOverrides = new InventoryItemFlags(dto.FlagOverrides);
-        }
 
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(ItemDefinitionID);
         if (itemDef.BackgroundColorOverride != null) {
@@ -78,5 +70,16 @@ public class InventoryItemInstance {
 
     public void RotateCounterClockwise() {
         Rotation = (InventoryItemRotation)(((int)Rotation + 3) % 4);
+    }
+
+    public InventoryItemInstanceDTO ToDTO() {
+        InventoryItemInstanceDTO dto = new InventoryItemInstanceDTO() {
+            ItemInstanceID = ItemInstanceID,
+            ItemDefinitionID = ItemDefinitionID,
+            X = X,
+            Y = Y,
+            Rotation = Rotation
+        };
+        return dto;
     }
 }

@@ -43,28 +43,28 @@ public partial class AssetManager : Node {
         ProcessMode = ProcessModeEnum.Always;
 
         _inventoryItemCategoryStore = new AssetStore<InventoryItemCategoryDTO, InventoryItemCategory>(
-            (InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
+            (string id, InventoryItemCategoryDTO dto) => new InventoryItemCategory(dto),
             AssetIDUtil.IsInventoryItemCategoryID,
             null,
             AssetIDUtil.IsInventoryItemCategoryID,
             _persistedTextures
         );
         _questDefinitionStore = new AssetStore<QuestDefinitionDTO, QuestDefinition>(
-            (QuestDefinitionDTO dto) => new QuestDefinition(dto),
+            (string id, QuestDefinitionDTO dto) => new QuestDefinition(dto),
             AssetIDUtil.IsQuestID,
             null,
             AssetIDUtil.IsQuestID,
             _persistedTextures
         );
         _inventoryItemDefinitionStore = new AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition>(
-            (InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
+            (string id, InventoryItemDefinitionDTO dto) => new InventoryItemDefinition(dto),
             AssetIDUtil.IsInventoryItemDefinitionID,
             (InventoryItemDefinition itemDefinition) => AreItemDefinitionsDepsSatisfied(itemDefinition),
             AssetIDUtil.IsInventoryItemDefinitionID,
             _persistedTextures
         );
         _inventoryStore = new AssetStore<InventoryDTO, Inventory>(
-            (InventoryDTO dto) => new Inventory(dto),
+            (string id, InventoryDTO dto) => new Inventory(id, dto),
             AssetIDUtil.IsInventoryID,
             (Inventory inventory) => AreInventoryDepsSatisfied(inventory),
             AssetIDUtil.IsInventoryID,
@@ -220,5 +220,21 @@ public partial class AssetManager : Node {
         Texture2D texture = GD.Load<Texture2D>(globalizedPath);
         _persistedTextures.Add(imagePath, texture);
         GD.Print($"Persisted texture from path {globalizedPath}");
+    }
+
+    public Dictionary<string, InventoryDTO> GetInventoryDTOs() {
+        return _inventoryStore.GetAssetDTOs();
+    }
+
+    public void SetInventoryDTOs(Dictionary<string, InventoryDTO> dtos) {
+        _inventoryStore.Clear();
+        foreach (var kv in dtos) {
+            try {
+                _inventoryStore.AddAsset(kv.Key, kv.Value);
+            }
+            catch (Exception e) {
+                GD.PrintErr($"Error adding inventory DTO with ID {kv.Key}: {e}");
+            }
+        }
     }
 }

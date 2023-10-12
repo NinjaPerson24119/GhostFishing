@@ -62,7 +62,8 @@ public class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     }
 }
 
-public partial class Inventory : Node {
+public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
+    public string InventoryID { get; set; }
     public int Width { get; set; }
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
@@ -92,10 +93,11 @@ public partial class Inventory : Node {
     [Signal]
     public delegate void UpdatedEventHandler(UpdateType updateType, string itemInstanceID);
 
-    public Inventory(InventoryDTO dto) {
+    public Inventory(string inventoryID, InventoryDTO dto) {
         if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryDTO");
         }
+        InventoryID = inventoryID;
         Width = dto.Width;
         Height = dto.Height;
         BackgroundImagePath = dto.BackgroundImagePath;
@@ -324,5 +326,20 @@ public partial class Inventory : Node {
             str += "\n";
         }
         return str;
+    }
+
+    public InventoryDTO ToDTO() {
+        InventoryDTO dto = new InventoryDTO() {
+            Width = Width,
+            Height = Height,
+            BackgroundImagePath = BackgroundImagePath,
+            Disabled = Disabled,
+            UsableMask = _usableMask,
+            Items = new InventoryItemInstanceDTO[Items.Count],
+        };
+        for (int i = 0; i < Items.Count; ++i) {
+            dto.Items[i] = Items[i].ToDTO();
+        }
+        return dto;
     }
 }

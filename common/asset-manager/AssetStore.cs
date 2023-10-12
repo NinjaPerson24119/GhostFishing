@@ -5,7 +5,7 @@ using Godot;
 public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private Dictionary<string, T> _assets = new Dictionary<string, T>();
 
-    public delegate T BuildAssetFromDTO(DTO dto);
+    public delegate T BuildAssetFromDTO(string id, DTO dto);
     public delegate bool IsIDOfType(string id);
     public delegate bool AreDepsSatisfied(T asset);
     public delegate bool IsValidID(string id);
@@ -42,7 +42,7 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
         }
         T model;
         try {
-            model = _buildAssetFromDTO(dto);
+            model = _buildAssetFromDTO(id, dto);
         }
         catch (Exception e) {
             GD.PrintErr($"Error building {typeof(T)} asset from DTO: {e}");
@@ -97,5 +97,21 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
         }
         return _assets.ContainsKey(id);
+    }
+
+    public void Clear() {
+        _assets.Clear();
+    }
+
+    public Dictionary<string, DTO> GetAssetDTOs() {
+        Dictionary<string, DTO> dtos = new Dictionary<string, DTO>();
+        if (!typeof(IGameAssetWritable<DTO>).IsAssignableFrom(typeof(T))) {
+            throw new ArgumentException($"Asset type {typeof(T)} does not implement IGameAssetWritable");
+        }
+        foreach (var kv in _assets) {
+            DTO dto = (kv.Value as IGameAssetWritable<DTO>)!.ToDTO();
+            dtos.Add(kv.Key, dto);
+        }
+        return dtos;
     }
 }
