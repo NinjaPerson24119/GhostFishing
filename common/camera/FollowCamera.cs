@@ -150,26 +150,15 @@ public partial class FollowCamera : Camera3D {
         //_cameraBody.TestMove()
         //if (_cameraBody.)
 
-        bool updated = false;
-        if (Input.IsActionPressed("rotate_camera_left")) {
-            Yaw += (float)delta * _controllerRadiansPerSecond;
-            updated = true;
+        Vector2 controlDirection = Input.GetVector("rotate_camera_left", "rotate_camera_right", "rotate_camera_down", "rotate_camera_up");
+        bool updated = controlDirection != Vector2.Zero;
+        if (controlDirection.X != 0) {
             IsCameraDefault = false;
+            Yaw += (float)delta * _controllerRadiansPerSecond * controlDirection.X;
         }
-        else if (Input.IsActionPressed("rotate_camera_right")) {
-            Yaw -= (float)delta * _controllerRadiansPerSecond;
-            updated = true;
-            IsCameraDefault = false;
+        if (controlDirection.Y != 0) {
+            Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
         }
-        else if (Input.IsActionPressed("rotate_camera_up")) {
-            Pitch += (float)delta * _controllerRadiansPerSecond;
-            updated = true;
-        }
-        else if (Input.IsActionPressed("rotate_camera_down")) {
-            Pitch -= (float)delta * _controllerRadiansPerSecond;
-            updated = true;
-        }
-
         if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
             _cameraResetTimer.Start();
         }
