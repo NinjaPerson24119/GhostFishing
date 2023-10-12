@@ -51,6 +51,9 @@ public partial class FollowCamera : Camera3D {
     [Export]
     public float ResetRadiansPerSecond = Mathf.DegToRad(90f);
 
+    [Export]
+    public bool DisableControls = false;
+
     private Timer _cameraResetTimer = new Timer() {
         WaitTime = 3f,
         OneShot = true,
@@ -90,8 +93,13 @@ public partial class FollowCamera : Camera3D {
     }
 
     public override void _Input(InputEvent inputEvent) {
+        if (DisableControls) {
+            return;
+        }
+
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             Yaw -= mouseMotion.Relative.X * MouseSensitivity;
+            Pitch += mouseMotion.Relative.Y * MouseSensitivity;
             IsCameraDefault = false;
             _cameraResetTimer.Start();
         }
@@ -150,28 +158,29 @@ public partial class FollowCamera : Camera3D {
         //_cameraBody.TestMove()
         //if (_cameraBody.)
 
-        Vector2 controlDirection = Input.GetVector("rotate_camera_left", "rotate_camera_right", "rotate_camera_down", "rotate_camera_up");
-        bool updated = controlDirection != Vector2.Zero;
-        if (controlDirection.X != 0) {
-            IsCameraDefault = false;
-            Yaw += (float)delta * _controllerRadiansPerSecond * controlDirection.X;
-        }
-        if (controlDirection.Y != 0) {
-            Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
-        }
-        if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
-            _cameraResetTimer.Start();
-        }
-        if (_cameraResetTimer.IsStopped()) {
-            if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) % Mathf.Tau > 0.01f) {
-                Yaw += -Mathf.Sign((Yaw - _player.GlobalRotation.Y) % Mathf.Tau) * (float)delta * ResetRadiansPerSecond;
+        if (!DisableControls) {
+            Vector2 controlDirection = Input.GetVector("rotate_camera_left", "rotate_camera_right", "rotate_camera_down", "rotate_camera_up");
+            bool updated = controlDirection != Vector2.Zero;
+            if (controlDirection.X != 0) {
+                IsCameraDefault = false;
+                Yaw -= (float)delta * _controllerRadiansPerSecond * controlDirection.X;
             }
-            else {
-                IsCameraDefault = true;
+            if (controlDirection.Y != 0) {
+                Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
             }
+            if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
+                _cameraResetTimer.Start();
+            }
+            if (_cameraResetTimer.IsStopped()) {
+                if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) % Mathf.Tau > 0.01f) {
+                    Yaw += -Mathf.Sign((Yaw - _player.GlobalRotation.Y) % Mathf.Tau) * (float)delta * ResetRadiansPerSecond;
+                }
+                else {
+                    IsCameraDefault = true;
+                }
+            }
+            _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
         }
-
-        _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
 
         // TODO: raycast towards player to adjust distance
 
@@ -184,5 +193,9 @@ public partial class FollowCamera : Camera3D {
 
         tf = tf.Translated(_player.GlobalTransform.Origin);
         GlobalTransform = tf;
+    }
+
+    public void SetControlsDisabled(bool controlsDisabled) {
+        DisableControls = controlsDisabled;
     }
 }
