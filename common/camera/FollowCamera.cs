@@ -92,6 +92,12 @@ public partial class FollowCamera : Node3D {
     private Node3D? _rayCastGroup;
     private float _rayExtraDistance = 0.2f;//1f;
     private float _rayNearDistance = 1f;
+    private float _rayPitchDistance = 3f;
+    private float _rayNearPitchPerSecond = Mathf.DegToRad(90f);
+    private Timer _rayPitchUpTimer = new Timer() {
+        WaitTime = 0.1f,
+        OneShot = true,
+    };
 
     private CameraState _cameraState;
 
@@ -131,6 +137,7 @@ public partial class FollowCamera : Node3D {
 
         AddChild(_cameraResetTimer);
         AddChild(_zoomTimer);
+        AddChild(_rayPitchUpTimer);
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -140,7 +147,9 @@ public partial class FollowCamera : Node3D {
 
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             _cameraState.Yaw -= mouseMotion.Relative.X * MouseSensitivity;
-            _cameraState.Pitch += mouseMotion.Relative.Y * MouseSensitivity;
+            if (mouseMotion.Relative.Y > 0 || _rayPitchUpTimer.IsStopped()) {
+                _cameraState.Pitch += mouseMotion.Relative.Y * MouseSensitivity;
+            }
             IsCameraDefault = false;
             _cameraResetTimer.Start();
         }
@@ -200,23 +209,25 @@ public partial class FollowCamera : Node3D {
                 Rid rid = ray.GetColliderRid();
                 if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
                     minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
-                    GD.Print("Did not hit player");
                     hitsThisIter = true;
                 }
             }
             if (minCollidingDistance < float.MaxValue && hitsThisIter) {
-                GD.Print($"Hitting {minCollidingDistance}");
                 _cameraState.CollidingMaxDistance = minCollidingDistance - CollidingDistanceBuffer;
                 _cameraState.CollidingMaxDistance = Mathf.Max(_cameraState.CollidingMaxDistance, 0f);
             }
             else {
-                GD.Print("Not hitting");
                 // not hitting anything
                 break;
             }
             UpdateRaycastGroupTransform(_cameraState.CollidingMaxDistance);
-            GD.Print($"Recast {raycastIters + 1}");
             raycastIters++;
+        }
+        if (_cameraState.CollidingMaxDistance < _rayPitchDistance) {
+            _rayPitchUpTimer.Start();
+        }
+        if (!_rayPitchUpTimer.IsStopped()) {
+            _cameraState.Pitch += (float)delta * _rayNearPitchPerSecond;
         }
 
         // smooth zoom
@@ -246,7 +257,9 @@ public partial class FollowCamera : Node3D {
                 _cameraState.Yaw -= (float)delta * _controllerRadiansPerSecond * controlDirection.X;
             }
             if (controlDirection.Y != 0) {
-                _cameraState.Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
+                if (controlDirection.Y > 0 || _rayPitchUpTimer.IsStopped()) {
+                    _cameraState.Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
+                }
             }
             if (updated || _player.IsMoving() || !_zoomTimer.IsStopped()) {
                 _cameraResetTimer.Start();
