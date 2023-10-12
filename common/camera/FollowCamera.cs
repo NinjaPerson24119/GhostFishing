@@ -10,13 +10,6 @@ public partial class FollowCamera : Node3D {
             get => _pitch;
             set {
                 _pitch = Mathf.Clamp(value, _followCamera.MinPitch, _followCamera.MaxPitch);
-
-                if (CollidingMaxDistance < _followCamera.RayPitchDistance) {
-                    float distanceIntoPitchingArea = _followCamera.RayPitchDistance - CollidingMaxDistance;
-                    float pitchingAreaSize = _followCamera.RayPitchDistance - _followCamera.RayNearDistance;
-                    float minPitch = pitchingAreaSize > 0 ? distanceIntoPitchingArea / pitchingAreaSize * _followCamera.MaxPitch : _followCamera.MaxPitch;
-                    _pitch = Mathf.Max(_pitch, minPitch);
-                }
             }
         }
         private float _pitch = Mathf.DegToRad(30f);
@@ -100,8 +93,8 @@ public partial class FollowCamera : Node3D {
 
     private Node3D? _rayCastGroup;
     private float _rayExtraDistance = 0.2f;
-    private float RayNearDistance = 2f;
-    private float RayPitchDistance = 6f;
+    private float RayNearDistance = 1f;
+    private float RayPitchDistance = 3f;
     private float _rayNearPitchPerSecond = Mathf.DegToRad(90f);
     private Timer _rayPitchUpTimer = new Timer() {
         WaitTime = 0.1f,
