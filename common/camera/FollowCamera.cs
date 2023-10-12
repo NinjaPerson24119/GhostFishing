@@ -23,6 +23,8 @@ public partial class FollowCamera : Camera3D {
         OneShot = true,
     };
     private int _zoomStep = 1;
+    private float _collidingMaxDistance = float.MaxValue;
+    private float _collidingDistanceBuffer = 0.2f;
 
     [Export]
     public float ControllerDegreesPerSecond {
@@ -70,7 +72,7 @@ public partial class FollowCamera : Camera3D {
     private bool _isCameraDefault = true;
 
     private Player? _player;
-    private CharacterBody3D? _cameraBody;
+    RayCast3D? _ray;
 
     public FollowCamera() {
         Projection = ProjectionType.Perspective;
@@ -86,7 +88,7 @@ public partial class FollowCamera : Camera3D {
         _player = DependencyInjector.Ref().GetPlayer();
         Yaw = _player.GlobalRotation.Y;
 
-        _cameraBody = GetNode<CharacterBody3D>("CameraBody");
+        _ray = GetNode<RayCast3D>("RayCast3D");
 
         AddChild(_cameraResetTimer);
         AddChild(_zoomTimer);
@@ -135,12 +137,31 @@ public partial class FollowCamera : Camera3D {
         };
     }
 
+    public override void _PhysicsProcess(double delta) {
+        if (_ray == null) {
+            throw new System.Exception("Ray is null");
+        }
+        if (_player == null) {
+            throw new System.Exception("Player is null");
+        }
+        _ray.TargetPosition = _ray.ToLocal(_player.GlobalPosition);
+        _ray.ForceRaycastUpdate();
+        Rid rid = _ray.GetColliderRid();
+        if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
+            _collidingMaxDistance = _ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition) - _collidingDistanceBuffer;
+            _collidingMaxDistance = Mathf.Max(_collidingMaxDistance, 0f);
+        }
+        else {
+            _collidingMaxDistance = float.MaxValue;
+        }
+    }
+
     public override void _Process(double delta) {
         if (_player == null) {
             throw new System.Exception("Player is null");
         }
-        if (_cameraBody == null) {
-            throw new System.Exception("CameraBody is null");
+        if (_ray == null) {
+            throw new System.Exception("Ray is null");
         }
 
         if (!_zoomTimer.IsStopped()) {
@@ -153,10 +174,6 @@ public partial class FollowCamera : Camera3D {
                     break;
             }
         }
-
-        // TODO: camera collides with terrain (avoid clipping)
-        //_cameraBody.TestMove()
-        //if (_cameraBody.)
 
         if (!DisableControls) {
             Vector2 controlDirection = Input.GetVector("rotate_camera_left", "rotate_camera_right", "rotate_camera_down", "rotate_camera_up");
@@ -182,17 +199,27 @@ public partial class FollowCamera : Camera3D {
             _followYaw = Mathf.LerpAngle(_followYaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
         }
 
-        // TODO: raycast towards player to adjust distance
+        float _uncollidingDistance = Mathf.Min(Distance, _collidingMaxDistance);
+        GlobalTransform = CameraTransform(_uncollidingDistance);
+        _ray.GlobalTransform = CameraTransform(Distance);
+    }
+
+    private Transform3D CameraTransform(float distance) {
+        if (_player == null) {
+            throw new System.Exception("Player is null");
+        }
 
         Transform3D tf = new Transform3D(Basis.Identity, Vector3.Zero);
-        tf = tf.Translated(-Vector3.Forward * Distance);
+
+        tf = tf.Translated(-Vector3.Forward * distance);
         tf = tf.Rotated(Vector3.Left, Pitch);
 
         float yaw = IsCameraDefault ? _followYaw : Yaw;
         tf = tf.Rotated(Vector3.Up, yaw);
 
         tf = tf.Translated(_player.GlobalTransform.Origin);
-        GlobalTransform = tf;
+
+        return tf;
     }
 
     public void SetControlsDisabled(bool controlsDisabled) {
