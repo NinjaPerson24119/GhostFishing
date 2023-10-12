@@ -4,9 +4,15 @@ using Godot;
 
 public partial class SaveStateManager : Node {
     static SingletonTracker<SaveStateManager> _singletonTracker = new SingletonTracker<SaveStateManager>();
+    public static SaveStateManager Ref() {
+        return _singletonTracker.Ref();
+    }
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
     private int _noPlayers;
+
+    [Signal]
+    public delegate void LoadedSaveStateEventHandler();
 
     public SaveStateManager() {
         ProcessMode = ProcessModeEnum.Always;
@@ -32,6 +38,7 @@ public partial class SaveStateManager : Node {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
             PlayerSaveState = new PlayerSaveState[_noPlayers],
+            InventoryStates = AssetManager.Ref().GetInventoryDTOs(),
         };
 
         for (int i = 0; i < _noPlayers; i++) {
@@ -70,6 +77,10 @@ public partial class SaveStateManager : Node {
                 player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
             }
         }
+        if (saveState.InventoryStates != null) {
+            GD.Print($"Setting inventory states: {saveState.InventoryStates.Count}");
+            AssetManager.Ref().SetInventoryDTOs(saveState.InventoryStates);
+        }
     }
 
     void Load() {
@@ -81,5 +92,6 @@ public partial class SaveStateManager : Node {
         }
         SetState(saveState);
         GD.Print($"Loaded state from {_saveStatePath}");
+        EmitSignal(SignalName.LoadedSaveState);
     }
 }
