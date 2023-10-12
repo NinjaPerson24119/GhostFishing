@@ -1,7 +1,10 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class FollowCamera : Node3D {
     private struct CameraState {
+        public double Time = 0;
+
         public float Yaw = 0f;
 
         public float Pitch {
@@ -78,21 +81,25 @@ public partial class FollowCamera : Node3D {
     private bool _isCameraDefault = true;
 
     private Player? _player;
-    private RayCast3D? _ray;
     private Area3D? _area3D;
 
+    private RayCast3D? _ray;
+    private float _rayExtraDistance = 0;//1f;
+
     private CameraState _cameraState;
-    private CameraState _lastCameraState;
+    private LinkedList<CameraState> _cameraStateStack = new LinkedList<CameraState>();
+    private int _cameraStateStackMaxLength = 100;
+    private float _cameraStateHistoryResolution = 0.01f;
 
     public FollowCamera() {
         float[] zoomSteps = GetZoomSteps();
         _cameraState = new CameraState(this, zoomSteps[_zoomStep]);
-        _lastCameraState = _cameraState;
     }
 
     public override void _Ready() {
         _player = DependencyInjector.Ref().GetPlayer();
         _cameraState.Yaw = _player.GlobalRotation.Y;
+        PushCameraState(_cameraState);
 
         _ray = GetNode<RayCast3D>("RayCast3D");
         _area3D = GetNode<Area3D>("Area3D");
@@ -215,16 +222,30 @@ public partial class FollowCamera : Node3D {
             }
         }
 
+        /*
         if (_area3D.HasOverlappingBodies()) {
-            _cameraState = _lastCameraState;
             GD.Print("Colliding");
+            CameraState? lastState = PopCameraState();
+            if (lastState == null) {
+                throw new System.Exception("Camera state stack is empty, but we're still colliding");
+            }
+            _cameraState = lastState.Value;
         }
         else {
-            float _uncollidingDistance = Mathf.Min(_cameraState.Distance, _cameraState.CollidingMaxDistance);
-            GlobalTransform = CameraTransform(_uncollidingDistance, _cameraState.Yaw, _cameraState.Pitch);
-            _ray.GlobalTransform = CameraTransform(_cameraState.Distance, _cameraState.Yaw, _cameraState.Pitch);
-            _lastCameraState = _cameraState;
+            PushCameraState(_cameraState);
         }
+        */
+        UpdateCamera();
+    }
+
+    private void UpdateCamera() {
+        if (_ray == null) {
+            throw new System.Exception("Ray is null");
+        }
+
+        float _uncollidingDistance = Mathf.Min(_cameraState.Distance, _cameraState.CollidingMaxDistance);
+        GlobalTransform = CameraTransform(_uncollidingDistance, _cameraState.Yaw, _cameraState.Pitch);
+        _ray.GlobalTransform = CameraTransform(_cameraState.Distance + _rayExtraDistance, _cameraState.Yaw, _cameraState.Pitch);
     }
 
     private Transform3D CameraTransform(float distance, float yaw, float pitch) {
@@ -245,5 +266,30 @@ public partial class FollowCamera : Node3D {
 
     public void SetControlsDisabled(bool controlsDisabled) {
         DisableControls = controlsDisabled;
+    }
+
+    private void PushCameraState(CameraState cameraState) {
+        // avoid pushing camera states really close in time as it'll overflow the history
+        cameraState.Time = RealClock.Ref().RealTime;
+        if (_cameraStateStack.Last != null) {
+            CameraState last = _cameraStateStack.Last.Value;
+            if (Mathf.Abs(last.Time - cameraState.Time) < _cameraStateHistoryResolution) {
+                return;
+            }
+        }
+        _cameraStateStack.AddLast(cameraState);
+        if (_cameraStateStack.Count > _cameraStateStackMaxLength) {
+            _cameraStateStack.RemoveFirst();
+        }
+    }
+
+    private CameraState? PopCameraState() {
+        var last = _cameraStateStack.Last;
+        if (last == null) {
+            return null;
+        }
+        CameraState cameraState = last.Value;
+        _cameraStateStack.RemoveLast();
+        return cameraState;
     }
 }

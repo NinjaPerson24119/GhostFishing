@@ -28,7 +28,7 @@ subdivide_width = 50
 subdivide_depth = 50
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_no4lg"]
-radius = 1.0
+radius = 2.0
 
 [node name="Main" type="Node"]
 process_mode = 3
