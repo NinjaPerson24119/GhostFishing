@@ -106,11 +106,9 @@ script = ExtResource("12_4qwtb")
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/FollowCamera/Area3D"]
 shape = SubResource("SphereShape3D_no4lg")
 
-[node name="RayCast3D" type="RayCast3D" parent="Pausable/FollowCamera"]
-collision_mask = 3
-hit_from_inside = true
-
 [node name="Camera3D" type="Camera3D" parent="Pausable/FollowCamera"]
 fov = 100.0
 near = 0.1
 far = 500.0
+
+[node name="RayCastGroup" type="Node3D" parent="Pausable/FollowCamera"]
