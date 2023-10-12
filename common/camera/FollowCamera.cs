@@ -82,7 +82,7 @@ public partial class FollowCamera : Node3D {
     private Player? _player;
 
     private Node3D? _rayCastGroup;
-    private float _rayExtraDistance = 0;//1f;
+    private float _rayExtraDistance = 0.2f;//1f;
 
     private CameraState _cameraState;
 
@@ -97,8 +97,15 @@ public partial class FollowCamera : Node3D {
 
         _rayCastGroup = GetNode<Node3D>("RayCastGroup");
         float radius = 1.0f;
+        float backAdjust = 0.1f;
+        _rayCastGroup.AddChild(new RayCast3D() {
+            Position = Vector3.Zero,
+        });
         Vector3[] offsets = new Vector3[] {
-            Vector3.Zero,
+            Vector3.Right + Vector3.Up,
+            Vector3.Right + Vector3.Down,
+            Vector3.Left + Vector3.Up,
+            Vector3.Left + Vector3.Down,
             Vector3.Right,
             Vector3.Left,
             Vector3.Up,
@@ -106,7 +113,7 @@ public partial class FollowCamera : Node3D {
         };
         foreach (Vector3 offset in offsets) {
             RayCast3D ray = new RayCast3D() {
-                Position = offset * radius,
+                Position = offset * radius + Vector3.Back * backAdjust,
             };
             _rayCastGroup.AddChild(ray);
         }
@@ -172,18 +179,22 @@ public partial class FollowCamera : Node3D {
         var rayCastGroupChildren = _rayCastGroup.GetChildren();
         for (int i = 0; i < rayCastGroupChildren.Count; i++) {
             RayCast3D ray = (RayCast3D)rayCastGroupChildren[i];
-            ray.TargetPosition = ray.ToLocal(_player.GlobalPosition);
-            ray.ForceRaycastUpdate();
+            float targetRadius = 0.1f;
+            float xRand = (GD.Randf() - 0.5f) * 2f;
+            float yRand = (GD.Randf() - 0.5f) * 2f;
+            ray.TargetPosition = ray.ToLocal(_player.GlobalPosition) + xRand * Vector3.Right * targetRadius + yRand * Vector3.Forward * targetRadius;
             Rid rid = ray.GetColliderRid();
             if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
                 minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
             }
         }
         if (minCollidingDistance < float.MaxValue) {
+            GD.Print($"Hitting {minCollidingDistance}");
             _cameraState.CollidingMaxDistance = minCollidingDistance - CollidingDistanceBuffer;
             _cameraState.CollidingMaxDistance = Mathf.Max(_cameraState.CollidingMaxDistance, 0f);
         }
         else {
+            GD.Print("Not hitting");
             _cameraState.CollidingMaxDistance = float.MaxValue;
         }
 
@@ -246,6 +257,17 @@ public partial class FollowCamera : Node3D {
         GlobalTransform = CameraTransform(_uncollidingDistance, _cameraState.Yaw, _cameraState.Pitch);
 
         _rayCastGroup.GlobalTransform = CameraTransform(_cameraState.Distance + _rayExtraDistance, _cameraState.Yaw, _cameraState.Pitch);
+    }
+
+    private void ForceRaycastGroupUpdate() {
+        if (_rayCastGroup == null) {
+            throw new System.Exception("Ray cast group is null");
+        }
+        var rayCastGroupChildren = _rayCastGroup.GetChildren();
+        for (int i = 0; i < rayCastGroupChildren.Count; i++) {
+            RayCast3D ray = (RayCast3D)rayCastGroupChildren[i];
+            ray.ForceRaycastUpdate();
+        }
     }
 
     private Transform3D CameraTransform(float distance, float yaw, float pitch) {
