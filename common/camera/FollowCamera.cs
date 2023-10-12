@@ -8,7 +8,16 @@ public partial class FollowCamera : Node3D {
 
         public float Pitch {
             get => _pitch;
-            set => _pitch = Mathf.Clamp(value, _followCamera.MinPitch, _followCamera.MaxPitch);
+            set {
+                _pitch = Mathf.Clamp(value, _followCamera.MinPitch, _followCamera.MaxPitch);
+
+                if (CollidingMaxDistance < _followCamera.RayPitchDistance) {
+                    float distanceIntoPitchingArea = _followCamera.RayPitchDistance - CollidingMaxDistance;
+                    float pitchingAreaSize = _followCamera.RayPitchDistance - _followCamera.RayNearDistance;
+                    float minPitch = pitchingAreaSize > 0 ? distanceIntoPitchingArea / pitchingAreaSize * _followCamera.MaxPitch : _followCamera.MaxPitch;
+                    _pitch = Mathf.Max(_pitch, minPitch);
+                }
+            }
         }
         private float _pitch = Mathf.DegToRad(30f);
 
@@ -23,7 +32,7 @@ public partial class FollowCamera : Node3D {
                 return _collidingMaxDistance;
             }
             set {
-                _collidingMaxDistance = Mathf.Max(_followCamera._rayNearDistance, value);
+                _collidingMaxDistance = Mathf.Max(_followCamera.RayNearDistance, value);
             }
         }
         private float _collidingMaxDistance = float.MaxValue;
@@ -90,9 +99,9 @@ public partial class FollowCamera : Node3D {
     private Player? _player;
 
     private Node3D? _rayCastGroup;
-    private float _rayExtraDistance = 0.2f;//1f;
-    private float _rayNearDistance = 1f;
-    private float _rayPitchDistance = 3f;
+    private float _rayExtraDistance = 0.2f;
+    private float RayNearDistance = 2f;
+    private float RayPitchDistance = 6f;
     private float _rayNearPitchPerSecond = Mathf.DegToRad(90f);
     private Timer _rayPitchUpTimer = new Timer() {
         WaitTime = 0.1f,
@@ -147,7 +156,7 @@ public partial class FollowCamera : Node3D {
 
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             _cameraState.Yaw -= mouseMotion.Relative.X * MouseSensitivity;
-            if (mouseMotion.Relative.Y > 0 || _rayPitchUpTimer.IsStopped()) {
+            if (mouseMotion.Relative.Y > 0 || !IsAutoPitchEnabled()) {
                 _cameraState.Pitch += mouseMotion.Relative.Y * MouseSensitivity;
             }
             IsCameraDefault = false;
@@ -223,11 +232,14 @@ public partial class FollowCamera : Node3D {
             UpdateRaycastGroupTransform(_cameraState.CollidingMaxDistance);
             raycastIters++;
         }
-        if (_cameraState.CollidingMaxDistance < _rayPitchDistance) {
+        if (_cameraState.CollidingMaxDistance < RayPitchDistance) {
             _rayPitchUpTimer.Start();
         }
         if (!_rayPitchUpTimer.IsStopped()) {
             _cameraState.Pitch += (float)delta * _rayNearPitchPerSecond;
+            if (Mathf.Abs(_cameraState.CollidingMaxDistance - RayPitchDistance) < 0.01f) {
+                _rayPitchUpTimer.Stop();
+            }
         }
 
         // smooth zoom
@@ -257,7 +269,8 @@ public partial class FollowCamera : Node3D {
                 _cameraState.Yaw -= (float)delta * _controllerRadiansPerSecond * controlDirection.X;
             }
             if (controlDirection.Y != 0) {
-                if (controlDirection.Y > 0 || _rayPitchUpTimer.IsStopped()) {
+                GD.Print($"Is auto pitch enabled: {IsAutoPitchEnabled()}");
+                if (controlDirection.Y > 0 || !IsAutoPitchEnabled()) {
                     _cameraState.Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
                 }
             }
@@ -318,5 +331,9 @@ public partial class FollowCamera : Node3D {
 
     public void SetControlsDisabled(bool controlsDisabled) {
         DisableControls = controlsDisabled;
+    }
+
+    public bool IsAutoPitchEnabled() {
+        return _cameraState.CollidingMaxDistance < RayPitchDistance || !_rayPitchUpTimer.IsStopped();
     }
 }
