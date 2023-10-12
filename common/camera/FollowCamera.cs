@@ -182,7 +182,7 @@ public partial class FollowCamera : Node3D {
                     _cameraState.Distance += (float)delta * ZoomPerSecond;
                     break;
             }
-            if (_zoomDistanceTarget != null && Mathf.Abs(_zoomDistanceTarget.Value - _cameraState.Distance) < 0.01) {
+            if (_zoomDistanceTarget != null && Mathf.Abs(_zoomDistanceTarget.Value - _cameraState.Distance) < (float)delta * ZoomPerSecond) {
                 _zoomDistanceTarget = null;
             }
         }
@@ -201,8 +201,10 @@ public partial class FollowCamera : Node3D {
                 _cameraResetTimer.Start();
             }
             if (_cameraResetTimer.IsStopped()) {
-                if (Mathf.Abs(_cameraState.Yaw - _player.GlobalRotation.Y) % Mathf.Tau > 0.01f) {
-                    _cameraState.Yaw += -Mathf.Sign((_cameraState.Yaw - _player.GlobalRotation.Y) % Mathf.Tau) * (float)delta * ResetRadiansPerSecond;
+                float diff = _cameraState.Yaw - _player.GlobalRotation.Y;
+                if (Mathf.Abs(diff) % Mathf.Tau > (float)delta * ResetRadiansPerSecond) {
+                    float sign = Mathf.Abs(diff) % Mathf.Tau > Mathf.Pi ? -Mathf.Sign(diff) : Mathf.Sign(diff);
+                    _cameraState.Yaw += -sign * (float)delta * ResetRadiansPerSecond;
                 }
                 else {
                     IsCameraDefault = true;
