@@ -125,7 +125,15 @@ public partial class SaveStateManager : Node {
             return;
         }
 
-        string jsonString = File.ReadAllText(_saveStatePath);
+        string jsonString;
+        try {
+            jsonString = File.ReadAllText(_saveStatePath);
+        }
+        catch (Exception e) {
+            GD.Print($"Cannot load save. Error reading file: {e}");
+            return;
+        }
+
         SaveState? saveState = JsonSerializer.Deserialize<SaveState>(jsonString);
         if (saveState == null) {
             GD.Print("Cannot load save. Deserialized null.");
