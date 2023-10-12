@@ -40,7 +40,7 @@ public partial class FollowCamera : Node3D {
     [Export]
     public float MaxDistance = 15f;
     [Export]
-    private float CollidingDistanceBuffer = 0f;
+    private float CollidingDistanceBuffer = 0.2f;
     [Export]
     public float ZoomPerSecond = 20f;
     private enum ZoomEnum {
