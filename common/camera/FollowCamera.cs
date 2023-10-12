@@ -163,8 +163,8 @@ public partial class FollowCamera : Camera3D {
             _cameraResetTimer.Start();
         }
         if (_cameraResetTimer.IsStopped()) {
-            if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) > 0.01f) {
-                Yaw += -Mathf.Sign(Yaw - _player.GlobalRotation.Y) * (float)delta * ResetRadiansPerSecond;
+            if (Mathf.Abs(Yaw - _player.GlobalRotation.Y) % Mathf.Tau > 0.01f) {
+                Yaw += -Mathf.Sign((Yaw - _player.GlobalRotation.Y) % Mathf.Tau) * (float)delta * ResetRadiansPerSecond;
             }
             else {
                 IsCameraDefault = true;
