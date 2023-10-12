@@ -43,6 +43,7 @@ public partial class FollowCamera : Node3D {
         OneShot = true,
     };
     private int _zoomStep = 1;
+    private float? _zoomDistanceTarget;
 
     [Export]
     public float ControllerDegreesPerSecond {
@@ -117,10 +118,12 @@ public partial class FollowCamera : Node3D {
                 case MouseButton.WheelUp:
                     _zoom = ZoomEnum.In;
                     _zoomTimer.Start();
+                    _zoomDistanceTarget = null;
                     break;
                 case MouseButton.WheelDown:
                     _zoom = ZoomEnum.Out;
                     _zoomTimer.Start();
+                    _zoomDistanceTarget = null;
                     break;
             }
         }
@@ -129,7 +132,7 @@ public partial class FollowCamera : Node3D {
             _zoomTimer.Stop();
             float[] zoomSteps = GetZoomSteps();
             _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
-            _cameraState.Distance = zoomSteps[_zoomStep];
+            _zoomDistanceTarget = zoomSteps[_zoomStep];
             _cameraResetTimer.Start();
         }
     }
@@ -150,6 +153,9 @@ public partial class FollowCamera : Node3D {
         if (_player == null) {
             throw new System.Exception("Player is null");
         }
+        if (_area3D == null) {
+            throw new System.Exception("Area3D is null");
+        }
 
         _ray.TargetPosition = _ray.ToLocal(_player.GlobalPosition);
         _ray.ForceRaycastUpdate();
@@ -162,7 +168,12 @@ public partial class FollowCamera : Node3D {
             _cameraState.CollidingMaxDistance = float.MaxValue;
         }
 
-        if (!_zoomTimer.IsStopped()) {
+        // smooth zoom
+        if (!_zoomTimer.IsStopped() || _zoomDistanceTarget != null) {
+            _cameraResetTimer.Start();
+            if (_zoomDistanceTarget != null) {
+                _zoom = _zoomDistanceTarget > _cameraState.Distance ? ZoomEnum.Out : ZoomEnum.In;
+            }
             switch (_zoom) {
                 case ZoomEnum.In:
                     _cameraState.Distance -= (float)delta * ZoomPerSecond;
@@ -170,6 +181,9 @@ public partial class FollowCamera : Node3D {
                 case ZoomEnum.Out:
                     _cameraState.Distance += (float)delta * ZoomPerSecond;
                     break;
+            }
+            if (_zoomDistanceTarget != null && Mathf.Abs(_zoomDistanceTarget.Value - _cameraState.Distance) < 0.01) {
+                _zoomDistanceTarget = null;
             }
         }
 
@@ -199,12 +213,9 @@ public partial class FollowCamera : Node3D {
             }
         }
 
-
-        if (_area3D == null) {
-            throw new System.Exception("Area3D is null");
-        }
         if (_area3D.HasOverlappingBodies()) {
             _cameraState = _lastCameraState;
+            GD.Print("Colliding");
         }
         else {
             float _uncollidingDistance = Mathf.Min(_cameraState.Distance, _cameraState.CollidingMaxDistance);
