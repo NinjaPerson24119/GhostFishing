@@ -13,6 +13,7 @@ public partial class Main : Node {
         TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
         PlayerMenu playerMenu = DependencyInjector.Ref().GetPlayerMenu();
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
+        FollowCamera followCamera = DependencyInjector.Ref().GetFollowCamera();
 
         GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ocean.ConfigureTileDebugVisuals;
 
@@ -20,6 +21,7 @@ public partial class Main : Node {
 
         player.PositionChangedSignificantly += ocean.OnOriginChanged;
         controller.SetPlayerControlsDisabled += player.SetControlsDisabled;
+        controller.SetPlayerControlsDisabled += followCamera.SetControlsDisabled;
     }
 
     private void AssignDefaults() {

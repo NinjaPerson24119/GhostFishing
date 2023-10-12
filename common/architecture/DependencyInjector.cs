@@ -40,5 +40,9 @@ public partial class DependencyInjector : Node {
         return GetNode<PlayerMenu>("/root/Main/Pausable/GameUI/PlayerMenu");
     }
 
+    public FollowCamera GetFollowCamera() {
+        return GetNode<FollowCamera>("/root/Main/Pausable/FollowCamera");
+    }
+
     // do not provide other singletons. they provide themselves.
 }

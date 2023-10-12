@@ -1,11 +1,12 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class Player : RigidBody3D {
     [Export(PropertyHint.Range, "0,1,0.01")]
     public float BuoyancyDamping = 0f;
 
     [Export(PropertyHint.Range, "0,100")]
-    public float ConstantLinearDrag = 0.7f;
+    public float ConstantLinearDrag = 1.5f;
     [Export(PropertyHint.Range, "0,100")]
     public float ConstantAngularDrag = 1f;
     [Export(PropertyHint.Range, "0,1")]
@@ -20,12 +21,11 @@ public partial class Player : RigidBody3D {
     public float SubmergedProportionOffset = 0.7f;
 
     // F = ma, for a in m/s^2
-    // 150kg, just want this to be constant
     [Export]
-    public float EngineForce = 0.06f * 150;
+    public float EngineForce = 9f;
     // rad/s^2
     [Export]
-    public float TurnForce = Mathf.DegToRad(2f) * 150;
+    public float TurnForce = 2.5f;
 
     [Export]
     public bool DisableControls = false;
@@ -43,6 +43,13 @@ public partial class Player : RigidBody3D {
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
     private Vector3 _size;
+
+    private static readonly List<string> _moveActions = new List<string>() {
+            "move_forward",
+            "move_backward",
+            "turn_left",
+            "turn_right",
+        };
 
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
@@ -94,23 +101,13 @@ public partial class Player : RigidBody3D {
             return;
         }
 
-        bool moveForward = Input.IsActionPressed("move_forward");
-        bool moveBackward = Input.IsActionPressed("move_backward");
+        var controlDirection = Input.GetVector("turn_left", "turn_right", "move_backward", "move_forward");
         Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
-        if (moveForward && !moveBackward) {
-            ApplyCentralForce(towardsFrontOfBoat * EngineForce * Mass);
+        if (controlDirection.Y != 0) {
+            ApplyCentralForce(towardsFrontOfBoat * EngineForce * Mass * controlDirection.Y);
         }
-        if (moveBackward && !moveForward) {
-            ApplyCentralForce(towardsFrontOfBoat * -1 * EngineForce * Mass);
-        }
-
-        bool turnLeft = Input.IsActionPressed("turn_left");
-        bool turnRight = Input.IsActionPressed("turn_right");
-        if (turnLeft && !turnRight) {
-            ApplyTorque(Vector3.Up * TurnForce * Mass);
-        }
-        if (turnRight && !turnLeft) {
-            ApplyTorque(Vector3.Down * TurnForce * Mass);
+        if (controlDirection.X != 0) {
+            ApplyTorque(Vector3.Down * TurnForce * Mass * controlDirection.X);
         }
     }
 
@@ -245,5 +242,16 @@ public partial class Player : RigidBody3D {
 
     public void SetControlsDisabled(bool controlsDisabled) {
         DisableControls = controlsDisabled;
+    }
+
+    public bool IsMoving() {
+        bool isMoving = false;
+        foreach (string action in _moveActions) {
+            if (Input.IsActionPressed(action)) {
+                isMoving = true;
+                break;
+            }
+        }
+        return isMoving;
     }
 }
