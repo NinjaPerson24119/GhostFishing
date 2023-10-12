@@ -107,6 +107,7 @@ script = ExtResource("12_4qwtb")
 shape = SubResource("SphereShape3D_no4lg")
 
 [node name="Camera3D" type="Camera3D" parent="Pausable/FollowCamera"]
+current = true
 fov = 100.0
 near = 0.1
 far = 500.0
