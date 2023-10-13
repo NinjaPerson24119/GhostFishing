@@ -94,7 +94,6 @@ public partial class SaveStateManager : Node {
             GD.Print("PlayerSaveState is null");
             return;
         }
-        GD.Print(saveState.PlayerSaveState[0].GlobalPositionX);
         string jsonString = JsonSerializer.Serialize<SaveState>(saveState, new JsonSerializerOptions() {
             WriteIndented = true,
         });

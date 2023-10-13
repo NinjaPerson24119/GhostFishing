@@ -9,4 +9,5 @@ public interface IGameAssetDTOWithImages {
 
 public interface IGameAssetWritable<DTO> where DTO : IGameAssetDTO {
     DTO ToDTO();
+    bool IsTouched();
 }

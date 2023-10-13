@@ -79,6 +79,13 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
         _assets.Add(id, model);
     }
 
+    public void ReplaceAsset(string id, DTO dto) {
+        if (_assets.ContainsKey(id)) {
+            _assets.Remove(id);
+        }
+        AddAsset(id, dto);
+    }
+
     public T GetAsset(string id) {
         if (!_isValidID(id)) {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
@@ -99,16 +106,15 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
         return _assets.ContainsKey(id);
     }
 
-    public void Clear() {
-        _assets.Clear();
-    }
-
     public Dictionary<string, DTO> GetAssetDTOs() {
         Dictionary<string, DTO> dtos = new Dictionary<string, DTO>();
         if (!typeof(IGameAssetWritable<DTO>).IsAssignableFrom(typeof(T))) {
             throw new ArgumentException($"Asset type {typeof(T)} does not implement IGameAssetWritable");
         }
         foreach (var kv in _assets) {
+            if (!(kv.Value as IGameAssetWritable<DTO>)!.IsTouched()) {
+                continue;
+            }
             DTO dto = (kv.Value as IGameAssetWritable<DTO>)!.ToDTO();
             dtos.Add(kv.Key, dto);
         }

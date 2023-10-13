@@ -227,10 +227,9 @@ public partial class AssetManager : Node {
     }
 
     public void SetInventoryDTOs(Dictionary<string, InventoryDTO> dtos) {
-        _inventoryStore.Clear();
         foreach (var kv in dtos) {
             try {
-                _inventoryStore.AddAsset(kv.Key, kv.Value);
+                _inventoryStore.ReplaceAsset(kv.Key, kv.Value);
             }
             catch (Exception e) {
                 GD.PrintErr($"Error adding inventory DTO with ID {kv.Key}: {e}");

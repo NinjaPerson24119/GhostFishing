@@ -82,4 +82,8 @@ public class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO
         };
         return dto;
     }
+
+    public bool IsTouched() {
+        return true;
+    }
 }

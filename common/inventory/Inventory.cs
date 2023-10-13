@@ -342,4 +342,8 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
         }
         return dto;
     }
+
+    public bool IsTouched() {
+        return Touched;
+    }
 }
