@@ -75,6 +75,9 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
         if (!dto.IsValid()) {
             throw new ArgumentException("Invalid InventoryInstanceDTO");
         }
+        if (!AssetIDUtil.IsInventoryInstanceID(id)) {
+            throw new ArgumentException($"Invalid InventoryInstanceID: {id}");
+        }
         InventoryInstanceID = id;
         _inventoryDefinitionID = dto.InventoryDefinitionID;
         _definition = AssetManager.Ref().GetInventoryDefinition(dto.InventoryDefinitionID!);
@@ -293,7 +296,7 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
     }
 
     public InventoryInstanceDTO ToDTO() {
-        if (!string.IsNullOrEmpty(_inventoryDefinitionID)) {
+        if (string.IsNullOrEmpty(_inventoryDefinitionID)) {
             throw new Exception("Can't write inventory instance without a corresponding definition. Likely tried to write a temporary inventory instance.");
         }
 
