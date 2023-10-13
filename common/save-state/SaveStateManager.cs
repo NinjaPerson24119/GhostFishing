@@ -87,13 +87,13 @@ public partial class SaveStateManager : Node {
 
     void Save() {
         if (_locks > 0) {
-            GD.Print("Cannot save. SaveStateManager is locked.");
+            GD.PrintErr("Cannot save. SaveStateManager is locked.");
             return;
         }
 
         SaveState saveState = CaptureState();
         if (saveState.PlayerSaveState == null) {
-            GD.Print("PlayerSaveState is null");
+            GD.PrintErr("PlayerSaveState is null");
             return;
         }
         string jsonString = JsonSerializer.Serialize<SaveState>(saveState, new JsonSerializerOptions() {
@@ -105,7 +105,7 @@ public partial class SaveStateManager : Node {
 
     void SetState(SaveState saveState) {
         if (saveState.Version != version) {
-            GD.Print($"Save state version {saveState.Version} does not match expected version {version}");
+            GD.PrintErr($"Save state version {saveState.Version} does not match expected version {version}");
             return;
         }
         if (saveState.CommonSaveState != null) {
@@ -126,7 +126,7 @@ public partial class SaveStateManager : Node {
 
     void Load() {
         if (_locks > 0) {
-            GD.Print("Cannot load save. SaveStateManager is locked.");
+            GD.PrintErr("Cannot load save. SaveStateManager is locked.");
             return;
         }
 
@@ -135,13 +135,13 @@ public partial class SaveStateManager : Node {
             jsonString = File.ReadAllText(_saveStatePath);
         }
         catch (Exception e) {
-            GD.Print($"Cannot load save. Error reading file: {e}");
+            GD.PrintErr($"Cannot load save. Error reading file: {e}");
             return;
         }
 
         SaveState? saveState = JsonSerializer.Deserialize<SaveState>(jsonString);
         if (saveState == null) {
-            GD.Print("Cannot load save. Deserialized null.");
+            GD.PrintErr("Cannot load save. Deserialized null.");
             return;
         }
         SetState(saveState);
