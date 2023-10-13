@@ -20,6 +20,7 @@ public partial class PlayerMenu : Menu {
     }
 
     public override void _ExitTree() {
+        Close();
         SaveStateManager.Ref().LoadedSaveState -= OnLoadedSaveState;
     }
 
