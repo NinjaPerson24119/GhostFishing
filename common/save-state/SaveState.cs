@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 // JSON serializer relies on { get; set; } methods existing for each property.
 
 public class CommonSaveState {
@@ -11,6 +13,8 @@ public partial class PlayerSaveState {
 }
 
 public partial class SaveState {
+    public int Version { get; set; }
     public CommonSaveState? CommonSaveState { get; set; }
     public PlayerSaveState[]? PlayerSaveState { get; set; }
+    public Dictionary<string, InventoryInstanceDTO> InventoryStates { get; set; } = new Dictionary<string, InventoryInstanceDTO>();
 }

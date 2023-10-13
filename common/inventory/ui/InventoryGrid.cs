@@ -9,14 +9,14 @@ public partial class InventoryGrid : Node2D {
         public bool Visible;
     }
 
-    private Inventory _inventory;
+    private InventoryInstance _inventory;
     private int _tileSizePx = 64;
     private Color _defaultTileColor;
     private Color _backgroundColor;
     private List<InventoryTile> _tiles = new List<InventoryTile>();
     private List<TileAppearanceOverride> _tileAppearanceOverrides = new List<TileAppearanceOverride>();
 
-    public InventoryGrid(Inventory inventory, int tileSizePx, Color defaultTileColor, Color backgroundColor) {
+    public InventoryGrid(InventoryInstance inventory, int tileSizePx, Color defaultTileColor, Color backgroundColor) {
         _inventory = inventory;
         _tileSizePx = tileSizePx;
         _defaultTileColor = defaultTileColor;
@@ -56,7 +56,7 @@ public partial class InventoryGrid : Node2D {
         return color;
     }
 
-    private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
+    private void OnInventoryUpdated(InventoryInstance.UpdateType updateType, string itemInstanceID) {
         // fill states might have changed due to items moving
         UpdateTileAppearances();
     }
