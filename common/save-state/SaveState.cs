@@ -15,5 +15,5 @@ public partial class PlayerSaveState {
 public partial class SaveState {
     public CommonSaveState? CommonSaveState { get; set; }
     public PlayerSaveState[]? PlayerSaveState { get; set; }
-    public Dictionary<string, InventoryDTO> InventoryStates { get; set; } = new Dictionary<string, InventoryDTO>();
+    public Dictionary<string, InventoryInstanceDTO> InventoryStates { get; set; } = new Dictionary<string, InventoryInstanceDTO>();
 }

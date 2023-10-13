@@ -1,0 +1,45 @@
+{
+    "INVENTORY_INSTANCE-31cdec79-2a3b-4f4d-9e23-a878915f3973": {
+        "InventoryDefinitionID": "INVENTORY_DEF-a32188e4-2b11-41c6-a136-6758e426c414",
+        "Items": [
+            {
+                "ItemDefinitionID": "ITEM_DEF-8350f715-4989-44b1-b7b6-381b050c3d70",
+                "X": 3,
+                "Y": 0,
+                "Rotation": 0
+            },
+            {
+                "ItemDefinitionID": "ITEM_DEF-22573c01-8e3b-4020-b540-cedb88b7875f",
+                "X": 3,
+                "Y": 3,
+                "Rotation": 1
+            }
+        ]
+    },
+    "INVENTORY_INSTANCE-e158299f-a54e-42b0-964a-3ac732ec3631": {
+        "InventoryDefinitionID": "INVENTORY_DEF-a32188e4-2b11-41c6-a136-6758e426c414",
+        "Items": [
+            {
+                "ItemDefinitionID": "ITEM_DEF-8350f715-4989-44b1-b7b6-381b050c3d70",
+                "X": 3,
+                "Y": 0,
+                "Rotation": 0
+            },
+            {
+                "ItemDefinitionID": "ITEM_DEF-22573c01-8e3b-4020-b540-cedb88b7875f",
+                "X": 3,
+                "Y": 3,
+                "Rotation": 1
+            }
+        ]
+    },
+    "INVENTORY_INSTANCE-96c151e3-2436-406c-967c-79a1cc89c3ac": {
+        "InventoryDefinitionID": "INVENTORY_DEF-ab1458f7-4c0f-4171-b5f6-cf9bef2025da"
+    },
+    "INVENTORY_INSTANCE-f7091de2-6804-4f22-b8f1-d17be782adf6": {
+        "InventoryDefinitionID": "INVENTORY_DEF-ab1458f7-4c0f-4171-b5f6-cf9bef2025da"
+    },
+    "INVENTORY_INSTANCE-9f5d56ed-c8aa-4899-b749-66bd734141fb": {
+        "InventoryDefinitionID": "INVENTORY_DEF-ab1458f7-4c0f-4171-b5f6-cf9bef2025da"
+    }
+}

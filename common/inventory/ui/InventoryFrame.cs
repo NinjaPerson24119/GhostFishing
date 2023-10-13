@@ -51,7 +51,7 @@ public partial class InventoryFrame : Control {
     }
     private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
 
-    private Inventory _inventory;
+    private InventoryInstance _inventory;
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
 
@@ -75,7 +75,7 @@ public partial class InventoryFrame : Control {
     [Signal]
     public delegate void SelectedPositionChangedEventHandler(Vector2I position);
 
-    public InventoryFrame(Inventory inventory, int tileSizePx) {
+    public InventoryFrame(InventoryInstance inventory, int tileSizePx) {
         FocusMode = FocusModeEnum.All;
         TileSizePx = tileSizePx;
 
@@ -234,13 +234,13 @@ public partial class InventoryFrame : Control {
         return sprite;
     }
 
-    private void OnInventoryUpdated(Inventory.UpdateType updateType, string itemInstanceID) {
+    private void OnInventoryUpdated(InventoryInstance.UpdateType updateType, string itemInstanceID) {
         if (_inventoryGrid == null) {
             throw new Exception("Cannot update inventory because inventory grid is null.");
         }
 
         switch (updateType) {
-            case Inventory.UpdateType.Place:
+            case InventoryInstance.UpdateType.Place:
                 InventoryItemInstance? item = _inventory.GetItemByID(itemInstanceID);
                 if (item == null) {
                     throw new Exception("Inventory emitted place update with item instance ID that doesn't exist.");
@@ -249,7 +249,7 @@ public partial class InventoryFrame : Control {
                 _itemSprites.Add(itemSprite);
                 _inventoryGrid.CallDeferred("add_child", itemSprite);
                 break;
-            case Inventory.UpdateType.Take:
+            case InventoryInstance.UpdateType.Take:
                 InventoryItemSprite? itemToRemove = null;
                 foreach (InventoryItemSprite itemToCheck in _itemSprites) {
                     if (itemToCheck.ItemInstanceID == itemInstanceID) {

@@ -6,7 +6,7 @@ public partial class PlayerMenu : Menu {
     public int TileSizePx = 64;
 
     private InventoryItemTransport? _itemTransport;
-    private Inventory? _boatInventory;
+    private InventoryInstance? _boatInventory;
     private InventoryFrame? _boatInventoryFrame;
     private bool _initialized = false;
     private SaveStateManager.Lock? _saveStateLock;

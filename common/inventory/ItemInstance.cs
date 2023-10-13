@@ -9,16 +9,24 @@ public class InventoryItemInstanceDTO : IGameAssetDTO {
     public InventoryItemRotation Rotation { get; set; }
 
     public bool IsValid() {
-        if (string.IsNullOrEmpty(ItemDefinitionID)) {
+        if (string.IsNullOrEmpty(ItemDefinitionID) || !AssetIDUtil.IsInventoryItemDefinitionID(ItemDefinitionID)) {
+            GD.PrintErr($"Invalid ItemDefinitionID: {ItemDefinitionID}");
+            return false;
+        }
+        if (!string.IsNullOrEmpty(ItemInstanceID) && !AssetIDUtil.IsInventoryItemInstanceID(ItemInstanceID)) {
+            GD.PrintErr($"Invalid ItemInstanceID: {ItemInstanceID}");
             return false;
         }
         if (X < 0 || Y < 0) {
+            GD.PrintErr($"Invalid position: {X}, {Y}");
             return false;
         }
         return true;
     }
 
     public string Stringify() {
+        // items need not specify an ID as they don't exist outside of inventories
+        // it will be generated when the item is added to an inventory
         string str = $"ItemInstanceID (this may be empty until DTO is instanced): {ItemInstanceID}\n";
         str += $"ItemDefinitionID: {ItemDefinitionID}\n";
         str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";

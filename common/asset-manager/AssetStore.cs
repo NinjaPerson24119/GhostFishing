@@ -5,6 +5,8 @@ using Godot;
 public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private Dictionary<string, T> _assets = new Dictionary<string, T>();
 
+    // this should not have a second ID argument
+    // if an object needs to be referred by ID, it should be an instance variant with an ID field
     public delegate T BuildAssetFromDTO(string id, DTO dto);
     public delegate bool IsIDOfType(string id);
     public delegate bool AreDepsSatisfied(T asset);
@@ -31,13 +33,17 @@ public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     }
 
     public void AddAsset(string id, DTO dto) {
-        GD.Print($"Adding {typeof(T)} asset with ID: {id}");
+        GD.Print($"\n---\nAdding {typeof(T)} asset with ID: {id}");
 
         if (!_isValidID(id)) {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
         }
         if (dto == null) {
             GD.PrintErr($"DTO is null for {id} with asset type {typeof(T)}");
+            return;
+        }
+        if (!string.IsNullOrEmpty(id) && !_isValidID(id)) {
+            GD.PrintErr($"Invalid {typeof(T)} asset type ID: {id}");
             return;
         }
         T model;

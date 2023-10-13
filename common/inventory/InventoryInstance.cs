@@ -3,48 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
-    public int Width { get; set; }
-    public int Height { get; set; }
+public class InventoryInstanceDTO : IGameAssetDTO {
+    public string? InventoryDefinitionID { get; set; }
     public InventoryItemInstanceDTO[]? Items { get; set; }
-    public string? BackgroundImagePath { get; set; }
-    // disabled is used when an inventory needs to exist, but shouldn't be interactive
-    // - inspecting the contents of a locked chest
-    // - displaying a completed crafting result
     public bool Disabled { get; set; }
-    public bool[]? UsableMask { get; set; }
 
     public bool IsValid() {
-        if (Width <= 0 || Height <= 0) {
+        if (string.IsNullOrEmpty(InventoryDefinitionID) || !AssetIDUtil.IsInventoryDefinitionID(InventoryDefinitionID)) {
             return false;
         }
-        if (UsableMask != null) {
-            if (UsableMask.Length != Width * Height) {
-                return false;
-            }
-            if (!ConnectedArray.IsArrayConnected(Width, Height, UsableMask)) {
-                return false;
-            }
-        }
-
         return true;
     }
 
     public string Stringify() {
-        string str = $"Width: {Width}\nHeight: {Height}\n";
-        if (BackgroundImagePath != null) {
-            str += $"BackgroundImagePath: {BackgroundImagePath}\n";
-        }
+        string str = $"InventoryDefinitionID: {InventoryDefinitionID}\n";
         str += $"Disabled: {Disabled}\n";
-        if (UsableMask != null) {
-            str += "UsableMask:\n";
-            for (int y = 0; y < Height; ++y) {
-                for (int x = 0; x < Width; ++x) {
-                    str += UsableMask[y * Width + x] ? "1" : "0";
-                }
-                str += "\n";
-            }
-        }
         if (Items != null) {
             str += "Items (array):\n";
             foreach (InventoryItemInstanceDTO item in Items) {
@@ -53,32 +26,28 @@ public class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
         }
         return str;
     }
-
-    public string[] ImageAssetPaths() {
-        if (string.IsNullOrEmpty(BackgroundImagePath)) {
-            return new string[] { };
-        }
-        return new string[] { BackgroundImagePath };
-    }
 }
 
-public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
-    public string InventoryID { get; set; }
-    public int Width { get; set; }
-    public int Height { get; set; }
-    public List<InventoryItemInstance> Items { get; set; }
-    public string? BackgroundImagePath { get; set; }
-    public bool Disabled { get; set; }
+public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInstanceDTO> {
+    public readonly string InventoryInstanceID;
+    private readonly string? _inventoryDefinitionID;
 
+    private InventoryDefinition _definition;
+    public int Width { get => _definition.Width; }
+    public int Height { get => _definition.Height; }
+    public string? BackgroundImagePath { get => _definition.BackgroundImagePath; }
+
+    public List<InventoryItemInstance> Items { get; set; }
+    public bool Disabled { get; set; }
     public bool Touched { get; set; }
+
     // indicates if mutations should cause the inventory to be touched (e.g. ignore initialization placements)
     private bool _ignoreTouches = false;
 
-    // indicate spaces that are usable (shape might not be a perfect rectangle)
-    private bool[] _usableMask;
     // spaces that are currently occupied
     // each space contains the index of the item occupying it or UNUSED_SPACE_PLACEHOLDER
     private int[] _itemMask;
+
     // TODO: Complete() and add masks for specific categories and item UUIDs
     // _locked is used to prevent creating multiple mutators at once
     private bool _locked;
@@ -93,21 +62,24 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
     [Signal]
     public delegate void UpdatedEventHandler(UpdateType updateType, string itemInstanceID);
 
-    public Inventory(string inventoryID, InventoryDTO dto) {
+    // e.g. for temporary inventory
+    public InventoryInstance(int width, int height) {
+        InventoryInstanceID = AssetIDUtil.GenerateInventoryInstanceID();
+        _inventoryDefinitionID = null;
+        _definition = new InventoryDefinition(width, height);
+        _itemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
+        Items = new List<InventoryItemInstance>();
+    }
+
+    public InventoryInstance(string id, InventoryInstanceDTO dto) {
         if (!dto.IsValid()) {
-            throw new ArgumentException("Invalid InventoryDTO");
+            throw new ArgumentException("Invalid InventoryInstanceDTO");
         }
-        InventoryID = inventoryID;
-        Width = dto.Width;
-        Height = dto.Height;
-        BackgroundImagePath = dto.BackgroundImagePath;
+        InventoryInstanceID = id;
+        _inventoryDefinitionID = dto.InventoryDefinitionID;
+        _definition = AssetManager.Ref().GetInventoryDefinition(dto.InventoryDefinitionID!);
+
         Disabled = dto.Disabled;
-        if (dto.UsableMask == null) {
-            _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
-        }
-        else {
-            _usableMask = dto.UsableMask;
-        }
         _itemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
 
         Items = new List<InventoryItemInstance>();
@@ -122,14 +94,6 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
             }
             _ignoreTouches = false;
         }
-    }
-
-    public Inventory(int width, int height) {
-        Width = width;
-        Height = height;
-        _usableMask = Enumerable.Repeat(true, Width * Height).ToArray();
-        _itemMask = Enumerable.Repeat(UNUSED_SPACE_PLACEHOLDER, Width * Height).ToArray();
-        Items = new List<InventoryItemInstance>();
     }
 
     public bool CanPlaceItem(InventoryItemInstance item) {
@@ -148,7 +112,7 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
                 if (!itemDef.Space.GetFilledMask(item.Rotation)[j * itemDef.Space.Width + i]) {
                     continue;
                 }
-                if (!_usableMask[indexConsidered]) {
+                if (!_definition.UsableMask[indexConsidered]) {
                     if (_printLogs) {
                         GD.Print($"Can't place item {item.ItemDefinitionID} at ({x}, {y}) due to unusable space");
                     }
@@ -177,7 +141,7 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
                         continue;
                     }
                     int indexConsidered = (Items[idx].Y + j) * Width + (Items[idx].X + i);
-                    DebugTools.Assert(_usableMask[indexConsidered]);
+                    DebugTools.Assert(_definition.UsableMask[indexConsidered]);
                     DebugTools.Assert(newItemMask[indexConsidered] == UNUSED_SPACE_PLACEHOLDER);
                     newItemMask[indexConsidered] = idx;
                 }
@@ -200,7 +164,7 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
         if (x < 0 || y < 0 || x >= Width || y >= Height) {
             return false;
         }
-        return _usableMask[y * Width + x];
+        return _definition.UsableMask[y * Width + x];
     }
 
     public InventoryItemInstance? ItemAt(int x, int y) {
@@ -271,9 +235,9 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
     }
 
     public class Mutator : IDisposable {
-        private Inventory _inventory;
+        private InventoryInstance _inventory;
         private bool _released;
-        public Mutator(Inventory inventory) {
+        public Mutator(InventoryInstance inventory) {
             _inventory = inventory;
             _released = false;
         }
@@ -313,7 +277,7 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
         string str = "";
         for (int y = 0; y < Height; ++y) {
             for (int x = 0; x < Width; ++x) {
-                if (!_usableMask[y * Width + x]) {
+                if (!_definition.UsableMask[y * Width + x]) {
                     str += "XX";
                     continue;
                 }
@@ -328,13 +292,14 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
         return str;
     }
 
-    public InventoryDTO ToDTO() {
-        InventoryDTO dto = new InventoryDTO() {
-            Width = Width,
-            Height = Height,
-            BackgroundImagePath = BackgroundImagePath,
+    public InventoryInstanceDTO ToDTO() {
+        if (!string.IsNullOrEmpty(_inventoryDefinitionID)) {
+            throw new Exception("Can't write inventory instance without a corresponding definition. Likely tried to write a temporary inventory instance.");
+        }
+
+        InventoryInstanceDTO dto = new InventoryInstanceDTO() {
+            InventoryDefinitionID = _inventoryDefinitionID,
             Disabled = Disabled,
-            UsableMask = _usableMask,
             Items = new InventoryItemInstanceDTO[Items.Count],
         };
         for (int i = 0; i < Items.Count; ++i) {
@@ -344,6 +309,7 @@ public partial class Inventory : Node, IGameAssetWritable<InventoryDTO> {
     }
 
     public bool IsTouched() {
-        return Touched;
+        // we can't write inventory instances without a corresponding definition
+        return Touched && !string.IsNullOrEmpty(_inventoryDefinitionID);
     }
 }

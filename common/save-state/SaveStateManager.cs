@@ -69,7 +69,7 @@ public partial class SaveStateManager : Node {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
             PlayerSaveState = new PlayerSaveState[_noPlayers],
-            InventoryStates = AssetManager.Ref().GetInventoryDTOs(),
+            InventoryStates = AssetManager.Ref().GetInventoryInstanceDTOs(),
         };
 
         for (int i = 0; i < _noPlayers; i++) {
@@ -114,7 +114,7 @@ public partial class SaveStateManager : Node {
         }
         if (saveState.InventoryStates != null) {
             GD.Print($"Setting inventory states: {saveState.InventoryStates.Count}");
-            AssetManager.Ref().SetInventoryDTOs(saveState.InventoryStates);
+            AssetManager.Ref().SetInventoryInstanceDTOs(saveState.InventoryStates);
         }
     }
 

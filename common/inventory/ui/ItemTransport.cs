@@ -3,12 +3,12 @@ using Godot;
 
 public partial class InventoryItemTransport : Node2D {
     public class TakeItemAction {
-        public Inventory From;
-        public Inventory.Mutator FromMutator;
+        public InventoryInstance From;
+        public InventoryInstance.Mutator FromMutator;
         public Vector2I TilePosition;
         public InventoryItemRotation Rotation;
 
-        public TakeItemAction(Inventory from, Inventory.Mutator fromMutator, InventoryItemInstance item) {
+        public TakeItemAction(InventoryInstance from, InventoryInstance.Mutator fromMutator, InventoryItemInstance item) {
             From = from;
             FromMutator = fromMutator;
             TilePosition = new Vector2I(item.X, item.Y);
@@ -22,8 +22,8 @@ public partial class InventoryItemTransport : Node2D {
     // position of the tile we're currently hovering over in the inventory
     public Vector2I TilePosition;
     // inventory we're currently interacting with
-    private Inventory? _inventory;
-    private Inventory.Mutator? _mutator;
+    private InventoryInstance? _inventory;
+    private InventoryInstance.Mutator? _mutator;
     // visual representation of inventory we need to send updates to
     private InventoryFrame? _frame;
     private InventoryItemTransportSelector _selector;
@@ -61,7 +61,7 @@ public partial class InventoryItemTransport : Node2D {
         }
     }
 
-    public void OpenInventory(Inventory inventory, InventoryFrame inventoryFrame) {
+    public void OpenInventory(InventoryInstance inventory, InventoryFrame inventoryFrame) {
         if (_inventory != null) {
             throw new Exception("Cannot open inventory because inventory is not null.");
         }
@@ -156,7 +156,7 @@ public partial class InventoryItemTransport : Node2D {
             return;
         }
 
-        Inventory.Mutator? mutator = _lastTake.FromMutator;
+        InventoryInstance.Mutator? mutator = _lastTake.FromMutator;
         if (mutator == null) {
             throw new Exception("Failed to revert take because lastTake mutator is null.");
         }
