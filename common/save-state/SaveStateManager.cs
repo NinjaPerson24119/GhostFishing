@@ -35,6 +35,7 @@ public partial class SaveStateManager : Node {
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
     private int _noPlayers;
     private int _locks = 0;
+    private int version = 0;
 
     [Signal]
     public delegate void LoadedSaveStateEventHandler();
@@ -65,6 +66,7 @@ public partial class SaveStateManager : Node {
 
     private SaveState CaptureState() {
         SaveState saveState = new SaveState() {
+            Version = version,
             CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
@@ -102,6 +104,10 @@ public partial class SaveStateManager : Node {
     }
 
     void SetState(SaveState saveState) {
+        if (saveState.Version != version) {
+            GD.Print($"Save state version {saveState.Version} does not match expected version {version}");
+            return;
+        }
         if (saveState.CommonSaveState != null) {
             GameClock.GameSeconds = saveState.CommonSaveState.GameSeconds;
         }
