@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=18 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/game-ui/GameUI.tscn" id="5_8atem"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
 [ext_resource type="PackedScene" uid="uid://brrd5dfqqljyv" path="res://common/sky/Sky.tscn" id="7_5ixg0"]
+[ext_resource type="PackedScene" uid="uid://cuxkb32iujs8d" path="res://assets/Chest.blend" id="8_4fp4j"]
 [ext_resource type="Script" path="res://common/water/WaterTileCPU.cs" id="9_sht6q"]
 [ext_resource type="PackedScene" uid="uid://btubjkxhs3o87" path="res://common/ui/pause-menu/PauseMenu.tscn" id="10_sg4eq"]
 [ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="12_4qwtb"]
@@ -52,30 +53,33 @@ script = ExtResource("2_cg76b")
 [node name="Sky" parent="Pausable" instance=ExtResource("7_5ixg0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.3415, 17.4548, 0)
 
-[node name="IslandGroup" type="Node3D" parent="Pausable"]
+[node name="Level" type="Node3D" parent="Pausable"]
 
-[node name="Terrain" type="StaticBody3D" parent="Pausable/IslandGroup"]
+[node name="Terrain" type="StaticBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.871, 0)
 
-[node name="ground" parent="Pausable/IslandGroup/Terrain" instance=ExtResource("4_e77m6")]
+[node name="ground" parent="Pausable/Level/Terrain" instance=ExtResource("4_e77m6")]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/IslandGroup/Terrain"]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/Level/Terrain"]
 transform = Transform3D(50, 0, 0, 0, 1, 0, 0, 0, 50, 0, 0, 0)
 shape = SubResource("ConcavePolygonShape3D_ouryt")
 
-[node name="SpotLight3D" type="SpotLight3D" parent="Pausable/IslandGroup"]
+[node name="SpotLight3D" type="SpotLight3D" parent="Pausable/Level"]
 transform = Transform3D(-0.919451, 0.38168, 0.0944987, 1.11759e-08, -0.24033, 0.970691, 0.393204, 0.892503, 0.220972, -15.6434, 17.0687, 18.6465)
 visible = false
 light_energy = 35.0
 shadow_enabled = true
 spot_range = 100.0
 
-[node name="SpotLight3D2" type="SpotLight3D" parent="Pausable/IslandGroup"]
+[node name="SpotLight3D2" type="SpotLight3D" parent="Pausable/Level"]
 transform = Transform3D(-0.919451, 0.351809, 0.175612, 7.45058e-09, -0.446619, 0.894724, 0.393204, 0.822655, 0.410645, -25.4186, 23.2238, -4.21151)
 visible = false
 light_energy = 25.0
 shadow_enabled = true
 spot_range = 100.0
+
+[node name="Chest" parent="Pausable/Level" instance=ExtResource("8_4fp4j")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
 
 [node name="Ocean" type="Node3D" parent="Pausable"]
 script = ExtResource("5_mnq5h")
@@ -85,18 +89,18 @@ NoWaves = 6
 Intensity = 2.0
 Damping = 0.7
 
-[node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
-script = ExtResource("3_t71xa")
-ConstantAngularDrag = 1.4
-
-[node name="WaterTileCPU" type="MeshInstance3D" parent="Pausable"]
+[node name="WaterTileCPU" type="MeshInstance3D" parent="Pausable/Ocean"]
 process_mode = 4
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.240842, 0)
 visible = false
 mesh = SubResource("PlaneMesh_us5c3")
-skeleton = NodePath("../..")
+skeleton = NodePath("../../..")
 script = ExtResource("9_sht6q")
+
+[node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
+script = ExtResource("3_t71xa")
+ConstantAngularDrag = 1.4
 
 [node name="FollowCamera" type="Node3D" parent="Pausable"]
 script = ExtResource("12_4qwtb")
