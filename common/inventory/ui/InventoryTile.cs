@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class InventoryTile : Sprite2D {
+internal partial class InventoryTile : Sprite2D {
     public Color TileColor {
         get {
             return _tileColor;

@@ -1,8 +1,8 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class InventoryGrid : Node2D {
-    public struct TileAppearanceOverride {
+internal partial class InventoryGrid : Node2D {
+    internal struct TileAppearanceOverride {
         public Vector2I Position;
         public Color TileColor;
         public bool Filled;

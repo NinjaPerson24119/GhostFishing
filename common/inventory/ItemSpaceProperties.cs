@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
+internal class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     public int Width { get; set; }
     public int Height { get; set; }
     public bool[]? FilledMask { get; set; }
@@ -41,7 +41,7 @@ public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     }
 }
 
-public class InventoryItemSpaceProperties {
+internal class InventoryItemSpaceProperties {
     public int Width { get; private set; }
     public int Height { get; private set; }
     private bool[] _filledMaskClockwise0;

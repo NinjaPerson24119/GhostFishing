@@ -1,4 +1,4 @@
-public struct Matrix<T> {
+internal struct Matrix<T> {
     public int Width;
     public int Height;
     public T[] Data;

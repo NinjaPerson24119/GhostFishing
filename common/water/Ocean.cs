@@ -2,7 +2,7 @@ using System;
 using Godot;
 
 // Controls the ocean surface as a grid of water tiles
-public partial class Ocean : Node3D {
+internal partial class Ocean : Node3D {
     // The farthest distance from the origin that a water tile will be spawned
     [ExportGroup("Rendering")]
     [Export]

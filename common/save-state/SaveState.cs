@@ -1,16 +1,16 @@
 // JSON serializer relies on { get; set; } methods existing for each property.
 
-public class CommonSaveState {
+internal class CommonSaveState {
     public double GameSeconds { get; set; }
 }
 
-public partial class PlayerSaveState {
+internal partial class PlayerSaveState {
     public float GlobalPositionX { get; set; }
     public float GlobalPositionZ { get; set; }
     public float GlobalRotationY { get; set; }
 }
 
-public partial class SaveState {
+internal partial class SaveState {
     public CommonSaveState? CommonSaveState { get; set; }
     public PlayerSaveState[]? PlayerSaveState { get; set; }
 }

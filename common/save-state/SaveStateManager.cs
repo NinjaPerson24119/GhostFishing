@@ -2,7 +2,7 @@ using System.Text.Json;
 using System.IO;
 using Godot;
 
-public partial class SaveStateManager : Node {
+internal partial class SaveStateManager : Node {
     static SingletonTracker<SaveStateManager> _singletonTracker = new SingletonTracker<SaveStateManager>();
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");

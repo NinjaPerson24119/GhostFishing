@@ -2,7 +2,7 @@ using System;
 using Godot;
 using System.Collections.Generic;
 
-public class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImages {
+internal class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     public string? Name { get; set; }
     public string? Description { get; set; }
     public int CurrencyValue { get; set; }
@@ -72,7 +72,7 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImages
     }
 }
 
-public class InventoryItemDefinition {
+internal class InventoryItemDefinition {
     public string Name { get; set; }
     public string Description { get; set; }
     public int CurrencyValue { get; set; }

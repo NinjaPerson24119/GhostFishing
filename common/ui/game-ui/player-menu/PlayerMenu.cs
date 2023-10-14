@@ -1,7 +1,7 @@
 using System.Runtime.InteropServices;
 using Godot;
 
-public partial class PlayerMenu : Menu {
+internal partial class PlayerMenu : Menu {
     [Export]
     public int TileSizePx = 64;
 

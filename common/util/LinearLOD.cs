@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using Godot;
 
-public class LinearLOD {
+internal class LinearLOD {
     // the distance at which the LOD curve reaches its end value
     private float _distance;
     private int _startValue;
     private int _endValue;
     private int _step;
 
-    private Dictionary <float, float> _distanceToLOD = new Dictionary<float, float>();
-    public int ReusedDistances {get; private set;} = 0;
-    private Dictionary <float, bool> _computedLODsLogCheck = new Dictionary<float, bool>();
+    private Dictionary<float, float> _distanceToLOD = new Dictionary<float, float>();
+    public int ReusedDistances { get; private set; } = 0;
+    private Dictionary<float, bool> _computedLODsLogCheck = new Dictionary<float, bool>();
 
     public LinearLOD(float distance, int startValue, int endValue, int step) {
         _distance = distance;
@@ -30,13 +30,13 @@ public class LinearLOD {
 
         // round to nearest lower multiple of step
         result = result - (result % _step);
-        
+
         // clamp to minimum
         result = Mathf.Max(result, _endValue);
 
         if (!_computedLODsLogCheck.ContainsKey(result)) {
             _computedLODsLogCheck[result] = true;
-            GD.Print($"Computed LOD at distance {distance} with result {result} (progression percentage {lodProgression*100}%))");
+            GD.Print($"Computed LOD at distance {distance} with result {result} (progression percentage {lodProgression * 100}%))");
         }
 
         _distanceToLOD[distance] = result;

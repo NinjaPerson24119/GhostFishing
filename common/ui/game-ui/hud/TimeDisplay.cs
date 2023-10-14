@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class TimeDisplay : Label {
+internal partial class TimeDisplay : Label {
     public void Update(double gameSeconds) {
         float gameSecondsToday = (float)gameSeconds % GameClock.SecondsPerDay;
         int hours = (int)Mathf.Floor(gameSecondsToday / GameClock.SecondsPerHour);

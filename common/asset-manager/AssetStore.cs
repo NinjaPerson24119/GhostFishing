@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
+internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private Dictionary<string, T> _assets = new Dictionary<string, T>();
 
     public delegate T BuildAssetFromDTO(DTO dto);

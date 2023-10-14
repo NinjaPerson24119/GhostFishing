@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class DebugMode : Node {
+internal partial class DebugMode : Node {
     private bool debugMode = true;
 
     [Signal]

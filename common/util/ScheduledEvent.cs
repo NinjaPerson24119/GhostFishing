@@ -2,7 +2,7 @@ using Godot;
 
 // Helper for mapping GameClock time to a periodic event
 // E.g. day/night cycle, whether an encounter is active during a time of day, etc.
-public struct ScheduledEvent {
+internal struct ScheduledEvent {
     public float StartSecondsModuloTime;
     public float DurationSeconds;
     public float ModuloTimeSeconds;

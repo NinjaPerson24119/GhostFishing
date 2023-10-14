@@ -4,11 +4,11 @@ using System.IO;
 using System.Text.Json;
 using Godot;
 
-public class AssetDefinitionArray<T> {
+internal class AssetDefinitionArray<T> {
     public T[]? Array { get; set; }
 }
 
-public partial class AssetManager : Node {
+internal partial class AssetManager : Node {
     static SingletonTracker<AssetManager> _singletonTracker = new SingletonTracker<AssetManager>();
     private static AssetManager _singleton { get => _singletonTracker.Ref(); }
     public static AssetManager Ref() {

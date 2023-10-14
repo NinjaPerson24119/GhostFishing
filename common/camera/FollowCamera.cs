@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class FollowCamera : Node3D {
+internal partial class FollowCamera : Node3D {
     private struct CameraState {
         public double Time = 0;
 

@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class DependencyInjector : Node {
+internal partial class DependencyInjector : Node {
     static SingletonTracker<DependencyInjector> _singletonTracker = new SingletonTracker<DependencyInjector>();
     private static DependencyInjector _singleton { get => _singletonTracker.Ref(); }
 

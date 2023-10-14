@@ -1,7 +1,7 @@
 using Godot;
 
 // CPU equivalent of the Gerstner shader
-public struct Gerstner {
+internal struct Gerstner {
     private WaveSet _waveSet;
 
     public Gerstner(WaveSet waveSet) {

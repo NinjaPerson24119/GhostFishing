@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class Menu : Control {
+internal partial class Menu : Control {
     protected List<string> _closeActions = new List<string> { "cancel" };
 
     public bool IsOpen {

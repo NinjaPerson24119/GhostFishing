@@ -1,8 +1,8 @@
 using System;
 using Godot;
 
-public partial class InventoryItemTransport : Node2D {
-    public class TakeItemAction {
+internal partial class InventoryItemTransport : Node2D {
+    internal class TakeItemAction {
         public Inventory From;
         public Inventory.Mutator FromMutator;
         public Vector2I TilePosition;

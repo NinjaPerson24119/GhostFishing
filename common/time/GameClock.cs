@@ -1,7 +1,7 @@
 using Godot;
 
 // cannot export static variables, so we use private variables and a singleton accessor pattern
-public partial class GameClock : Node {
+internal partial class GameClock : Node {
     static SingletonTracker<GameClock> _singletonTracker = new SingletonTracker<GameClock>();
     private static GameClock _singleton { get => _singletonTracker.Ref(); }
 

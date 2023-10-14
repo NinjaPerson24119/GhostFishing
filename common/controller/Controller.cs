@@ -5,7 +5,7 @@ public enum ControllerInputType {
     Joypad = 1,
 }
 
-public partial class Controller : Node {
+internal partial class Controller : Node {
     private enum ControlsContextType {
         // player can open menus
         Player = 0,

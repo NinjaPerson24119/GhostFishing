@@ -1,7 +1,7 @@
 using Godot;
 
 // Gerstner Wave
-public class Wave {
+internal class Wave {
     static float gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
     public float amplitude { get; private set; }
     public float k { get; private set; }

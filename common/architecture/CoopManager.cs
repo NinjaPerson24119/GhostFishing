@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class CoopManager : Node {
+internal partial class CoopManager : Node {
     static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
     private static CoopManager _singleton { get => _singletonTracker.Ref(); }
 

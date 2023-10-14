@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class BuoyantBody : RigidBody3D {
+internal partial class BuoyantBody : RigidBody3D {
     [Export]
     public Vector3 Size = Vector3.One;
 

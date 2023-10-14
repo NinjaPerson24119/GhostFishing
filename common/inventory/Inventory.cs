@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-public class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
+internal class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     public int Width { get; set; }
     public int Height { get; set; }
     public InventoryItemInstanceDTO[]? Items { get; set; }
@@ -62,7 +62,7 @@ public class InventoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     }
 }
 
-public partial class Inventory : Node {
+internal partial class Inventory : Node {
     public int Width { get; set; }
     public int Height { get; set; }
     public List<InventoryItemInstance> Items { get; set; }
@@ -268,7 +268,7 @@ public partial class Inventory : Node {
         return new Mutator(this);
     }
 
-    public class Mutator : IDisposable {
+    internal class Mutator : IDisposable {
         private Inventory _inventory;
         private bool _released;
         public Mutator(Inventory inventory) {

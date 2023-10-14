@@ -2,7 +2,7 @@ using Godot;
 
 // need residual intensities after end of period, but sun and moon do not overlap
 
-public partial class PlanetaryLight : DirectionalLight3D {
+internal partial class PlanetaryLight : DirectionalLight3D {
     // these are controlled by GameEnvironment (hence the lack of an Export attribute)
     // start of period relative to module time (24hrs clock)
     public float StartSecondsModuloTime;

@@ -1,6 +1,6 @@
 using System;
 
-public class FishDefinitionDTO : InventoryItemDefinitionDTO, IGameAssetDTO {
+internal class FishDefinitionDTO : InventoryItemDefinitionDTO, IGameAssetDTO {
     public override bool IsValid() {
         return base.IsValid();
     }
@@ -10,7 +10,7 @@ public class FishDefinitionDTO : InventoryItemDefinitionDTO, IGameAssetDTO {
     }
 }
 
-public class FishDefinition : InventoryItemDefinition {
+internal class FishDefinition : InventoryItemDefinition {
     public FishDefinition(FishDefinitionDTO dto) : base(dto) {
         if (!dto.IsValid()) {
             throw new ArgumentException("Invalid FishDefinitionDTO");

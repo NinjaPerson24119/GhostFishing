@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class InventoryItemTransportSelector : Node2D {
+internal partial class InventoryItemTransportSelector : Node2D {
     private int _tileSize;
     // for scaling simplicity center all the children
     private Sprite2D _outline = new Sprite2D() {

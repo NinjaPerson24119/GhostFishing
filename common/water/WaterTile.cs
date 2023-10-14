@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class WaterTile : MeshInstance3D {
+internal partial class WaterTile : MeshInstance3D {
     [Export]
     public float WaterDepth {
         get {

@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class Player : BuoyantBody {
+internal partial class Player : BuoyantBody {
     // F = ma, for a in m/s^2
     [Export]
     public float EngineForce = 9f;

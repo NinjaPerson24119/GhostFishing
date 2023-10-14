@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class InventoryFrame : Control {
+internal partial class InventoryFrame : Control {
     public float ContainerWidthPx = 800;
     public float ContainerHeightPx = 800;
     // if this is set then the container dimensions are ignored
