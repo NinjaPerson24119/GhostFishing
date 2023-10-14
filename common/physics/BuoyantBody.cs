@@ -78,6 +78,13 @@ public partial class BuoyantBody : RigidBody3D {
         if (!string.IsNullOrEmpty(WaterContactPointsNodePath)) {
             ValidateWaterContactPoints();
         }
+
+        CenterOfMassMode = CenterOfMassModeEnum.Custom;
+        CenterOfMass = new Vector3(0, -Size.Y / 2, 0);
+        if (Mass == 1f) {
+            GD.PrintErr("Looks like you forgot to set the mass on your BuoyantBody");
+        }
+
         _ready = true;
     }
 
@@ -216,7 +223,7 @@ public partial class BuoyantBody : RigidBody3D {
         }
         waterContactPoints = new Node3D() {
             Name = _defaultWaterContactPointsNodePath,
-            Position = new Vector3(0, -Size.Y, 0),
+            Position = new Vector3(0, -Size.Y / 2, 0),
         };
         // set private field directly since we have alternative validation for generated water contact points
         _waterContactPointsNodePath = _defaultWaterContactPointsNodePath;
