@@ -262,7 +262,6 @@ internal partial class FollowCamera : Node3D {
                 _cameraState.Yaw -= (float)delta * _controllerRadiansPerSecond * controlDirection.X;
             }
             if (controlDirection.Y != 0) {
-                GD.Print($"Is auto pitch enabled: {IsAutoPitchEnabled()}");
                 if (controlDirection.Y > 0 || !IsAutoPitchEnabled()) {
                     _cameraState.Pitch += (float)delta * _controllerRadiansPerSecond * controlDirection.Y;
                 }
