@@ -1,11 +1,19 @@
 using Godot;
 
-internal partial class BuoyantBody : PublicBuoyantBody {
+internal partial class BuoyantBody : RigidBody3D {
+    [Export]
+    public Vector3 Size = Vector3.One;
+
+    // Buoyancy
+    [Export(PropertyHint.Range, "0,1,0.01")]
+    public float BuoyancyDamping = 0f;
+
     public float HorizontalSliceArea { get => Size.X * Size.Z; }
     // drag relies on the depth in water set by buoyancy
     public float DepthInWater { get; private set; } = 0f;
 
-    public override float DefaultWaterContactPointsRadius {
+    [Export]
+    public float DefaultWaterContactPointsRadius {
         get => _defaultWaterContactPointsRadius;
         set {
             _defaultWaterContactPointsRadius = value;
@@ -13,8 +21,8 @@ internal partial class BuoyantBody : PublicBuoyantBody {
         }
     }
     private float _defaultWaterContactPointsRadius = 2f;
-
-    public override string? WaterContactPointsNodePath {
+    [Export]
+    public string? WaterContactPointsNodePath {
         get => _waterContactPointsNodePath;
         set {
             GD.Print($"Setting water contact points node path: {value}");
@@ -29,6 +37,31 @@ internal partial class BuoyantBody : PublicBuoyantBody {
     private bool _waterContactPointsReady = false;
 
     private bool _ready = false;
+
+    // Drag
+    [Export(PropertyHint.Range, "0,100")]
+    public float ConstantLinearDrag = 1.5f;
+    [Export(PropertyHint.Range, "0,100")]
+    public float ConstantAngularDrag = 1f;
+    [Export(PropertyHint.Range, "0,1")]
+    public float AirDragCoefficient = 0.5f;
+    [Export(PropertyHint.Range, "0,1")]
+    public float AirMomentCoefficient = 0.08f;
+    [Export(PropertyHint.Range, "0,1")]
+    public float WaterDragCoefficient = 0.3f;
+    [Export(PropertyHint.Range, "0,1")]
+    public float WaterMomentCoefficient = 0.08f;
+    [Export(PropertyHint.Range, "0,0.99")]
+    public float SubmergedProportionOffset = 0.7f;
+
+    [Export]
+    public bool EnableBuoyancy = true;
+    [Export]
+    public bool EnablePhysicalDrag = true;
+    [Export]
+    public bool EnableConstantDrag = true;
+
+    public bool DebugLogs = false;
 
     private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
     private float _waterDensity = 1000; // kg/m^3

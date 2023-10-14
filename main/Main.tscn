@@ -117,7 +117,6 @@ shape = SubResource("ConvexPolygonShape3D_wc5rg")
 [node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
-DefaultWaterContactPointsRadius = 2.0
 ConstantAngularDrag = 1.4
 
 [node name="FollowCamera" type="Node3D" parent="Pausable"]
