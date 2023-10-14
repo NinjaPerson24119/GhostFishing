@@ -2,9 +2,9 @@
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
-[ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://entities/player/Player.tscn" id="2_teuhj"]
+[ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="2_teuhj"]
 [ext_resource type="Script" path="res://common/controller/Controller.cs" id="3_pm5ys"]
-[ext_resource type="Script" path="res://entities/player/Player.cs" id="3_t71xa"]
+[ext_resource type="Script" path="res://common/player/Player.cs" id="3_t71xa"]
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
 [ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/game-ui/GameUI.tscn" id="5_8atem"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
