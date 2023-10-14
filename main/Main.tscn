@@ -100,13 +100,8 @@ spot_range = 100.0
 
 [node name="Chest" type="RigidBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
-mass = 100.0
+mass = 250.0
 script = ExtResource("9_5whak")
-WaterContactPointsNodePath = "WaterContactPoints"
-
-[node name="WaterContactPoints" type="Node3D" parent="Pausable/Level/Chest"]
-
-[node name="Marker3D" type="Marker3D" parent="Pausable/Level/Chest/WaterContactPoints"]
 
 [node name="ChestModel" parent="Pausable/Level/Chest" instance=ExtResource("8_4fp4j")]
 
@@ -117,7 +112,9 @@ shape = SubResource("ConvexPolygonShape3D_wc5rg")
 [node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
+DefaultWaterContactPointsRadius = 0.0
 ConstantAngularDrag = 1.4
+SubmergedProportionOffset = 0.7
 
 [node name="FollowCamera" type="Node3D" parent="Pausable"]
 script = ExtResource("12_4qwtb")

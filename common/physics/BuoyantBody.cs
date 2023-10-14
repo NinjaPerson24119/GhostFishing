@@ -1,6 +1,6 @@
 using Godot;
 
-internal partial class BuoyantBody : RigidBody3D {
+public partial class BuoyantBody : RigidBody3D {
     [Export]
     public Vector3 Size = Vector3.One;
 
@@ -27,7 +27,10 @@ internal partial class BuoyantBody : RigidBody3D {
         set {
             GD.Print($"Setting water contact points node path: {value}");
             _waterContactPointsNodePath = value;
-            if (_ready) {
+            if (string.IsNullOrEmpty(value)) {
+                DefaultWaterContactPoints();
+            }
+            else if (_ready) {
                 ValidateWaterContactPoints();
             }
         }
@@ -52,7 +55,7 @@ internal partial class BuoyantBody : RigidBody3D {
     [Export(PropertyHint.Range, "0,1")]
     public float WaterMomentCoefficient = 0.08f;
     [Export(PropertyHint.Range, "0,0.99")]
-    public float SubmergedProportionOffset = 0.7f;
+    public float SubmergedProportionOffset = 0.5f;
 
     [Export]
     public bool EnableBuoyancy = true;
@@ -61,6 +64,7 @@ internal partial class BuoyantBody : RigidBody3D {
     [Export]
     public bool EnableConstantDrag = true;
 
+    [Export]
     public bool DebugLogs = false;
 
     private float _gravity = (float)ProjectSettings.GetSetting("physics/3d/default_gravity");
@@ -99,7 +103,7 @@ internal partial class BuoyantBody : RigidBody3D {
         ApplyConstantDrag(state);
     }
 
-    public void ApplyBuoyancy() {
+    private void ApplyBuoyancy() {
         if (!EnableBuoyancy) {
             return;
         }
@@ -165,7 +169,7 @@ internal partial class BuoyantBody : RigidBody3D {
         }
     }
 
-    public void ApplyPhysicalDrag(PhysicsDirectBodyState3D state) {
+    private void ApplyPhysicalDrag(PhysicsDirectBodyState3D state) {
         if (!EnablePhysicalDrag) {
             return;
         }
@@ -205,7 +209,7 @@ internal partial class BuoyantBody : RigidBody3D {
         ApplyTorque(-state.AngularVelocity * angularDrag * state.Step);
     }
 
-    public void ApplyConstantDrag(PhysicsDirectBodyState3D state) {
+    private void ApplyConstantDrag(PhysicsDirectBodyState3D state) {
         if (!EnableConstantDrag) {
             return;
         }
@@ -213,7 +217,7 @@ internal partial class BuoyantBody : RigidBody3D {
         state.AngularVelocity *= 1 - Mathf.Clamp(ConstantAngularDrag * state.Step, 0, 1);
     }
 
-    public void DefaultWaterContactPoints() {
+    private void DefaultWaterContactPoints() {
         Node3D? waterContactPoints = GetNodeOrNull<Node3D>(_defaultWaterContactPointsNodePath);
         if (waterContactPoints != null) {
             foreach (Node child in GetNode<Node3D>(_defaultWaterContactPointsNodePath).GetChildren()) {
@@ -249,7 +253,7 @@ internal partial class BuoyantBody : RigidBody3D {
         AddChild(waterContactPoints);
     }
 
-    public void ValidateWaterContactPoints() {
+    private void ValidateWaterContactPoints() {
         if (string.IsNullOrEmpty(WaterContactPointsNodePath)) {
             return;
         }
