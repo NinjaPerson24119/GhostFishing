@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class BuoyantBody : RigidBody3D {
     [Export]
@@ -115,14 +116,13 @@ public partial class BuoyantBody : RigidBody3D {
             throw new System.Exception("WaterContactPointsNodePath must be set");
         }
 
-        float cumulativeDepth = 0;
-        int submergedPoints = 0;
-        float totalBuoyantForce = 0;
         Node3D waterContactPointsNode = GetNode<Node3D>(WaterContactPointsNodePath);
         if (waterContactPointsNode == null) {
             throw new System.Exception($"WaterContactPointsNodePath ({WaterContactPointsNodePath}) is null");
         }
         var waterContactPoints = waterContactPointsNode.GetChildren();
+        List<float> waterContactPointDepths = new List<float>();
+        // compute depths first
         for (int i = 0; i < waterContactPoints.Count; i++) {
             Marker3D? contactPoint = waterContactPoints[i] as Marker3D;
             if (contactPoint == null) {
@@ -139,24 +139,41 @@ public partial class BuoyantBody : RigidBody3D {
                 GD.Print($"Water height ({waterContactPoint.Y}) = Water {contactPoint.GlobalPosition.Y} + Displacement {waterDisplacement.Y}, boat height = {contactPoint.GlobalPosition.Y}");
             }
             float depth = waterContactPoint.Y - contactPoint.GlobalPosition.Y;
+            waterContactPointDepths.Add(depth);
+        }
 
+        // adjust forces based on number of submerged points
+        float cumulativeDepth = 0;
+        int noSubmergedPoints = 0;
+        for (int i = 0; i < waterContactPoints.Count; i++) {
+            float depth = waterContactPointDepths[i];
             if (depth > 0) {
-                submergedPoints++;
+                noSubmergedPoints++;
                 cumulativeDepth += depth;
+            }
+        }
+
+        // apply buoyancy forces
+        float totalBuoyantForce = 0;
+        for (int i = 0; i < waterContactPoints.Count; i++) {
+            Marker3D contactPoint = (Marker3D)waterContactPoints[i];
+            float depth = waterContactPointDepths[i];
+            if (depth > 0) {
+
                 // Archimedes Principle: F = ρgV
                 float volumeDisplaced = HorizontalSliceArea * Mathf.Min(depth, Size.Y);
                 if (DebugLogs) {
                     GD.Print($"Volume displaced: {volumeDisplaced}, depth: {depth}, horizontal slice area: {HorizontalSliceArea}, boat height: {Size.Y}");
                 }
-                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced / waterContactPoints.Count;
+                float buoyancyForce = _waterDensity * _gravity * volumeDisplaced / noSubmergedPoints;
                 totalBuoyantForce += buoyancyForce;
                 ApplyForce(Vector3.Up * (1 - BuoyancyDamping) * buoyancyForce, contactPoint.GlobalPosition - GlobalPosition);
             }
         }
 
         // set depth in water to average of contact points
-        if (submergedPoints > 0) {
-            DepthInWater = cumulativeDepth / submergedPoints;
+        if (noSubmergedPoints > 0) {
+            DepthInWater = cumulativeDepth / noSubmergedPoints;
         }
         else {
             DepthInWater = 0;
@@ -245,6 +262,11 @@ public partial class BuoyantBody : RigidBody3D {
             Vector3.Left * Size.X,
             Vector3.Forward * Size.Z,
             Vector3.Back * Size.Z,
+            Vector3.Zero + Vector3.Up * Size.Y,
+            Vector3.Right * Size.X + Vector3.Up * Size.Y,
+            Vector3.Left * Size.X + Vector3.Up * Size.Y,
+            Vector3.Forward * Size.Z + Vector3.Up * Size.Y,
+            Vector3.Back * Size.Z + Vector3.Up * Size.Y,
         };
         foreach (Vector3 offset in offsets) {
             Marker3D m = new Marker3D() {

@@ -100,8 +100,10 @@ spot_range = 100.0
 
 [node name="Chest" type="RigidBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
-mass = 250.0
+mass = 1000.0
 script = ExtResource("9_5whak")
+Size = Vector3(2, 1, 1)
+DebugLogs = true
 
 [node name="ChestModel" parent="Pausable/Level/Chest" instance=ExtResource("8_4fp4j")]
 
@@ -112,7 +114,7 @@ shape = SubResource("ConvexPolygonShape3D_wc5rg")
 [node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
-DefaultWaterContactPointsRadius = 0.0
+Size = Vector3(2, 3, 2)
 ConstantAngularDrag = 1.4
 SubmergedProportionOffset = 0.7
 
