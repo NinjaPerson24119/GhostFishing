@@ -104,8 +104,6 @@ spot_range = 100.0
 [node name="Chest" type="RigidBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
 mass = 100.0
-center_of_mass_mode = 1
-center_of_mass = Vector3(0, -0.5, 0)
 script = ExtResource("9_5whak")
 WaterContactPointsNodePath = "WaterContactPoints"
 

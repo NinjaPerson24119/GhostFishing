@@ -337,13 +337,9 @@ public partial class Ocean : Node3D {
 
     // returns the tile indices relative to the ocean origin
     private Vector2 GetTileIndices(Vector2 globalXZ) {
-        GD.Print($"Getting tile indices for {globalXZ}");
         Vector2 relativeToOcean = new Vector2(globalXZ.X - GlobalPosition.X, globalXZ.Y - GlobalPosition.Z);
-        GD.Print($"Relative to ocean: {relativeToOcean}");
         Vector2 shiftedPosition = AlignPositionToOceanOriginCorner(relativeToOcean);
-        GD.Print($"Shifted position: {shiftedPosition}");
         var t = new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Y / TileSize));
-        GD.Print($"Got tile indices: {t}");
         return t;
     }
 

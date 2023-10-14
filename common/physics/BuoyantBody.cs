@@ -79,8 +79,11 @@ public partial class BuoyantBody : RigidBody3D {
             ValidateWaterContactPoints();
         }
 
-        CenterOfMassMode = CenterOfMassModeEnum.Custom;
-        CenterOfMass = new Vector3(0, -Size.Y / 2, 0);
+        if (CenterOfMassMode != CenterOfMassModeEnum.Custom) {
+            CenterOfMassMode = CenterOfMassModeEnum.Custom;
+            CenterOfMass = new Vector3(0, -Size.Y / 2, 0);
+            GD.Print($"Setting default center of mass: {CenterOfMass} for {Name}");
+        }
         if (Mass == 1f) {
             GD.PrintErr("Looks like you forgot to set the mass on your BuoyantBody");
         }
@@ -123,7 +126,6 @@ public partial class BuoyantBody : RigidBody3D {
 
             // TODO: stop ignoring displacement on XZ plane
             // this should just call a GetHeight(), and the displacement should be internal to the Ocean
-            GD.Print($"contact point: {contactPoint.GlobalPosition}");
             Vector3 waterDisplacement = _ocean.GetDisplacement(new Vector2(contactPoint.GlobalPosition.X, contactPoint.GlobalPosition.Z));
             Vector3 waterContactPoint = new Vector3(contactPoint.GlobalPosition.X, _ocean.GlobalPosition.Y, contactPoint.GlobalPosition.Z) + waterDisplacement;
 
