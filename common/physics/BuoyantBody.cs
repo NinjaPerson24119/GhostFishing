@@ -1,5 +1,4 @@
 using Godot;
-using System.Collections.Generic;
 
 public partial class BuoyantBody : RigidBody3D {
     [Export]
@@ -22,7 +21,22 @@ public partial class BuoyantBody : RigidBody3D {
         }
     }
     private float _defaultWaterContactPointsRadius = 2f;
-    public string? WaterContactPointsNodePath = null;
+    [Export]
+    public string? WaterContactPointsNodePath {
+        get => _waterContactPointsNodePath;
+        set {
+            GD.Print($"Setting water contact points node path: {value}");
+            _waterContactPointsNodePath = value;
+            if (_ready) {
+                ValidateWaterContactPoints();
+            }
+        }
+    }
+    private string? _waterContactPointsNodePath = null;
+    private string _defaultWaterContactPointsNodePath = "DefaultWaterContactPoints";
+    private bool _waterContactPointsReady = false;
+
+    private bool _ready = false;
 
     // Drag
     [Export(PropertyHint.Range, "0,100")]
@@ -61,6 +75,10 @@ public partial class BuoyantBody : RigidBody3D {
         if (WaterContactPointsNodePath == null) {
             DefaultWaterContactPoints();
         }
+        if (!string.IsNullOrEmpty(WaterContactPointsNodePath)) {
+            ValidateWaterContactPoints();
+        }
+        _ready = true;
     }
 
     public override void _IntegrateForces(PhysicsDirectBodyState3D state) {
@@ -75,7 +93,9 @@ public partial class BuoyantBody : RigidBody3D {
         if (!EnableBuoyancy) {
             return;
         }
-
+        if (!_waterContactPointsReady) {
+            return;
+        }
         if (string.IsNullOrEmpty(WaterContactPointsNodePath)) {
             throw new System.Exception("WaterContactPointsNodePath must be set");
         }
@@ -83,9 +103,16 @@ public partial class BuoyantBody : RigidBody3D {
         float cumulativeDepth = 0;
         int submergedPoints = 0;
         float totalBuoyantForce = 0;
-        List<Marker3D> waterContactPoints = WaterContactPointsFromChildren(WaterContactPointsNodePath);
+        Node3D waterContactPointsNode = GetNode<Node3D>(WaterContactPointsNodePath);
+        if (waterContactPointsNode == null) {
+            throw new System.Exception($"WaterContactPointsNodePath ({WaterContactPointsNodePath}) is null");
+        }
+        var waterContactPoints = waterContactPointsNode.GetChildren();
         for (int i = 0; i < waterContactPoints.Count; i++) {
-            Marker3D contactPoint = waterContactPoints[i];
+            Marker3D? contactPoint = waterContactPoints[i] as Marker3D;
+            if (contactPoint == null) {
+                throw new System.Exception($"WaterContactPointsNodePath ({WaterContactPointsNodePath}) child {i} is not a Marker3D");
+            }
 
             // TODO: stop ignoring displacement on XZ plane
             // this should just call a GetHeight(), and the displacement should be internal to the Ocean
@@ -178,20 +205,22 @@ public partial class BuoyantBody : RigidBody3D {
     }
 
     public void DefaultWaterContactPoints() {
-        WaterContactPointsNodePath = "WaterContactPoints";
-        Node3D? waterContactPoints = GetNode<Node3D>("WaterContactPoints");
+        Node3D? waterContactPoints = GetNodeOrNull<Node3D>(_defaultWaterContactPointsNodePath);
         if (waterContactPoints != null) {
-            foreach (Node child in GetNode<Node3D>("WaterContactPoints").GetChildren()) {
+            foreach (Node child in GetNode<Node3D>(_defaultWaterContactPointsNodePath).GetChildren()) {
                 child.QueueFree();
             }
+            waterContactPoints.Ready -= ValidateWaterContactPoints;
+            waterContactPoints.Name = _defaultWaterContactPointsNodePath + "_old";
+            waterContactPoints.QueueFree();
         }
-        else {
-            waterContactPoints = new Node3D() {
-                Name = "WaterContactPoints",
-                Position = new Vector3(0, -Size.Y, 0),
-            };
-            AddChild(waterContactPoints);
-        }
+        waterContactPoints = new Node3D() {
+            Name = _defaultWaterContactPointsNodePath,
+            Position = new Vector3(0, -Size.Y, 0),
+        };
+        // set private field directly since we have alternative validation for generated water contact points
+        _waterContactPointsNodePath = _defaultWaterContactPointsNodePath;
+
         Vector3[] offsets = new Vector3[] {
             Vector3.Zero,
             //Vector3.Right,
@@ -206,23 +235,26 @@ public partial class BuoyantBody : RigidBody3D {
             GD.Print($"Adding water contact point at {m.Position}");
             waterContactPoints.AddChild(m);
         }
+
+        waterContactPoints.Ready += ValidateWaterContactPoints;
+        AddChild(waterContactPoints);
     }
 
-    public List<Marker3D> WaterContactPointsFromChildren(string node3DPath) {
-        List<Marker3D> waterContactPoints = new List<Marker3D>();
-        var node = GetNode(node3DPath);
+    public void ValidateWaterContactPoints() {
+        if (string.IsNullOrEmpty(WaterContactPointsNodePath)) {
+            return;
+        }
+        GD.Print($"Validating water contact points: {WaterContactPointsNodePath}");
+        var node = GetNode(WaterContactPointsNodePath);
         if (!(node is Node3D)) {
-            throw new System.Exception($"WaterContactPointsFromChildren node3DPath ({node3DPath}) is not a Node3D");
+            throw new System.Exception($"WaterContactPointsFromChildren node3DPath ({WaterContactPointsNodePath}) is not a Node3D");
         }
         var children = node.GetChildren();
         foreach (Node child in children) {
-            if (child is Marker3D marker) {
-                waterContactPoints.Add(marker);
-            }
-            else {
+            if (!(child is Marker3D)) {
                 GD.PrintErr("WaterContactPointsFromNode3D child is not a Marker3D");
             }
         }
-        return waterContactPoints;
+        _waterContactPointsReady = true;
     }
 }

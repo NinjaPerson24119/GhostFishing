@@ -102,10 +102,18 @@ shadow_enabled = true
 spot_range = 100.0
 
 [node name="Chest" type="RigidBody3D" parent="Pausable/Level"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
+mass = 100.0
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.5, 0)
 script = ExtResource("9_5whak")
+WaterContactPointsNodePath = "WaterContactPoints"
+
+[node name="WaterContactPoints" type="Node3D" parent="Pausable/Level/Chest"]
+
+[node name="Marker3D" type="Marker3D" parent="Pausable/Level/Chest/WaterContactPoints"]
 
 [node name="ChestModel" parent="Pausable/Level/Chest" instance=ExtResource("8_4fp4j")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
 
 [node name="CollisionShape3D2" type="CollisionShape3D" parent="Pausable/Level/Chest"]
 transform = Transform3D(2, 0, 0, 0, 2, 0, 0, 0, 2, 0, 0, 0)
@@ -119,9 +127,6 @@ shape = SubResource("ConvexPolygonShape3D_ppoc5")
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 script = ExtResource("3_t71xa")
 ConstantAngularDrag = 1.4
-EnableBuoyancy = false
-EnablePhysicalDrag = false
-EnableConstantDrag = false
 
 [node name="FollowCamera" type="Node3D" parent="Pausable"]
 script = ExtResource("12_4qwtb")
