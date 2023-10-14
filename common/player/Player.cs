@@ -45,8 +45,7 @@ public partial class Player : BuoyantBody {
     public override void _Ready() {
         _ocean = DependencyInjector.Ref().GetOcean();
 
-        WaterContactPointsFromChildren("Boat/WaterContactPoints");
-
+        WaterContactPointsNodePath = "Boat/WaterContactPoints";
         MeshInstance3D boundingBox = GetNode<MeshInstance3D>("BoundingBox");
         if (boundingBox != null && boundingBox.Mesh is BoxMesh) {
             BoxMesh boxMesh = (BoxMesh)boundingBox.Mesh;
