@@ -2,7 +2,17 @@ using Godot;
 
 public partial class BuoyantBody : RigidBody3D {
     [Export]
-    public Vector3 Size = Vector3.One;
+    public Vector3 Size {
+        get => _size;
+        set {
+            _size = value;
+            if (_ready && string.IsNullOrEmpty(WaterContactPointsNodePath)) {
+                DefaultWaterContactPoints();
+            }
+        }
+    }
+
+    private Vector3 _size = Vector3.One;
 
     // Buoyancy
     [Export(PropertyHint.Range, "0,1,0.01")]
@@ -12,15 +22,6 @@ public partial class BuoyantBody : RigidBody3D {
     // drag relies on the depth in water set by buoyancy
     public float DepthInWater { get; private set; } = 0f;
 
-    [Export]
-    public float DefaultWaterContactPointsRadius {
-        get => _defaultWaterContactPointsRadius;
-        set {
-            _defaultWaterContactPointsRadius = value;
-            DefaultWaterContactPoints();
-        }
-    }
-    private float _defaultWaterContactPointsRadius = 2f;
     [Export]
     public string? WaterContactPointsNodePath {
         get => _waterContactPointsNodePath;
@@ -218,6 +219,10 @@ public partial class BuoyantBody : RigidBody3D {
     }
 
     private void DefaultWaterContactPoints() {
+        if (!string.IsNullOrEmpty(_waterContactPointsNodePath)) {
+            return;
+        }
+
         Node3D? waterContactPoints = GetNodeOrNull<Node3D>(_defaultWaterContactPointsNodePath);
         if (waterContactPoints != null) {
             foreach (Node child in GetNode<Node3D>(_defaultWaterContactPointsNodePath).GetChildren()) {
@@ -236,14 +241,14 @@ public partial class BuoyantBody : RigidBody3D {
 
         Vector3[] offsets = new Vector3[] {
             Vector3.Zero,
-            //Vector3.Right,
-            //Vector3.Left,
-            //Vector3.Forward,
-            //Vector3.Back,
+            Vector3.Right * Size.X,
+            Vector3.Left * Size.X,
+            Vector3.Forward * Size.Z,
+            Vector3.Back * Size.Z,
         };
         foreach (Vector3 offset in offsets) {
             Marker3D m = new Marker3D() {
-                Position = offset * DefaultWaterContactPointsRadius,
+                Position = offset,
             };
             GD.Print($"Adding water contact point at {m.Position}");
             waterContactPoints.AddChild(m);
