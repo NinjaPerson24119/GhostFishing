@@ -151,6 +151,12 @@ PlayerID = 0
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 collision_mask = 11
 script = ExtResource("3_t71xa")
-Size = Vector3(2, 3, 2)
-ConstantAngularDrag = 1.4
-SubmergedProportionOffset = 0.7
+
+[node name="PlayerContext-2" type="Node" parent="Pausable"]
+script = ExtResource("14_vwxyi")
+PlayerID = 1
+
+[node name="Player" parent="Pausable/PlayerContext-2" instance=ExtResource("2_teuhj")]
+transform = Transform3D(-0.158382, 0, 0.987378, 0, 1, 0, -0.987378, 0, -0.158382, 25.8977, -0.0444298, -27.5792)
+collision_mask = 11
+script = ExtResource("3_t71xa")

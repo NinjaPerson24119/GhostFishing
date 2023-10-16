@@ -10,11 +10,14 @@ internal partial class PlayerMenu : Menu {
     private InventoryFrame? _boatInventoryFrame;
     private bool _initialized = false;
     private SaveStateManager.Lock? _saveStateLock;
+    private CoopManager.PlayerID _playerID = CoopManager.PlayerID.Invalid;
 
     public override void _Ready() {
         base._Ready();
         _closeActions.Add("open_inventory");
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
+
+        _playerID = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).PlayerID;
 
         Initialize();
     }
@@ -53,7 +56,8 @@ internal partial class PlayerMenu : Menu {
             return;
         }
 
-        if (inputEvent.IsActionPressed("select")) {
+        int device = (int)_playerID;
+        if (inputEvent.IsActionPressed($"select_{device}")) {
             if (!_itemTransport.HasItem()) {
                 _itemTransport.TakeItem();
             }
@@ -61,13 +65,13 @@ internal partial class PlayerMenu : Menu {
                 _itemTransport.PlaceItem();
             }
         }
-        if (inputEvent.IsActionPressed("cancel")) {
+        if (inputEvent.IsActionPressed($"cancel_{device}")) {
             _itemTransport.RevertTakeItem();
         }
-        if (inputEvent.IsActionPressed("inventory_rotate_clockwise")) {
+        if (inputEvent.IsActionPressed($"inventory_rotate_clockwise_{device}")) {
             _itemTransport.RotateClockwise();
         }
-        if (inputEvent.IsActionPressed("inventory_rotate_counterclockwise")) {
+        if (inputEvent.IsActionPressed($"inventory_rotate_counterclockwise_{device}")) {
             _itemTransport.RotateCounterClockwise();
         }
 

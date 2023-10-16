@@ -89,6 +89,9 @@ public partial class Player : BuoyantBody, ITrackableObject {
     }
 
     private void ApplyForcesFromControls() {
+        if (PlayerContext == null) {
+            throw new System.Exception("PlayerContext must be set before ApplyForcesFromControls is called");
+        }
         if (DisableControls) {
             return;
         }
@@ -96,7 +99,8 @@ public partial class Player : BuoyantBody, ITrackableObject {
             return;
         }
 
-        var controlDirection = Input.GetVector("turn_left", "turn_right", "move_backward", "move_forward");
+        int device = (int)PlayerContext.PlayerID;
+        var controlDirection = Input.GetVector($"turn_left_{device}", $"turn_right_{device}", $"move_backward_{device}", $"move_forward_{device}");
         Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
         if (controlDirection.Y != 0) {
             ApplyCentralForce(towardsFrontOfBoat * EngineForce * Mass * controlDirection.Y);

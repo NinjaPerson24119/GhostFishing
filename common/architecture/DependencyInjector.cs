@@ -16,10 +16,6 @@ internal partial class DependencyInjector : Node {
         return _singleton;
     }
 
-    public Player GetPlayer() {
-        return GetNode<Player>("/root/Main/Pausable/PlayerContext-1/Player");
-    }
-
     public Ocean GetOcean() {
         return GetNode<Ocean>("/root/Main/Pausable/Ocean");
     }

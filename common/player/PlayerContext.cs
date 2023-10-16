@@ -6,4 +6,14 @@ public partial class PlayerContext : Node {
     public PlayerStateView PlayerStateView {
         get => AssetManager.Ref().GetPlayerView(0);
     }
+    public Player Player {
+        get => GetNode<Player>("Player");
+    }
+    public FollowCamera FollowCamera {
+        get => GetNode<FollowCamera>("FollowCamera");
+    }
+
+    public string SelectAction {
+        get => $"select_{(int)PlayerID}";
+    }
 }

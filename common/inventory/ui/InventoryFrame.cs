@@ -55,6 +55,8 @@ internal partial class InventoryFrame : Control {
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
 
+    private CoopManager.PlayerID _playerID;
+    private Dictionary<string, Vector2I> _inputActionToDirection;
     private Timer _inputRepeatDebounceTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
@@ -63,13 +65,6 @@ internal partial class InventoryFrame : Control {
         WaitTime = 0.5f,
         OneShot = true,
     };
-    private Dictionary<string, Vector2I> _inputActionToDirection = new Dictionary<string, Vector2I> {
-            {"ui_up", new Vector2I(0, -1)},
-            {"ui_down", new Vector2I(0, 1)},
-            {"ui_left", new Vector2I(-1, 0)},
-            {"ui_right", new Vector2I(1, 0)}
-        };
-
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
     [Signal]
@@ -93,6 +88,15 @@ internal partial class InventoryFrame : Control {
         SelectDefaultPosition();
 
         AssetManager.Ref().PersistImage(_containerFrameImagePath);
+
+        _playerID = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).PlayerID;
+        int device = (int)_playerID;
+        _inputActionToDirection = new Dictionary<string, Vector2I> {
+            {$"ui_up_{device}", new Vector2I(0, -1)},
+            {$"ui_down_{device}", new Vector2I(0, 1)},
+            {$"ui_left_{device}", new Vector2I(-1, 0)},
+            {$"ui_right_{device}", new Vector2I(1, 0)}
+        };
     }
 
     public override void _ExitTree() {
@@ -104,6 +108,9 @@ internal partial class InventoryFrame : Control {
             return;
         }
         if (!HasFocus()) {
+            return;
+        }
+        if (_playerID != CoopManager.PlayerID.One) {
             return;
         }
 
@@ -124,6 +131,7 @@ internal partial class InventoryFrame : Control {
             return;
         }
 
+
         foreach (KeyValuePair<string, Vector2I> entry in _inputActionToDirection) {
             if (Input.IsActionJustPressed(entry.Key)) {
                 SelectedPosition = SelectedPosition + entry.Value;
@@ -140,6 +148,10 @@ internal partial class InventoryFrame : Control {
     }
 
     public override void _Notification(int what) {
+        if (_playerID != CoopManager.PlayerID.One) {
+            return;
+        }
+
         switch (what) {
             case (int)NotificationMouseEnter:
                 GrabFocus();

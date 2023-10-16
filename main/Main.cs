@@ -6,13 +6,14 @@ internal partial class Main : Node {
     }
 
     private void SetupSignals() {
-        Player player = DependencyInjector.Ref().GetPlayer();
+        // TODO Hack: until we make these references support multiple players
+        Player player = DependencyInjector.Ref().GetLocalPlayerContext("/Main/Pausable/PlayerContext-1/Player").Player;
         Ocean ocean = DependencyInjector.Ref().GetOcean();
         Controller controller = DependencyInjector.Ref().GetController();
         TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
         PlayerMenu playerMenu = DependencyInjector.Ref().GetPlayerMenu();
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
-        FollowCamera followCamera = DependencyInjector.Ref().GetFollowCamera();
+        FollowCamera followCamera = DependencyInjector.Ref().GetLocalPlayerContext("/Main/Pausable/PlayerContext-1/Player").FollowCamera;
 
         GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ocean.ConfigureTileDebugVisuals;
 

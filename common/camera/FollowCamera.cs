@@ -1,6 +1,6 @@
 using Godot;
 
-internal partial class FollowCamera : Node3D {
+public partial class FollowCamera : Node3D {
     private struct CameraState {
         public double Time = 0;
 
@@ -89,6 +89,7 @@ internal partial class FollowCamera : Node3D {
     }
     private bool _isCameraDefault = true;
 
+    private PlayerContext? _playerContext;
     private Player? _player;
 
     private Node3D? _rayCastGroup;
@@ -109,7 +110,8 @@ internal partial class FollowCamera : Node3D {
     }
 
     public override void _Ready() {
-        _player = DependencyInjector.Ref().GetPlayer();
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        _player = _playerContext.Player;
         _cameraState.Yaw = _player.GlobalRotation.Y;
 
         _rayCastGroup = GetNode<Node3D>("RayCastGroup");
@@ -143,10 +145,28 @@ internal partial class FollowCamera : Node3D {
     }
 
     public override void _Input(InputEvent inputEvent) {
+        if (_playerContext == null) {
+            throw new System.Exception("Player context is null");
+        }
         if (DisableControls) {
             return;
         }
 
+        if (_playerContext.PlayerID == CoopManager.PlayerID.One) {
+            HandleMouseInput(inputEvent);
+        }
+
+        int device = (int)_playerContext.PlayerID;
+        if (inputEvent.IsActionPressed($"cycle_zoom_{device}")) {
+            _zoomTimer.Stop();
+            float[] zoomSteps = GetZoomSteps();
+            _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
+            _zoomDistanceTarget = zoomSteps[_zoomStep];
+            _cameraResetTimer.Start();
+        }
+    }
+
+    public void HandleMouseInput(InputEvent inputEvent) {
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             _cameraState.Yaw -= mouseMotion.Relative.X * MouseSensitivity;
             if (mouseMotion.Relative.Y > 0 || !IsAutoPitchEnabled()) {
@@ -170,14 +190,6 @@ internal partial class FollowCamera : Node3D {
                     break;
             }
         }
-
-        if (inputEvent.IsActionPressed("cycle_zoom")) {
-            _zoomTimer.Stop();
-            float[] zoomSteps = GetZoomSteps();
-            _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
-            _zoomDistanceTarget = zoomSteps[_zoomStep];
-            _cameraResetTimer.Start();
-        }
     }
 
     public float[] GetZoomSteps() {
@@ -196,6 +208,9 @@ internal partial class FollowCamera : Node3D {
         if (_player == null) {
             throw new System.Exception("Player is null");
         }
+        if (_playerContext == null) {
+            throw new System.Exception("Player context is null");
+        }
 
         _cameraState.CollidingMaxDistance = float.MaxValue;
         int maxRaycastIters = 2;
@@ -209,7 +224,7 @@ internal partial class FollowCamera : Node3D {
                 ray.TargetPosition = ray.ToLocal(_player.GlobalPosition);
                 ray.ForceRaycastUpdate();
                 Rid rid = ray.GetColliderRid();
-                if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
+                if (rid != _player.GetRid()) {
                     minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
                     hitsThisIter = true;
                 }
@@ -255,7 +270,13 @@ internal partial class FollowCamera : Node3D {
         }
 
         if (!DisableControls) {
-            Vector2 controlDirection = Input.GetVector("rotate_camera_left", "rotate_camera_right", "rotate_camera_down", "rotate_camera_up");
+            int device = (int)_playerContext.PlayerID;
+            Vector2 controlDirection = Input.GetVector(
+                $"rotate_camera_left_{device}",
+                $"rotate_camera_right_{device}",
+                $"rotate_camera_down_{device}",
+                $"rotate_camera_up_{device}"
+            );
             bool updated = controlDirection != Vector2.Zero;
             if (controlDirection.X != 0) {
                 IsCameraDefault = false;
