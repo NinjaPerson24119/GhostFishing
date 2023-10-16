@@ -8,7 +8,6 @@ internal class DistancePrecondition : IInteractiveObjectPrecondition {
     }
 
     public bool Check(InteractiveObject interactiveObject, Player player) {
-        GD.Print($"Checking distance... {TrackerDistance.DistanceSquared(player.TrackingPosition, interactiveObject.TrackingPosition)} < {_maxDistanceSquared}");
         return TrackerDistance.DistanceSquared(player.TrackingPosition, interactiveObject.TrackingPosition) < _maxDistanceSquared;
     }
 }
