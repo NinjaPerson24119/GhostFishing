@@ -3,16 +3,31 @@ using Godot;
 
 public partial class TreasureChest : BuoyantBody {
     [Export]
-    string? InventoryInstanceID;
+    public string InventoryInstanceID = "";
+    [Export]
+    public string InteractiveObjectID = "";
+    [Export]
+    public string InteractiveObjectName = "";
 
-    private InteractiveObject
+    private InteractiveObject _interactiveObject;
 
-    TreasureChest() : base() {
-        if (InventoryInstanceID == null) {
+    public TreasureChest() {
+        if (string.IsNullOrEmpty(InventoryInstanceID)) {
             throw new Exception("InventoryInstanceID must be set");
         }
+        if (string.IsNullOrEmpty(InteractiveObjectID)) {
+            throw new Exception("InteractiveObjectID must be set");
+        }
+        if (string.IsNullOrEmpty(InteractiveObjectName)) {
+            throw new Exception("InteractiveObjectName must be set");
+        }
 
-        var description = "Open treasure chest";
-        Action = new OpenInventoryAction(description, InventoryInstanceID);
+        OpenInventoryAction action = new OpenInventoryAction($"Open {InteractiveObjectName}", InventoryInstanceID);
+        _interactiveObject = new InteractiveObject(InteractiveObjectID, this, action);
+    }
+
+    public override void _PhysicsProcess(double delta) {
+        base._PhysicsProcess(delta);
+        _interactiveObject.PhysicsProcess(delta);
     }
 }
