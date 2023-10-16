@@ -1,21 +1,22 @@
 using Godot;
 
-public class OpenInventoryAction : IInteractiveObjectAction {
+internal class OpenInventoryAction : InteractiveObjectAction {
     private string _inventoryInstanceID;
 
-    public void Activate() {
+    public OpenInventoryAction(string description, string inventoryInstanceID, float maxDistance = 6f) : base(description) {
+        _inventoryInstanceID = inventoryInstanceID;
+        _preconditions.Add(new DistancePrecondition(maxDistance));
+    }
+
+    public override bool Activate(InteractiveObject interactiveObject, Player player) {
+        bool baseResult = base.Activate(interactiveObject, player);
+        if (!baseResult) {
+            return false;
+        }
+
         GD.Print($"Activated inventory {_inventoryInstanceID}");
         // TODO: call high-level API to open this inventory and player inventory side-by-side
         // also need to predicate by player
-    }
-
-    public string Description {
-        get => _description;
-    }
-    private string _description;
-
-    public OpenInventoryAction(string description, string inventoryInstanceID) {
-        _description = description;
-        _inventoryInstanceID = inventoryInstanceID;
+        return true;
     }
 }

@@ -2,7 +2,7 @@ using Godot;
 
 public partial class InteractiveObject : ITrackableObject {
     [Export]
-    public string ID {
+    public string TrackingID {
         get {
             return _ID;
         }
@@ -11,15 +11,19 @@ public partial class InteractiveObject : ITrackableObject {
 
     public Vector3 TrackingPosition {
         get {
+            if (_attachedNode == null) {
+                throw new System.Exception("_attachedNode should have been set by construction");
+            }
             return _attachedNode.GlobalPosition;
         }
     }
 
-    private Tracker _tracker;
-    private Node3D _attachedNode;
-    protected IInteractiveObjectAction Action { get; set; }
+    public InteractiveObjectAction Action { get; private set; }
 
-    public InteractiveObject(string id, Node3D attachedNode, IInteractiveObjectAction action) {
+    private Tracker _tracker;
+    private Node3D? _attachedNode;
+
+    public InteractiveObject(string id, Node3D attachedNode, InteractiveObjectAction action) {
         if (action == null) {
             throw new System.ArgumentNullException("Action must be set before _Ready");
         }
@@ -30,15 +34,23 @@ public partial class InteractiveObject : ITrackableObject {
         }
         _ID = id;
 
+        _attachedNode = attachedNode;
         TrackingServer trackingServer = DependencyInjector.Ref().GetTrackingServer();
         _tracker = new Tracker(this, trackingServer);
-        _attachedNode = attachedNode;
     }
 
     public void PhysicsProcess(double delta) {
         if (_tracker == null) {
-            throw new System.Exception("_tracker must be set before _Process");
+            throw new System.Exception("_tracker must be set before PhysicsProcess");
         }
         _tracker.Update();
+    }
+
+    public bool CheckPreconditions(Player player) {
+        return Action.CheckPreconditions(this, player);
+    }
+
+    public bool Activate(Player player) {
+        return Action.Activate(this, player);
     }
 }

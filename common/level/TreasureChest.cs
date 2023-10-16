@@ -9,9 +9,11 @@ public partial class TreasureChest : BuoyantBody {
     [Export]
     public string InteractiveObjectName = "";
 
-    private InteractiveObject _interactiveObject;
+    private InteractiveObject? _interactiveObject;
 
-    public TreasureChest() {
+    public override void _Ready() {
+        base._Ready();
+
         if (string.IsNullOrEmpty(InventoryInstanceID)) {
             throw new Exception("InventoryInstanceID must be set");
         }
@@ -22,12 +24,16 @@ public partial class TreasureChest : BuoyantBody {
             throw new Exception("InteractiveObjectName must be set");
         }
 
-        OpenInventoryAction action = new OpenInventoryAction($"Open {InteractiveObjectName}", InventoryInstanceID);
+        InteractiveObjectAction action = new OpenInventoryAction($"Open {InteractiveObjectName}", InventoryInstanceID);
         _interactiveObject = new InteractiveObject(InteractiveObjectID, this, action);
     }
 
     public override void _PhysicsProcess(double delta) {
         base._PhysicsProcess(delta);
+
+        if (_interactiveObject == null) {
+            throw new Exception("InteractiveObject is null");
+        }
         _interactiveObject.PhysicsProcess(delta);
     }
 }

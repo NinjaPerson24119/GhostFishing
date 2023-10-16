@@ -1,7 +1,14 @@
 using Godot;
 using System.Collections.Generic;
 
-internal partial class Player : BuoyantBody {
+public partial class Player : BuoyantBody, ITrackableObject {
+    // TODO: customize this
+    public string TrackingID {
+        get {
+            return "PLAYER-1";
+        }
+    }
+
     // F = ma, for a in m/s^2
     [Export]
     public float EngineForce = 9f;
@@ -14,6 +21,12 @@ internal partial class Player : BuoyantBody {
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
+
+    public Vector3 TrackingPosition {
+        get {
+            return GlobalPosition;
+        }
+    }
 
     private Ocean _ocean = null!;
 
@@ -53,7 +66,7 @@ internal partial class Player : BuoyantBody {
         }
 
         base._Ready();
-        
+
     }
 
     public override void _Process(double delta) {

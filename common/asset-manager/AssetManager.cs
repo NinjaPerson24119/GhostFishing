@@ -140,7 +140,10 @@ internal partial class AssetManager : Node {
         try {
             string globalizedPath = ProjectSettings.GlobalizePath(filePath);
             string jsonString = File.ReadAllText(globalizedPath);
-            return JsonSerializer.Deserialize<T>(jsonString);
+            var options = new JsonSerializerOptions {
+                ReadCommentHandling = JsonCommentHandling.Skip
+            };
+            return JsonSerializer.Deserialize<T>(jsonString, options);
         }
         catch (FileNotFoundException) {
             GD.PrintErr("File not found: " + filePath);

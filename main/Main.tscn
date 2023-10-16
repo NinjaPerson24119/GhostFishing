@@ -55,6 +55,7 @@ script = ExtResource("2_cg76b")
 
 [node name="TrackingServer" type="Node" parent="Pausable"]
 script = ExtResource("5_hh4xg")
+TileSize = 100.0
 
 [node name="GameUI" parent="Pausable" instance=ExtResource("5_8atem")]
 
@@ -81,6 +82,8 @@ script = ExtResource("9_sht6q")
 
 [node name="Terrain" type="StaticBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.871, 0)
+collision_layer = 2
+collision_mask = 0
 
 [node name="ground" parent="Pausable/Level/Terrain" instance=ExtResource("4_e77m6")]
 
@@ -104,8 +107,14 @@ spot_range = 100.0
 
 [node name="TreasureChest" type="RigidBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, -13.071)
+collision_layer = 8
+collision_mask = 11
 mass = 1000.0
 script = ExtResource("11_d7jjb")
+InventoryInstanceID = "INVENTORY_DEF-e2f5b51f-e071-4c60-9e6e-d68d19438c07"
+InteractiveObjectID = "treasure-chest"
+InteractiveObjectName = "Treasure Chest"
+Size = Vector3(2, 1, 1)
 
 [node name="TreasureChestModel" parent="Pausable/Level/TreasureChest" instance=ExtResource("8_4fp4j")]
 
@@ -115,6 +124,7 @@ shape = SubResource("ConvexPolygonShape3D_wc5rg")
 
 [node name="Player" parent="Pausable" instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
+collision_mask = 11
 script = ExtResource("3_t71xa")
 Size = Vector3(2, 3, 2)
 ConstantAngularDrag = 1.4

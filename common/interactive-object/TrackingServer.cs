@@ -10,7 +10,7 @@ internal partial class TrackingServer : Node {
             if (_tileSize != -1) {
                 throw new System.InvalidOperationException("TileSize cannot be set more than once");
             }
-            if (_tileSize <= 0) {
+            if (value <= 0) {
                 throw new System.ArgumentOutOfRangeException("TileSize must be positive");
             }
             _tileSize = value;
@@ -25,7 +25,7 @@ internal partial class TrackingServer : Node {
         if (obj == null) {
             throw new System.ArgumentNullException("obj cannot be null");
         }
-        string ID = obj.ID;
+        string ID = obj.TrackingID;
 
         // remove from old tile if exists
         Vector2I tileIndices = GetTile(obj.TrackingPosition);
@@ -34,7 +34,7 @@ internal partial class TrackingServer : Node {
             if (oldTileIndices == tileIndices) {
                 return;
             }
-            _tileToObjects[oldTileIndices].RemoveAll((ITrackableObject obj) => obj.ID == ID);
+            _tileToObjects[oldTileIndices].RemoveAll((ITrackableObject obj) => obj.TrackingID == ID);
         }
         _objectToTile[ID] = tileIndices;
         if (!_tileToObjects.ContainsKey(tileIndices)) {
