@@ -2,10 +2,14 @@ using Godot;
 using System.Collections.Generic;
 
 public partial class Player : BuoyantBody, ITrackableObject {
-    // TODO: customize this
+    public PlayerContext? PlayerContext { get; private set; }
+
     public string TrackingID {
         get {
-            return "PLAYER-1";
+            if (PlayerContext == null) {
+                throw new System.Exception("PlayerContext must be set before TrackingID is accessed");
+            }
+            return PlayerContext.PlayerID.ToString();
         }
     }
 
@@ -56,6 +60,8 @@ public partial class Player : BuoyantBody, ITrackableObject {
     }
 
     public override void _Ready() {
+        PlayerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+
         _ocean = DependencyInjector.Ref().GetOcean();
 
         WaterContactPointsNodePath = "Boat/WaterContactPoints";
@@ -66,7 +72,7 @@ public partial class Player : BuoyantBody, ITrackableObject {
         }
 
         base._Ready();
-
+        AddChildInteractiveObject();
     }
 
     public override void _Process(double delta) {
@@ -148,5 +154,27 @@ public partial class Player : BuoyantBody, ITrackableObject {
             }
         }
         return isMoving;
+    }
+
+    public void AddChildInteractiveObject() {
+        if (PlayerContext == null) {
+            throw new System.Exception("PlayerContext must be set before AddChildInteractiveObject is called");
+        }
+        if (PlayerContext.PlayerStateView == null) {
+            throw new System.Exception("PlayerStateView must be set before AddChildInteractiveObject is called");
+        }
+
+        // Player's inventory can only be accessed if
+        // - Player cannot access its own inventory as an interactive object
+        // - Player is not active
+        InteractiveObject interactiveObject = new InteractiveObject() {
+            TrackingID = $"PlayerBoatInventory-{PlayerContext.PlayerID}",
+            Description = "Open Boat Inventory",
+        };
+        InteractiveObjectAction action = new OpenInventoryAction(PlayerContext.PlayerStateView.BoatInventory.InventoryInstanceID);
+        action.AddPrecondition(new NotPrecondition(new IsPlayerPrecondition(PlayerContext.PlayerID)));
+        action.AddPrecondition(new NotPrecondition(new PlayerActivePrecondition(PlayerContext.PlayerID)));
+        interactiveObject.AddAction(action);
+        AddChild(interactiveObject);
     }
 }

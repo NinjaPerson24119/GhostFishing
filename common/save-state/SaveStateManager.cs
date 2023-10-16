@@ -33,7 +33,6 @@ internal partial class SaveStateManager : Node {
     }
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
-    private int _noPlayers;
     private int _locks = 0;
     private int version = 0;
 
@@ -52,7 +51,6 @@ internal partial class SaveStateManager : Node {
 
     public override void _Ready() {
         _singletonTracker.Ready(this);
-        _noPlayers = CoopManager.Ref().NoPlayers;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -70,11 +68,12 @@ internal partial class SaveStateManager : Node {
             CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
-            PlayerSaveState = new PlayerSaveState[_noPlayers],
+            PlayerSaveState = new PlayerSaveState[CoopManager.MaxPlayers],
             InventoryStates = AssetManager.Ref().GetInventoryInstanceDTOs(),
         };
 
-        for (int i = 0; i < _noPlayers; i++) {
+        for (int i = 0; i < CoopManager.MaxPlayers; i++) {
+            // TODO: do this by ID
             Player player = DependencyInjector.Ref().GetPlayer();
             saveState.PlayerSaveState[i] = new PlayerSaveState() {
                 GlobalPositionX = player.GlobalPosition.X,

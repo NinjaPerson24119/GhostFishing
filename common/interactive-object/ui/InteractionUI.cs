@@ -20,7 +20,7 @@ internal partial class InteractionUI : Control {
 
         Label label = GetNode<Label>("Label");
         if (selectedObject != null) {
-            label.Text = selectedObject.Action.Description;
+            label.Text = selectedObject.Description;
         }
     }
 

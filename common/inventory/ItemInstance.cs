@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-internal class InventoryItemInstanceDTO : IGameAssetDTO {
+public class InventoryItemInstanceDTO : IGameAssetDTO {
     public string? ItemInstanceID { get; set; }
     public string? ItemDefinitionID { get; set; }
     public int X { get; set; }
@@ -34,7 +34,7 @@ internal class InventoryItemInstanceDTO : IGameAssetDTO {
     }
 }
 
-internal class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO> {
+public class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO> {
     public string ItemInstanceID { get; set; }
     public string ItemDefinitionID { get; set; }
     public int X { get; set; }

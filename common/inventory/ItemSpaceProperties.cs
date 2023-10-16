@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-internal class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
+public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     public int Width { get; set; }
     public int Height { get; set; }
     public bool[]? FilledMask { get; set; }

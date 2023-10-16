@@ -1,4 +1,4 @@
-internal struct PlayerStateAssetIDs {
+public struct PlayerStateAssetIDs {
     public string BoatInventoryInstanceID { get; }
     public string QuestInventoryInstanceID { get; }
     public string StorageInventoryInstanceID { get; }
@@ -10,7 +10,7 @@ internal struct PlayerStateAssetIDs {
     }
 }
 
-internal class PlayerStateView {
+public class PlayerStateView {
     public InventoryInstance BoatInventory;
     public InventoryInstance QuestInventory;
     public InventoryInstance StorageInventory;

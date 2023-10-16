@@ -1,7 +1,7 @@
 using System;
 using Godot;
 
-internal class InventoryItemCategoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
+public class InventoryItemCategoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     public string? Name { get; set; }
     public string? IconImagePath { get; set; }
     public string? BackgroundColor { get; set; }

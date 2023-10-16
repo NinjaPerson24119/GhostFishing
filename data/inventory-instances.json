@@ -42,6 +42,7 @@
     "INVENTORY_INSTANCE-9f5d56ed-c8aa-4899-b749-66bd734141fb": {
         "InventoryDefinitionID": "INVENTORY_DEF-ab1458f7-4c0f-4171-b5f6-cf9bef2025da"
     },
+    // Treasure chest
     "INVENTORY_INSTANCE-3cfd6920-fa38-4529-80cd-3bc9ebb3a405": {
         "InventoryDefinitionID": "INVENTORY_DEF-e2f5b51f-e071-4c60-9e6e-d68d19438c07",
         "Items": [

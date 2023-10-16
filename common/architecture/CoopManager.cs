@@ -1,6 +1,12 @@
 using Godot;
 
-internal partial class CoopManager : Node {
+public partial class CoopManager : Node {
+    public enum PlayerID {
+        Invalid = -1,
+        One = 0,
+        Two = 1,
+    }
+
     static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
     private static CoopManager _singleton { get => _singletonTracker.Ref(); }
 
@@ -15,7 +21,16 @@ internal partial class CoopManager : Node {
         return _singleton;
     }
 
-    public int NoPlayers { get; private set; } = 1;
+    public const int MaxPlayers = 2;
 
-    // TODO: signals for players joining and leaving
+    public bool IsPlayerActive(PlayerID playerID) {
+        switch (playerID) {
+            case PlayerID.One:
+                return true;
+            case PlayerID.Two:
+                return Input.GetConnectedJoypads().Count > 0;
+            default:
+                throw new System.Exception($"Invalid player ID {playerID}");
+        }
+    }
 }

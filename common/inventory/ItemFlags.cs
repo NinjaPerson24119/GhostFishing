@@ -1,6 +1,6 @@
 using System;
 
-internal class InventoryItemFlagsDTO : IGameAssetDTO {
+public class InventoryItemFlagsDTO : IGameAssetDTO {
     public bool CanPutInStorage { get; set; } = true;
     public bool CanBeMovedByPlayer { get; set; } = true;
     public bool CanDelete { get; set; } = true;

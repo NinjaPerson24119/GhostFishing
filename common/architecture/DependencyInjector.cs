@@ -17,7 +17,7 @@ internal partial class DependencyInjector : Node {
     }
 
     public Player GetPlayer() {
-        return GetNode<Player>("/root/Main/Pausable/Player");
+        return GetNode<Player>("/root/Main/Pausable/PlayerContext-1/Player");
     }
 
     public Ocean GetOcean() {
@@ -49,4 +49,24 @@ internal partial class DependencyInjector : Node {
     }
 
     // do not provide other singletons. they provide themselves.
+
+    // resources local to each player
+    private T NearestResourceInSubtree<T>(string relativeToNodePath) where T : Node {
+        Node? node = GetNodeOrNull(relativeToNodePath);
+        if (node == null) {
+            throw new System.Exception($"Could not find node {relativeToNodePath}");
+        }
+        if (node is T) {
+            return (T)node;
+        }
+        Node? parent = node.GetParentOrNull<Node>();
+        if (parent == null) {
+            throw new System.Exception($"Could not find nearest resource of type {typeof(T).Name} in subtree of {relativeToNodePath}");
+        }
+        return NearestResourceInSubtree<T>(parent.GetPath());
+    }
+
+    public PlayerContext GetLocalPlayerContext(string relativeToNodePath) {
+        return NearestResourceInSubtree<PlayerContext>(relativeToNodePath);
+    }
 }

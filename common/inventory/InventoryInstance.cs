@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Godot;
 
-internal class InventoryInstanceDTO : IGameAssetDTO {
+public class InventoryInstanceDTO : IGameAssetDTO {
     public string? InventoryDefinitionID { get; set; }
     public InventoryItemInstanceDTO[]? Items { get; set; }
     public bool Disabled { get; set; }
@@ -28,7 +28,7 @@ internal class InventoryInstanceDTO : IGameAssetDTO {
     }
 }
 
-internal partial class InventoryInstance : Node, IGameAssetWritable<InventoryInstanceDTO> {
+public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInstanceDTO> {
     public readonly string InventoryInstanceID;
     private readonly string? _inventoryDefinitionID;
 

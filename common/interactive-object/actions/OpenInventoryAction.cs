@@ -3,7 +3,7 @@ using Godot;
 internal class OpenInventoryAction : InteractiveObjectAction {
     private string _inventoryInstanceID;
 
-    public OpenInventoryAction(string description, string inventoryInstanceID, float maxDistance = 6f) : base(description) {
+    public OpenInventoryAction(string inventoryInstanceID, float maxDistance = 6f) {
         _inventoryInstanceID = inventoryInstanceID;
         _preconditions.Add(new DistancePrecondition(maxDistance));
     }
