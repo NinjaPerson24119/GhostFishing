@@ -1,23 +1,23 @@
 internal struct PlayerStateAssetIDs {
-    public string BoatInventoryID { get; }
-    public string QuestInventoryID { get; }
-    public string StorageID { get; }
+    public string BoatInventoryInstanceID { get; }
+    public string QuestInventoryInstanceID { get; }
+    public string StorageInventoryInstanceID { get; }
 
-    public PlayerStateAssetIDs(string boatInventoryID, string questInventoryID, string storageID) {
-        BoatInventoryID = boatInventoryID;
-        QuestInventoryID = questInventoryID;
-        StorageID = storageID;
+    public PlayerStateAssetIDs(string boatInventoryInstanceID, string questInventoryInstanceID, string storageInventoryInstanceID) {
+        BoatInventoryInstanceID = boatInventoryInstanceID;
+        QuestInventoryInstanceID = questInventoryInstanceID;
+        StorageInventoryInstanceID = storageInventoryInstanceID;
     }
 }
 
 internal class PlayerStateView {
-    public Inventory BoatInventory;
-    public Inventory QuestInventory;
-    public Inventory StorageInventory;
+    public InventoryInstance BoatInventory;
+    public InventoryInstance QuestInventory;
+    public InventoryInstance StorageInventory;
 
     public PlayerStateView(PlayerStateAssetIDs assetIDs) {
-        BoatInventory = AssetManager.Ref().GetInventory(assetIDs.BoatInventoryID);
-        QuestInventory = AssetManager.Ref().GetInventory(assetIDs.QuestInventoryID);
-        StorageInventory = AssetManager.Ref().GetInventory(assetIDs.StorageID);
+        BoatInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.BoatInventoryInstanceID);
+        QuestInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.QuestInventoryInstanceID);
+        StorageInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.StorageInventoryInstanceID);
     }
 }

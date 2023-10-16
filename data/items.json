@@ -1,5 +1,5 @@
 {
-    "ITEM-8350f715-4989-44b1-b7b6-381b050c3d70": {
+    "ITEM_DEF-8350f715-4989-44b1-b7b6-381b050c3d70": {
         "Name": "Gold",
         "Description": "Used to trade for goods and services.",
         "CurrencyValue": 1,

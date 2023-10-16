@@ -5,7 +5,9 @@ using Godot;
 internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private Dictionary<string, T> _assets = new Dictionary<string, T>();
 
-    public delegate T BuildAssetFromDTO(DTO dto);
+    // this should not have a second ID argument
+    // if an object needs to be referred by ID, it should be an instance variant with an ID field
+    public delegate T BuildAssetFromDTO(string id, DTO dto);
     public delegate bool IsIDOfType(string id);
     public delegate bool AreDepsSatisfied(T asset);
     public delegate bool IsValidID(string id);
@@ -31,7 +33,7 @@ internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     }
 
     public void AddAsset(string id, DTO dto) {
-        GD.Print($"Adding {typeof(T)} asset with ID: {id}");
+        GD.Print($"\n---\nAdding {typeof(T)} asset with ID: {id}");
 
         if (!_isValidID(id)) {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
@@ -40,9 +42,13 @@ internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
             GD.PrintErr($"DTO is null for {id} with asset type {typeof(T)}");
             return;
         }
+        if (!string.IsNullOrEmpty(id) && !_isValidID(id)) {
+            GD.PrintErr($"Invalid {typeof(T)} asset type ID: {id}");
+            return;
+        }
         T model;
         try {
-            model = _buildAssetFromDTO(dto);
+            model = _buildAssetFromDTO(id, dto);
         }
         catch (Exception e) {
             GD.PrintErr($"Error building {typeof(T)} asset from DTO: {e}");
@@ -79,6 +85,13 @@ internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
         _assets.Add(id, model);
     }
 
+    public void ReplaceAsset(string id, DTO dto) {
+        if (_assets.ContainsKey(id)) {
+            _assets.Remove(id);
+        }
+        AddAsset(id, dto);
+    }
+
     public T GetAsset(string id) {
         if (!_isValidID(id)) {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
@@ -97,5 +110,20 @@ internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
             throw new ArgumentException($"Invalid {typeof(T)} asset type ID: {id}");
         }
         return _assets.ContainsKey(id);
+    }
+
+    public Dictionary<string, DTO> GetAssetDTOs() {
+        Dictionary<string, DTO> dtos = new Dictionary<string, DTO>();
+        if (!typeof(IGameAssetWritable<DTO>).IsAssignableFrom(typeof(T))) {
+            throw new ArgumentException($"Asset type {typeof(T)} does not implement IGameAssetWritable");
+        }
+        foreach (var kv in _assets) {
+            if (!(kv.Value as IGameAssetWritable<DTO>)!.IsTouched()) {
+                continue;
+            }
+            DTO dto = (kv.Value as IGameAssetWritable<DTO>)!.ToDTO();
+            dtos.Add(kv.Key, dto);
+        }
+        return dtos;
     }
 }

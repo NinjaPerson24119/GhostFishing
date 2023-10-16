@@ -1,15 +1,53 @@
 using System.Text.Json;
 using System.IO;
 using Godot;
+using System;
 
 internal partial class SaveStateManager : Node {
+    public class Lock : IDisposable {
+        private SaveStateManager _saveStateManager;
+        private bool _released;
+        public Lock(SaveStateManager saveStateManager) {
+            _saveStateManager = saveStateManager;
+            saveStateManager._locks++;
+        }
+
+        ~Lock() {
+            if (!_released) {
+                GD.PrintErr("SaveStateManagerLock was not released before being destroyed.");
+                Dispose();
+            }
+        }
+
+        public void Dispose() {
+            if (!_released) {
+                _saveStateManager._locks--;
+                _released = true;
+            }
+        }
+    }
+
     static SingletonTracker<SaveStateManager> _singletonTracker = new SingletonTracker<SaveStateManager>();
+    public static SaveStateManager Ref() {
+        return _singletonTracker.Ref();
+    }
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
     private int _noPlayers;
+    private int _locks = 0;
+    private int version = 0;
+
+    [Signal]
+    public delegate void LoadedSaveStateEventHandler();
 
     public SaveStateManager() {
         ProcessMode = ProcessModeEnum.Always;
+    }
+
+    ~SaveStateManager() {
+        if (_locks > 0) {
+            GD.PrintErr("SaveStateManager was not closed before being destroyed.");
+        }
     }
 
     public override void _Ready() {
@@ -28,10 +66,12 @@ internal partial class SaveStateManager : Node {
 
     private SaveState CaptureState() {
         SaveState saveState = new SaveState() {
+            Version = version,
             CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
             PlayerSaveState = new PlayerSaveState[_noPlayers],
+            InventoryStates = AssetManager.Ref().GetInventoryInstanceDTOs(),
         };
 
         for (int i = 0; i < _noPlayers; i++) {
@@ -46,12 +86,16 @@ internal partial class SaveStateManager : Node {
     }
 
     void Save() {
-        SaveState saveState = CaptureState();
-        if (saveState.PlayerSaveState == null) {
-            GD.Print("PlayerSaveState is null");
+        if (_locks > 0) {
+            GD.PrintErr("Cannot save. SaveStateManager is locked.");
             return;
         }
-        GD.Print(saveState.PlayerSaveState[0].GlobalPositionX);
+
+        SaveState saveState = CaptureState();
+        if (saveState.PlayerSaveState == null) {
+            GD.PrintErr("PlayerSaveState is null");
+            return;
+        }
         string jsonString = JsonSerializer.Serialize<SaveState>(saveState, new JsonSerializerOptions() {
             WriteIndented = true,
         });
@@ -60,6 +104,10 @@ internal partial class SaveStateManager : Node {
     }
 
     void SetState(SaveState saveState) {
+        if (saveState.Version != version) {
+            GD.PrintErr($"Save state version {saveState.Version} does not match expected version {version}");
+            return;
+        }
         if (saveState.CommonSaveState != null) {
             GameClock.GameSeconds = saveState.CommonSaveState.GameSeconds;
         }
@@ -70,16 +118,38 @@ internal partial class SaveStateManager : Node {
                 player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
             }
         }
+        if (saveState.InventoryStates != null) {
+            GD.Print($"Setting inventory states: {saveState.InventoryStates.Count}");
+            AssetManager.Ref().SetInventoryInstanceDTOs(saveState.InventoryStates);
+        }
     }
 
     void Load() {
-        string jsonString = File.ReadAllText(_saveStatePath);
+        if (_locks > 0) {
+            GD.PrintErr("Cannot load save. SaveStateManager is locked.");
+            return;
+        }
+
+        string jsonString;
+        try {
+            jsonString = File.ReadAllText(_saveStatePath);
+        }
+        catch (Exception e) {
+            GD.PrintErr($"Cannot load save. Error reading file: {e}");
+            return;
+        }
+
         SaveState? saveState = JsonSerializer.Deserialize<SaveState>(jsonString);
         if (saveState == null) {
-            GD.Print("Cannot load save. Deserialized null.");
+            GD.PrintErr("Cannot load save. Deserialized null.");
             return;
         }
         SetState(saveState);
         GD.Print($"Loaded state from {_saveStatePath}");
+        EmitSignal(SignalName.LoadedSaveState);
+    }
+
+    public Lock GetLock() {
+        return new Lock(this);
     }
 }

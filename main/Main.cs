@@ -3,7 +3,6 @@ using Godot;
 internal partial class Main : Node {
     public override void _Ready() {
         SetupSignals();
-        AssignDefaults();
     }
 
     private void SetupSignals() {
@@ -22,10 +21,5 @@ internal partial class Main : Node {
         player.PositionChangedSignificantly += ocean.OnOriginChanged;
         controller.SetPlayerControlsDisabled += player.SetControlsDisabled;
         controller.SetPlayerControlsDisabled += followCamera.SetControlsDisabled;
-    }
-
-    private void AssignDefaults() {
-        // assign default inventory to player
-        // player.Inventory = AssetManager.Ref().DefaultInventory;
     }
 }

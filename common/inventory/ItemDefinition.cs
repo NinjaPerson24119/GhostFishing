@@ -26,7 +26,6 @@ internal class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImag
             GD.PrintErr($"ImagePath is null or empty.");
             return false;
         }
-        // Silhouette is optional
         if (Space == null || !Space.IsValid()) {
             GD.Print($"Space is null or invalid.");
             return false;
@@ -35,8 +34,10 @@ internal class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImag
             GD.Print($"Flags is null or invalid.");
             return false;
         }
-        // Category is optional
-        // BackgroundColorOverride is optional
+        if (!string.IsNullOrEmpty(CategoryID) && !AssetIDUtil.IsInventoryItemCategoryID(CategoryID)) {
+            GD.Print($"CategoryID is invalid.");
+            return false;
+        }
         return true;
     }
 

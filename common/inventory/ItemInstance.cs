@@ -7,30 +7,34 @@ internal class InventoryItemInstanceDTO : IGameAssetDTO {
     public int X { get; set; }
     public int Y { get; set; }
     public InventoryItemRotation Rotation { get; set; }
-    public InventoryItemFlagsDTO? FlagOverrides { get; set; }
 
     public bool IsValid() {
-        if (string.IsNullOrEmpty(ItemDefinitionID)) {
+        if (string.IsNullOrEmpty(ItemDefinitionID) || !AssetIDUtil.IsInventoryItemDefinitionID(ItemDefinitionID)) {
+            GD.PrintErr($"Invalid ItemDefinitionID: {ItemDefinitionID}");
+            return false;
+        }
+        if (!string.IsNullOrEmpty(ItemInstanceID) && !AssetIDUtil.IsInventoryItemInstanceID(ItemInstanceID)) {
+            GD.PrintErr($"Invalid ItemInstanceID: {ItemInstanceID}");
             return false;
         }
         if (X < 0 || Y < 0) {
+            GD.PrintErr($"Invalid position: {X}, {Y}");
             return false;
         }
         return true;
     }
 
     public string Stringify() {
+        // items need not specify an ID as they don't exist outside of inventories
+        // it will be generated when the item is added to an inventory
         string str = $"ItemInstanceID (this may be empty until DTO is instanced): {ItemInstanceID}\n";
         str += $"ItemDefinitionID: {ItemDefinitionID}\n";
         str += $"X: {X}, Y: {Y}, Rotation: {Rotation}\n";
-        if (FlagOverrides != null) {
-            str += $"FlagOverrides (object):\n{FlagOverrides.Stringify()}\n";
-        }
         return str;
     }
 }
 
-internal class InventoryItemInstance {
+internal class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO> {
     public string ItemInstanceID { get; set; }
     public string ItemDefinitionID { get; set; }
     public int X { get; set; }
@@ -41,7 +45,6 @@ internal class InventoryItemInstance {
             return Mathf.Pi / 2 * (int)Rotation;
         }
     }
-    public InventoryItemFlags? FlagOverrides { get; set; }
     public Color? BackgroundColor;
 
     public InventoryItemInstance(InventoryItemInstanceDTO dto) {
@@ -58,9 +61,6 @@ internal class InventoryItemInstance {
         X = dto.X;
         Y = dto.Y;
         Rotation = dto.Rotation;
-        if (dto.FlagOverrides != null) {
-            FlagOverrides = new InventoryItemFlags(dto.FlagOverrides);
-        }
 
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(ItemDefinitionID);
         if (itemDef.BackgroundColorOverride != null) {
@@ -78,5 +78,20 @@ internal class InventoryItemInstance {
 
     public void RotateCounterClockwise() {
         Rotation = (InventoryItemRotation)(((int)Rotation + 3) % 4);
+    }
+
+    public InventoryItemInstanceDTO ToDTO() {
+        InventoryItemInstanceDTO dto = new InventoryItemInstanceDTO() {
+            ItemInstanceID = ItemInstanceID,
+            ItemDefinitionID = ItemDefinitionID,
+            X = X,
+            Y = Y,
+            Rotation = Rotation
+        };
+        return dto;
+    }
+
+    public bool IsTouched() {
+        return true;
     }
 }
