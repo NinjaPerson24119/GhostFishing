@@ -44,5 +44,9 @@ internal partial class DependencyInjector : Node {
         return GetNode<FollowCamera>("/root/Main/Pausable/FollowCamera");
     }
 
+    public TrackingServer GetTrackingServer() {
+        return GetNode<TrackingServer>("/root/Main/Pausable/TrackingServer");
+    }
+
     // do not provide other singletons. they provide themselves.
 }

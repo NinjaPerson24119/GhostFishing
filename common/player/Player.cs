@@ -53,6 +53,7 @@ internal partial class Player : BuoyantBody {
         }
 
         base._Ready();
+        
     }
 
     public override void _Process(double delta) {
