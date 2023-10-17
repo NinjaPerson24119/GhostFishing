@@ -33,4 +33,8 @@ public partial class CoopManager : Node {
                 throw new System.Exception($"Invalid player ID {playerID}");
         }
     }
+
+    public bool IsSinglePlayer() {
+        return IsPlayerActive(PlayerID.One) && !IsPlayerActive(PlayerID.Two);
+    }
 }

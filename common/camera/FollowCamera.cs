@@ -152,7 +152,7 @@ public partial class FollowCamera : Node3D {
             return;
         }
 
-        if (_playerContext.PlayerID == CoopManager.PlayerID.One) {
+        if (_playerContext.Controller.MouseAllowed()) {
             HandleMouseInput(inputEvent);
         }
 

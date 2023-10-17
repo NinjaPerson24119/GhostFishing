@@ -16,6 +16,9 @@ public partial class PlayerContext : Node {
     public PlayerMenu PlayerMenu {
         get => GetNode<PlayerMenu>("PlayerHUD/PlayerMenu");
     }
+    public PlayerController Controller {
+        get => GetNode<PlayerController>("PlayerController");
+    }
 
     public Vector2 MovementControlVector() {
         int device = (int)PlayerID;

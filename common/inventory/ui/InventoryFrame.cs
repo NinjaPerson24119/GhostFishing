@@ -111,7 +111,7 @@ internal partial class InventoryFrame : Control {
         if (!HasFocus()) {
             return;
         }
-        if (_playerContext == null || _playerContext.PlayerID != CoopManager.PlayerID.One) {
+        if (_playerContext == null || !_playerContext.Controller.MouseAllowed()) {
             return;
         }
 
@@ -151,7 +151,7 @@ internal partial class InventoryFrame : Control {
     }
 
     public override void _Notification(int what) {
-        if (_playerContext == null || _playerContext.PlayerID != CoopManager.PlayerID.One) {
+        if (_playerContext == null || !_playerContext.Controller.MouseAllowed()) {
             return;
         }
 

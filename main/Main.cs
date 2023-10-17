@@ -2,10 +2,6 @@ using Godot;
 
 internal partial class Main : Node {
     public override void _Ready() {
-        SetupSignals();
-    }
-
-    private void SetupSignals() {
         // TODO Hack: until we make these references support multiple players
         Player player = DependencyInjector.Ref().GetPlayerOne();
         if (player.PlayerContext == null) {
@@ -13,7 +9,7 @@ internal partial class Main : Node {
         }
 
         Ocean ocean = DependencyInjector.Ref().GetOcean();
-        Controller controller = DependencyInjector.Ref().GetController();
+        CommonController commonController = DependencyInjector.Ref().GetCommonController();
         TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
 
@@ -26,7 +22,12 @@ internal partial class Main : Node {
         GameClock.ConnectGameSecondsChanged(timeDisplay.Update);
 
         player.PositionChangedSignificantly += ocean.OnOriginChanged;
-        controller.SetPlayerControlsDisabled += player.SetControlsDisabled;
-        controller.SetPlayerControlsDisabled += followCamera.SetControlsDisabled;
+
+        Player[] players = DependencyInjector.Ref().GetPlayers();
+        for (int i = 0; i < players.Length; i++) {
+            commonController.SetPlayerControlsDisabled += players[i].SetControlsDisabled;
+            commonController.SetPlayerControlsDisabled += players[i].PlayerContext.FollowCamera.SetControlsDisabled;
+        }
+
     }
 }

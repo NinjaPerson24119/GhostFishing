@@ -24,16 +24,16 @@ internal partial class DependencyInjector : Node {
         return GetNode<TimeDisplay>("/root/Main/Pausable/CommonHUD/TimeDisplay");
     }
 
-    public Controller GetController() {
-        return GetNode<Controller>("/root/Main/Controller");
-    }
-
     public PauseMenu GetPauseMenu() {
         return GetNode<PauseMenu>("/root/Main/PauseMenu");
     }
 
     public TrackingServer GetTrackingServer() {
         return GetNode<TrackingServer>("/root/Main/Pausable/TrackingServer");
+    }
+
+    public CommonController GetCommonController() {
+        return GetNode<CommonController>("/root/Main/CommonController");
     }
 
     public Player GetPlayerOne() {
