@@ -12,6 +12,10 @@ public partial class PlayerMenu : Menu {
     private SaveStateManager.Lock? _saveStateLock;
     private PlayerContext? _playerContext;
 
+    public PlayerMenu() {
+        Visible = false;
+    }
+
     public override void _Ready() {
         base._Ready();
 
@@ -89,7 +93,10 @@ public partial class PlayerMenu : Menu {
     }
 
     public override void Open() {
-        base.Open();
+        bool success = TryOpen();
+        if (!success) {
+            return;
+        }
         CallDeferred(nameof(OpenInventory));
     }
 
@@ -104,11 +111,14 @@ public partial class PlayerMenu : Menu {
     }
 
     public override void Close() {
+        bool success = TryClose();
+        if (!success) {
+            return;
+        }
         if (_itemTransport != null) {
             _itemTransport.CloseInventory();
             GD.Print("Closed inventory.");
         }
-        base.Close();
     }
 
     private void OnInventoryFrameResized() {
