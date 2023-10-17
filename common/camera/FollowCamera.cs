@@ -156,8 +156,7 @@ public partial class FollowCamera : Node3D {
             HandleMouseInput(inputEvent);
         }
 
-        int device = (int)_playerContext.PlayerID;
-        if (inputEvent.IsActionPressed($"cycle_zoom_{device}")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionCycleZoom)) {
             _zoomTimer.Stop();
             float[] zoomSteps = GetZoomSteps();
             _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
@@ -270,13 +269,7 @@ public partial class FollowCamera : Node3D {
         }
 
         if (!DisableControls) {
-            int device = (int)_playerContext.PlayerID;
-            Vector2 controlDirection = Input.GetVector(
-                $"rotate_camera_left_{device}",
-                $"rotate_camera_right_{device}",
-                $"rotate_camera_down_{device}",
-                $"rotate_camera_up_{device}"
-            );
+            Vector2 controlDirection = _playerContext.CameraControlVector();
             bool updated = controlDirection != Vector2.Zero;
             if (controlDirection.X != 0) {
                 IsCameraDefault = false;

@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-internal partial class PlayerMenu : Menu {
+public partial class PlayerMenu : Menu {
     [Export]
     public int TileSizePx = 64;
 
@@ -10,14 +10,19 @@ internal partial class PlayerMenu : Menu {
     private InventoryFrame? _boatInventoryFrame;
     private bool _initialized = false;
     private SaveStateManager.Lock? _saveStateLock;
-    private CoopManager.PlayerID _playerID = CoopManager.PlayerID.Invalid;
+    private PlayerContext? _playerContext;
 
     public override void _Ready() {
         base._Ready();
-        _closeActions.Add("open_inventory");
+
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext must be set before _Ready is called");
+        }
+        _closeActions.Add(_playerContext.ActionCancel);
+        _closeActions.Add(_playerContext.ActionOpenInventory);
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
 
-        _playerID = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).PlayerID;
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
 
         Initialize();
     }
@@ -55,9 +60,11 @@ internal partial class PlayerMenu : Menu {
         if (!AcceptingInput) {
             return;
         }
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext must be set before _Input is called");
+        }
 
-        int device = (int)_playerID;
-        if (inputEvent.IsActionPressed($"select_{device}")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionSelect)) {
             if (!_itemTransport.HasItem()) {
                 _itemTransport.TakeItem();
             }
@@ -65,13 +72,13 @@ internal partial class PlayerMenu : Menu {
                 _itemTransport.PlaceItem();
             }
         }
-        if (inputEvent.IsActionPressed($"cancel_{device}")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionCancel)) {
             _itemTransport.RevertTakeItem();
         }
-        if (inputEvent.IsActionPressed($"inventory_rotate_clockwise_{device}")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionRotateClockwise)) {
             _itemTransport.RotateClockwise();
         }
-        if (inputEvent.IsActionPressed($"inventory_rotate_counterclockwise_{device}")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionRotateCounterClockwise)) {
             _itemTransport.RotateCounterClockwise();
         }
 

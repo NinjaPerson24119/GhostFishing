@@ -37,13 +37,6 @@ public partial class Player : BuoyantBody, ITrackableObject {
     private float _horizontalSliceArea;
     private float _depthInWater = 1f;
 
-    private static readonly List<string> _moveActions = new List<string>() {
-            "move_forward",
-            "move_backward",
-            "turn_left",
-            "turn_right",
-        };
-
     [Signal]
     public delegate void PositionChangedSignificantlyEventHandler(Vector3 position);
 
@@ -57,6 +50,8 @@ public partial class Player : BuoyantBody, ITrackableObject {
         WaterDragCoefficient = 0.3f;
         WaterMomentCoefficient = 0.08f;
         SubmergedProportionOffset = 0.7f;
+
+        
     }
 
     public override void _Ready() {
@@ -100,7 +95,7 @@ public partial class Player : BuoyantBody, ITrackableObject {
         }
 
         int device = (int)PlayerContext.PlayerID;
-        var controlDirection = Input.GetVector($"turn_left_{device}", $"turn_right_{device}", $"move_backward_{device}", $"move_forward_{device}");
+        var controlDirection = PlayerContext.MovementControlVector();
         Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
         if (controlDirection.Y != 0) {
             ApplyCentralForce(towardsFrontOfBoat * EngineForce * Mass * controlDirection.Y);
@@ -150,8 +145,12 @@ public partial class Player : BuoyantBody, ITrackableObject {
     }
 
     public bool IsMoving() {
+        if (PlayerContext == null) {
+            throw new System.Exception("PlayerContext must be set before IsMoving is called");
+        }
+
         bool isMoving = false;
-        foreach (string action in _moveActions) {
+        foreach (string action in PlayerContext.MovementActions()) {
             if (Input.IsActionPressed(action)) {
                 isMoving = true;
                 break;

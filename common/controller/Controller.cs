@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 public enum ControllerInputType {
     KeyboardMouse = 0,
@@ -17,9 +18,6 @@ internal partial class Controller : Node {
 
     static SingletonTracker<Controller> _singletonTracker = new SingletonTracker<Controller>();
     private static Controller _singleton { get => _singletonTracker.Ref(); }
-    public override void _Ready() {
-        _singletonTracker.Ready(this);
-    }
 
     private ControlsContextType ControlsContext {
         get => _controlsContext;
@@ -48,10 +46,17 @@ internal partial class Controller : Node {
     }
     private ControllerInputType _inputType = ControllerInputType.KeyboardMouse;
 
+    private PlayerContext? _playerContext;
+
     [Signal]
     public delegate void InputTypeChangedEventHandler(ControllerInputType inputType);
     [Signal]
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
+
+    public override void _Ready() {
+        _singletonTracker.Ready(this);
+        _playerContext = DependencyInjector.Ref().GetPlayerOne().PlayerContext;
+    }
 
     public override void _Process(double delta) {
         ProcessPlayerMenu();
@@ -71,33 +76,42 @@ internal partial class Controller : Node {
     }
 
     public void TryOpenPlayerMenu(InputEvent inputEvent) {
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext must be set before _Process is called");
+        }
         if (ControlsContext != ControlsContextType.Player) {
             return;
         }
-        if (inputEvent.IsActionPressed("open_inventory")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionOpenInventory)) {
             ControlsContext = ControlsContextType.PlayerMenu;
-            DependencyInjector.Ref().GetPlayerMenu().Open();
+            _playerContext.PlayerMenu.Open();
             return;
         }
     }
 
     public void TryOpenPauseMenu(InputEvent inputEvent) {
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext must be set before _Process is called");
+        }
         if (ControlsContext != ControlsContextType.Player && ControlsContext != ControlsContextType.PlayerMenu) {
             return;
         }
-        if (inputEvent.IsActionPressed("open_pause_menu")) {
+        if (inputEvent.IsActionPressed("pause_menu")) {
             ControlsContext = ControlsContextType.PauseMenu;
-            DependencyInjector.Ref().GetPlayerMenu().Disabled = true;
+            _playerContext.PlayerMenu.Disabled = true;
             DependencyInjector.Ref().GetPauseMenu().Open();
             return;
         }
     }
 
     public void ProcessPlayerMenu() {
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext must be set before _Process is called");
+        }
         if (ControlsContext != ControlsContextType.PlayerMenu) {
             return;
         }
-        Menu menu = DependencyInjector.Ref().GetPlayerMenu();
+        Menu menu = _playerContext.PlayerMenu;
         if (menu.IsOpen && menu.RequestedClose) {
             menu.Close();
             ControlsContext = ControlsContextType.Player;
@@ -105,6 +119,9 @@ internal partial class Controller : Node {
     }
 
     public void ProcessPauseMenu() {
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext must be set before _Process is called");
+        }
         if (ControlsContext != ControlsContextType.PauseMenu && ControlsContext != ControlsContextType.PlayerMenu) {
             return;
         }
@@ -112,7 +129,7 @@ internal partial class Controller : Node {
         if (pauseMenu.IsOpen && pauseMenu.RequestedClose) {
             pauseMenu.Close();
 
-            Menu playerMenu = DependencyInjector.Ref().GetPlayerMenu();
+            Menu playerMenu = _playerContext.PlayerMenu;
             playerMenu.Disabled = false;
             ControlsContext = playerMenu.IsOpen ? ControlsContextType.PlayerMenu : ControlsContextType.Player;
         }

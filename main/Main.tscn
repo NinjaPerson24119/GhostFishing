@@ -1,4 +1,4 @@
-[gd_scene load_steps=23 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=24 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
@@ -6,7 +6,6 @@
 [ext_resource type="Script" path="res://common/controller/Controller.cs" id="3_pm5ys"]
 [ext_resource type="Script" path="res://common/player/Player.cs" id="3_t71xa"]
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
-[ext_resource type="PackedScene" uid="uid://ci5gksbe5005i" path="res://common/ui/game-ui/GameUI.tscn" id="5_8atem"]
 [ext_resource type="Script" path="res://common/interactive-object/TrackingServer.cs" id="5_hh4xg"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
 [ext_resource type="PackedScene" uid="uid://brrd5dfqqljyv" path="res://common/sky/Sky.tscn" id="7_5ixg0"]
@@ -17,6 +16,8 @@
 [ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="12_4qwtb"]
 [ext_resource type="Script" path="res://common/interactive-object/interactive-objects/InventoryInteractiveObject.cs" id="12_iy7x1"]
 [ext_resource type="Script" path="res://common/player/PlayerContext.cs" id="14_vwxyi"]
+[ext_resource type="PackedScene" uid="uid://capn7flj3nsyn" path="res://common/ui/player-hud/PlayerHud.tscn" id="14_xqyfj"]
+[ext_resource type="PackedScene" uid="uid://d3od5e8fu5ime" path="res://common/ui/common-hud/CommonHUD.tscn" id="18_0gdu0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qugdi"]
 transparency = 1
@@ -58,8 +59,6 @@ script = ExtResource("2_cg76b")
 [node name="TrackingServer" type="Node" parent="Pausable"]
 script = ExtResource("5_hh4xg")
 TileSize = 100.0
-
-[node name="GameUI" parent="Pausable" instance=ExtResource("5_8atem")]
 
 [node name="Sky" parent="Pausable" instance=ExtResource("7_5ixg0")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.3415, 17.4548, 0)
@@ -127,36 +126,40 @@ InventoryName = "Treasure Chest"
 InventoryInstanceID = "INVENTORY_INSTANCE-3cfd6920-fa38-4529-80cd-3bc9ebb3a405"
 TrackingID = "treasure-chest"
 
-[node name="FollowCamera" type="Node3D" parent="Pausable"]
-script = ExtResource("12_4qwtb")
-
-[node name="Area3D" type="Area3D" parent="Pausable/FollowCamera"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/FollowCamera/Area3D"]
-shape = SubResource("SphereShape3D_no4lg")
-
-[node name="Camera3D" type="Camera3D" parent="Pausable/FollowCamera"]
-current = true
-fov = 100.0
-near = 0.1
-far = 500.0
-
-[node name="RayCastGroup" type="Node3D" parent="Pausable/FollowCamera"]
-
 [node name="PlayerContext-1" type="Node" parent="Pausable"]
 script = ExtResource("14_vwxyi")
-PlayerID = 0
+PlayerID = 1
+
+[node name="PlayerHUD" parent="Pausable/PlayerContext-1" instance=ExtResource("14_xqyfj")]
 
 [node name="Player" parent="Pausable/PlayerContext-1" instance=ExtResource("2_teuhj")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 collision_mask = 11
 script = ExtResource("3_t71xa")
 
+[node name="FollowCamera" type="Node3D" parent="Pausable/PlayerContext-1"]
+script = ExtResource("12_4qwtb")
+
+[node name="Area3D" type="Area3D" parent="Pausable/PlayerContext-1/FollowCamera"]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Pausable/PlayerContext-1/FollowCamera/Area3D"]
+shape = SubResource("SphereShape3D_no4lg")
+
+[node name="Camera3D" type="Camera3D" parent="Pausable/PlayerContext-1/FollowCamera"]
+current = true
+fov = 100.0
+near = 0.1
+far = 500.0
+
+[node name="RayCastGroup" type="Node3D" parent="Pausable/PlayerContext-1/FollowCamera"]
+
 [node name="PlayerContext-2" type="Node" parent="Pausable"]
 script = ExtResource("14_vwxyi")
-PlayerID = 1
+PlayerID = 2
 
 [node name="Player" parent="Pausable/PlayerContext-2" instance=ExtResource("2_teuhj")]
 transform = Transform3D(-0.158382, 0, 0.987378, 0, 1, 0, -0.987378, 0, -0.158382, 25.8977, -0.0444298, -27.5792)
 collision_mask = 11
 script = ExtResource("3_t71xa")
+
+[node name="CommonHUD" parent="Pausable" instance=ExtResource("18_0gdu0")]

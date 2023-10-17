@@ -55,8 +55,8 @@ internal partial class InventoryFrame : Control {
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
 
-    private CoopManager.PlayerID _playerID;
-    private Dictionary<string, Vector2I> _inputActionToDirection;
+    private PlayerContext? _playerContext;
+    private Dictionary<string, Vector2I>? _inputActionToDirection;
     private Timer _inputRepeatDebounceTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
@@ -78,7 +78,9 @@ internal partial class InventoryFrame : Control {
         _inventory.Updated += OnInventoryUpdated;
 
         TileSizePx = tileSizePx;
+    }
 
+    public override void _Ready() {
         AddChild(_inputRepeatDebounceTimer);
         AddChild(_inputRepeatDelayTimer);
         SpawnFrame();
@@ -89,13 +91,12 @@ internal partial class InventoryFrame : Control {
 
         AssetManager.Ref().PersistImage(_containerFrameImagePath);
 
-        _playerID = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).PlayerID;
-        int device = (int)_playerID;
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
         _inputActionToDirection = new Dictionary<string, Vector2I> {
-            {$"ui_up_{device}", new Vector2I(0, -1)},
-            {$"ui_down_{device}", new Vector2I(0, 1)},
-            {$"ui_left_{device}", new Vector2I(-1, 0)},
-            {$"ui_right_{device}", new Vector2I(1, 0)}
+            {_playerContext.ActionNavigateUp, new Vector2I(0, -1)},
+            {_playerContext.ActionNavigateDown, new Vector2I(0, 1)},
+            {_playerContext.ActionNavigateLeft, new Vector2I(-1, 0)},
+            {_playerContext.ActionNavigateRight, new Vector2I(1, 0)}
         };
     }
 
@@ -110,7 +111,7 @@ internal partial class InventoryFrame : Control {
         if (!HasFocus()) {
             return;
         }
-        if (_playerID != CoopManager.PlayerID.One) {
+        if (_playerContext == null || _playerContext.PlayerID != CoopManager.PlayerID.One) {
             return;
         }
 
@@ -130,7 +131,9 @@ internal partial class InventoryFrame : Control {
         if (_inputRepeatDelayTimer == null || _inputRepeatDebounceTimer == null) {
             return;
         }
-
+        if (_inputActionToDirection == null) {
+            return;
+        }
 
         foreach (KeyValuePair<string, Vector2I> entry in _inputActionToDirection) {
             if (Input.IsActionJustPressed(entry.Key)) {
@@ -148,7 +151,7 @@ internal partial class InventoryFrame : Control {
     }
 
     public override void _Notification(int what) {
-        if (_playerID != CoopManager.PlayerID.One) {
+        if (_playerContext == null || _playerContext.PlayerID != CoopManager.PlayerID.One) {
             return;
         }
 

@@ -21,7 +21,7 @@ internal partial class DependencyInjector : Node {
     }
 
     public TimeDisplay GetTimeDisplay() {
-        return GetNode<TimeDisplay>("/root/Main/Pausable/GameUI/HUD/TimeDisplay");
+        return GetNode<TimeDisplay>("/root/Main/Pausable/CommonHUD/TimeDisplay");
     }
 
     public Controller GetController() {
@@ -32,16 +32,23 @@ internal partial class DependencyInjector : Node {
         return GetNode<PauseMenu>("/root/Main/PauseMenu");
     }
 
-    public PlayerMenu GetPlayerMenu() {
-        return GetNode<PlayerMenu>("/root/Main/Pausable/GameUI/PlayerMenu");
-    }
-
-    public FollowCamera GetFollowCamera() {
-        return GetNode<FollowCamera>("/root/Main/Pausable/FollowCamera");
-    }
-
     public TrackingServer GetTrackingServer() {
         return GetNode<TrackingServer>("/root/Main/Pausable/TrackingServer");
+    }
+
+    public Player GetPlayerOne() {
+        return GetNode<Player>("/root/Main/Pausable/PlayerContext-1/Player");
+    }
+
+    public Player GetPlayerTwo() {
+        return GetNode<Player>("/root/Main/Pausable/PlayerContext-2/Player");
+    }
+
+    public Player[] GetPlayers() {
+        return new Player[] {
+            GetPlayerOne(),
+            GetPlayerTwo(),
+        };
     }
 
     // do not provide other singletons. they provide themselves.

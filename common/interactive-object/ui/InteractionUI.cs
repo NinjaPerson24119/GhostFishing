@@ -7,9 +7,11 @@ internal partial class InteractionUI : Control {
         OneShot = true,
     };
     private InteractiveObject? selectedObject = null;
+    private PlayerContext? _playerContext;
 
     public override void _Ready() {
         AddChild(refreshTimer);
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
     }
 
     public override void _Process(double delta) {
@@ -25,12 +27,15 @@ internal partial class InteractionUI : Control {
     }
 
     public override void _Input(InputEvent inputEvent) {
+        if (_playerContext == null) {
+            throw new System.Exception("PlayerContext must be set before _Input is called");
+        }
         if (selectedObject == null) {
             return;
         }
 
         if (inputEvent.IsActionPressed("select")) {
-            Player player = DependencyInjector.Ref().GetPlayer();
+            Player player = _playerContext.Player;
             bool result = selectedObject.Activate(player);
             if (!result) {
                 GD.PrintErr($"Failed to activate {selectedObject.TrackingID}");
@@ -39,7 +44,11 @@ internal partial class InteractionUI : Control {
     }
 
     private void Refresh() {
-        Player player = DependencyInjector.Ref().GetPlayer();
+        if (_playerContext == null) {
+            throw new System.Exception("PlayerContext must be set before _Input is called");
+        }
+
+        Player player = _playerContext.Player;
         TrackingServer trackingServer = DependencyInjector.Ref().GetTrackingServer();
         Vector2I tile = trackingServer.GetTile(player.GlobalPosition);
         List<InteractiveObject> objects = trackingServer.GetObjectsInTileRadius<InteractiveObject>(tile, 1);

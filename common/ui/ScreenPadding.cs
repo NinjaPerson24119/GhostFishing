@@ -1,6 +1,6 @@
 using Godot;
 
-internal partial class GameUI : Control {
+internal partial class ScreenPadding : Control {
     [Export]
     public int PaddingPx = 16;
 

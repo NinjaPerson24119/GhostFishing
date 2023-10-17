@@ -72,9 +72,12 @@ internal partial class SaveStateManager : Node {
             InventoryStates = AssetManager.Ref().GetInventoryInstanceDTOs(),
         };
 
+        Player[] players = DependencyInjector.Ref().GetPlayers();
+        if (players.Length != CoopManager.MaxPlayers) {
+            throw new Exception($"Player count {players.Length} does not match expected count {CoopManager.MaxPlayers}");
+        }
         for (int i = 0; i < CoopManager.MaxPlayers; i++) {
-            // TODO: do this by ID
-            Player player = DependencyInjector.Ref().GetPlayer();
+            Player player = players[i];
             saveState.PlayerSaveState[i] = new PlayerSaveState() {
                 GlobalPositionX = player.GlobalPosition.X,
                 GlobalPositionZ = player.GlobalPosition.Z,
@@ -89,8 +92,15 @@ internal partial class SaveStateManager : Node {
             GD.PrintErr("Cannot save. SaveStateManager is locked.");
             return;
         }
+        SaveState saveState;
+        try {
+            saveState = CaptureState();
+        }
+        catch (Exception e) {
+            GD.PrintErr($"Cannot save. Error capturing state: {e}");
+            return;
+        }
 
-        SaveState saveState = CaptureState();
         if (saveState.PlayerSaveState == null) {
             GD.PrintErr("PlayerSaveState is null");
             return;
@@ -110,10 +120,17 @@ internal partial class SaveStateManager : Node {
         if (saveState.CommonSaveState != null) {
             GameClock.GameSeconds = saveState.CommonSaveState.GameSeconds;
         }
+
+
         if (saveState.PlayerSaveState != null) {
+            Player[] players = DependencyInjector.Ref().GetPlayers();
+            if (players.Length != saveState.PlayerSaveState.Length) {
+                GD.PrintErr($"Save state player count {saveState.PlayerSaveState.Length} does not match expected count {players.Length}");
+                return;
+            }
             for (int i = 0; i < saveState.PlayerSaveState.Length; i++) {
                 PlayerSaveState playerState = saveState.PlayerSaveState[i];
-                Player player = DependencyInjector.Ref().GetPlayer();
+                Player player = players[i];
                 player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
             }
         }

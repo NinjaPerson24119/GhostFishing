@@ -93,7 +93,7 @@ internal partial class DebugMode : Node {
             GameClock.TogglePause();
         }
         if (inputEvent.IsActionPressed("debug_reset_boat")) {
-            DependencyInjector.Ref().GetPlayer().ResetAboveWater();
+            DependencyInjector.Ref().GetPlayerOne().ResetAboveWater();
         }
     }
 
