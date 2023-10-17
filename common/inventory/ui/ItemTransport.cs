@@ -53,7 +53,7 @@ internal partial class InventoryItemTransport : Node2D {
         if (_inventory == null || _frame == null) {
             return;
         }
-        if (!_frame.HasFocus()) {
+        if (!_frame.HasPseudoFocus()) {
             InputEventMouse? mouseEvent = inputEvent as InputEventMouse;
             if (mouseEvent != null) {
                 _selector.GlobalPosition = mouseEvent.GlobalPosition;
@@ -77,8 +77,8 @@ internal partial class InventoryItemTransport : Node2D {
         _frame = inventoryFrame;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
 
-        _frame.FocusEntered += OnInventoryFocused;
-        _frame.FocusExited += OnInventoryUnfocused;
+        _frame.PseudoFocusEntered += OnInventoryFocused;
+        _frame.PseudoFocusExited += OnInventoryUnfocused;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
 
 
@@ -94,8 +94,8 @@ internal partial class InventoryItemTransport : Node2D {
 
     public void CloseInventory() {
         if (_frame != null) {
-            _frame.FocusEntered -= OnInventoryFocused;
-            _frame.FocusExited -= OnInventoryUnfocused;
+            _frame.PseudoFocusEntered -= OnInventoryFocused;
+            _frame.PseudoFocusExited -= OnInventoryUnfocused;
             _frame.SelectedPositionChanged -= OnSelectedPositionChanged;
             _frame = null;
         }

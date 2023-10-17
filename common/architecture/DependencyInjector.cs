@@ -87,4 +87,8 @@ internal partial class DependencyInjector : Node {
     public PlayerContext GetLocalPlayerContext(string relativeToNodePath) {
         return NearestResourceInSubtree<PlayerContext>(relativeToNodePath);
     }
+
+    public PseudoFocusContext GetLocalPseudoFocusContext(string relativeToNodePath) {
+        return NearestResourceInSubtree<PseudoFocusContext>(relativeToNodePath);
+    }
 }

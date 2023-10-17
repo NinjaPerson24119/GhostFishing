@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-internal partial class InventoryFrame : Control {
+internal partial class InventoryFrame : PseudoFocusControl {
     public float ContainerWidthPx = 800;
     public float ContainerHeightPx = 800;
     // if this is set then the container dimensions are ignored
@@ -70,8 +70,8 @@ internal partial class InventoryFrame : Control {
     [Signal]
     public delegate void SelectedPositionChangedEventHandler(Vector2I position);
 
+
     public InventoryFrame(InventoryInstance inventory, int tileSizePx) {
-        FocusMode = FocusModeEnum.All;
         TileSizePx = tileSizePx;
 
         _inventory = inventory;
@@ -81,6 +81,7 @@ internal partial class InventoryFrame : Control {
     }
 
     public override void _Ready() {
+        base._Ready();
         AddChild(_inputRepeatDebounceTimer);
         AddChild(_inputRepeatDelayTimer);
         SpawnFrame();
@@ -108,7 +109,7 @@ internal partial class InventoryFrame : Control {
         if (_inventoryGrid == null) {
             return;
         }
-        if (!HasFocus()) {
+        if (!_hasPseudoFocus) {
             return;
         }
         if (_playerContext == null || !_playerContext.Controller.MouseAllowed()) {
@@ -125,7 +126,7 @@ internal partial class InventoryFrame : Control {
     }
 
     public override void _Process(double delta) {
-        if (!HasFocus()) {
+        if (!_hasPseudoFocus) {
             return;
         }
         if (_inputRepeatDelayTimer == null || _inputRepeatDebounceTimer == null) {
@@ -157,10 +158,10 @@ internal partial class InventoryFrame : Control {
 
         switch (what) {
             case (int)NotificationMouseEnter:
-                GrabFocus();
+                _hasPseudoFocus = true;
                 break;
             case (int)NotificationMouseExit:
-                ReleaseFocus();
+                _hasPseudoFocus = false;
                 break;
         }
     }
@@ -382,7 +383,7 @@ internal partial class InventoryFrame : Control {
         Vector2 globalMousePosition = GetGlobalMousePosition();
         if (globalMousePosition < GetRect().Position || globalMousePosition > GetRect().Position + GetRect().Size) {
             GD.Print("Mouse is not over inventory frame");
-            ReleaseFocus();
+            _hasPseudoFocus = false;
             return;
         }
     }
