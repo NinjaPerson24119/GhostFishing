@@ -13,14 +13,32 @@ public partial class PlayerContext : Node {
     public Player Player {
         get => GetNode<Player>("Player");
     }
+
     public FollowCamera FollowCamera {
-        get => GetNode<FollowCamera>("FollowCamera");
+        get {
+            if (_usingSubviewport) {
+                return GetNode<FollowCamera>("SubViewport/FollowCamera");
+            }
+            else {
+                return GetNode<FollowCamera>("FollowCamera");
+            }
+        }
     }
+    private bool _usingSubviewport = false;
+
     public PlayerMenu PlayerMenu {
         get => GetNode<PlayerMenu>("PlayerHUD/PlayerMenu");
     }
     public PlayerController Controller {
         get => GetNode<PlayerController>("PlayerController");
+    }
+    public SubViewport SubViewport {
+        get {
+            if (!_usingSubviewport) {
+                throw new System.Exception("Subviewport is not in use, but detected a request for it");
+            }
+            return GetNode<SubViewport>("SubViewport");
+        }
     }
 
     public Vector2 MovementControlVector() {
@@ -84,5 +102,37 @@ public partial class PlayerContext : Node {
     }
     public string ActionNavigateRight {
         get => $"navigate_right_{(int)PlayerID}";
+    }
+
+    public override void _Ready() {
+        CoopManager.Ref().CoopChanged += OnCoopChanged;
+    }
+
+    public async void OnCoopChanged(bool coopActive) {
+        FollowCamera followCamera = FollowCamera;
+        if (coopActive && !_usingSubviewport) {
+            followCamera.GetParent().RemoveChild(followCamera);
+            // TODO: this might hang
+            await ToSignal(followCamera, "tree_exited");
+            SubViewport.AddChild(followCamera);
+        }
+        else if (!coopActive && _usingSubviewport) {
+            followCamera.GetParent().RemoveChild(followCamera);
+            // TODO: this might hang
+            await ToSignal(followCamera, "tree_exited");
+            AddChild(this);
+        }
+        _usingSubviewport = coopActive;
+        SubViewport.ProcessMode = _usingSubviewport ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
+
+
+        if (PlayerID == CoopManager.PlayerID.Two) {
+            Player.DisableControls = !coopActive;
+            if (!coopActive) {
+                PlayerMenu.Close();
+            }
+            Controller.ProcessMode = coopActive ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
+            FollowCamera.ProcessMode = coopActive ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
+        }
     }
 }

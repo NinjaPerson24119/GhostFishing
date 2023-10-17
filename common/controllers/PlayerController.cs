@@ -105,6 +105,6 @@ public partial class PlayerController : Node {
         if (_playerContext == null) {
             throw new Exception("PlayerContext null when checking if mouse is allowed");
         }
-        return _playerContext.PlayerID == CoopManager.PlayerID.One && CoopManager.Ref().IsSinglePlayer();
+        return _playerContext.PlayerID == CoopManager.PlayerID.One && !CoopManager.Ref().CoopActive;
     }
 }
