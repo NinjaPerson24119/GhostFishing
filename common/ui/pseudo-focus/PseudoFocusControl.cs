@@ -2,34 +2,32 @@ using Godot;
 
 public partial class PseudoFocusControl : Control {
     // Godot doesn't support multiple focuses for split-screen, so we need to fake it
+    // We use a PseudoFocusContext to track which control has focus
+    private PseudoFocusContext? _pseudoFocusContext;
+
     [Signal]
     public delegate void PseudoFocusEnteredEventHandler();
     [Signal]
     public delegate void PseudoFocusExitedEventHandler();
-    protected void SetPseudoFocus(bool value) {
-        if (value == _hasPseudoFocus) {
-            return;
-        }
-        _hasPseudoFocus = value;
-        if (_hasPseudoFocus) {
-            EmitSignal(SignalName.PseudoFocusEntered);
-        }
-        else {
-            EmitSignal(SignalName.PseudoFocusExited);
-        }
-    }
+
     public void GrabPseudoFocus() {
-        SetPseudoFocus(true);
+        if (_pseudoFocusContext == null) {
+            throw new System.Exception("PseudoFocusControl must be added to a PseudoFocusContext");
+        }
+        _pseudoFocusContext.GrabPseudoFocus(this);
     }
     public void ReleasePseudoFocus() {
-        SetPseudoFocus(false);
+        if (_pseudoFocusContext == null) {
+            throw new System.Exception("PseudoFocusControl must be added to a PseudoFocusContext");
+        }
+        _pseudoFocusContext.ReleasePseudoFocus(this);
     }
     public bool HasPseudoFocus() {
-        return _hasPseudoFocus;
+        if (_pseudoFocusContext == null) {
+            throw new System.Exception("PseudoFocusControl must be added to a PseudoFocusContext");
+        }
+        return _pseudoFocusContext.HasPseudoFocus(this);
     }
-    private bool _hasPseudoFocus = false;
-
-    private PseudoFocusContext? _pseudoFocusContext;
 
     public PseudoFocusControl() {
         FocusMode = FocusModeEnum.None;
