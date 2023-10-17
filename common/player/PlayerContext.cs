@@ -27,7 +27,7 @@ public partial class PlayerContext : Node {
     private bool _usingSubviewport = false;
 
     public PlayerMenu PlayerMenu {
-        get => GetNode<PlayerMenu>("PlayerHUD/PlayerMenu");
+        get => GetNode<PlayerMenu>("PseudoFocusContext/PlayerHUD/PlayerMenu");
     }
     public PlayerController Controller {
         get => GetNode<PlayerController>("PlayerController");
@@ -131,6 +131,7 @@ public partial class PlayerContext : Node {
             if (!coopActive) {
                 PlayerMenu.Close();
             }
+            PlayerMenu.Visible = coopActive;
             Controller.ProcessMode = coopActive ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
             FollowCamera.ProcessMode = coopActive ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
         }

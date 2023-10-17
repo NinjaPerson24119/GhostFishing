@@ -36,4 +36,16 @@ public partial class PseudoFocusControl : Control {
     public override void _Ready() {
         _pseudoFocusContext = DependencyInjector.Ref().GetLocalPseudoFocusContext(GetPath());
     }
+
+    public new void GrabFocus() {
+        throw new System.Exception("PseudoFocusControl does not support GrabFocus");
+    }
+
+    public new void ReleaseFocus() {
+        throw new System.Exception("PseudoFocusControl does not support ReleaseFocus");
+    }
+
+    public new void HasFocus() {
+        throw new System.Exception("PseudoFocusControl does not support HasFocus");
+    }
 }

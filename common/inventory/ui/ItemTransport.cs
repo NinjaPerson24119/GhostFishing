@@ -84,7 +84,7 @@ internal partial class InventoryItemTransport : Node2D {
 
         ControllerInputType inputType = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).Controller.InputType;
         if (inputType == ControllerInputType.Joypad) {
-            _frame.GrabFocus();
+            _frame.GrabPseudoFocus();
         }
     }
 
@@ -256,7 +256,7 @@ internal partial class InventoryItemTransport : Node2D {
             return;
         }
         if (inputType == ControllerInputType.Joypad && !_inventoryFocused) {
-            _frame.GrabFocus();
+            _frame.GrabPseudoFocus();
         }
         else if (inputType == ControllerInputType.KeyboardMouse && _inventoryFocused) {
             _frame.CheckMouseIsOver();

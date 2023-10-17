@@ -109,7 +109,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
         if (_inventoryGrid == null) {
             return;
         }
-        if (!_hasPseudoFocus) {
+        if (!HasPseudoFocus()) {
             return;
         }
         if (_playerContext == null || !_playerContext.Controller.MouseAllowed()) {
@@ -126,7 +126,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
     }
 
     public override void _Process(double delta) {
-        if (!_hasPseudoFocus) {
+        if (!HasPseudoFocus()) {
             return;
         }
         if (_inputRepeatDelayTimer == null || _inputRepeatDebounceTimer == null) {
@@ -158,10 +158,10 @@ internal partial class InventoryFrame : PseudoFocusControl {
 
         switch (what) {
             case (int)NotificationMouseEnter:
-                _hasPseudoFocus = true;
+                GrabPseudoFocus();
                 break;
             case (int)NotificationMouseExit:
-                _hasPseudoFocus = false;
+                ReleasePseudoFocus();
                 break;
         }
     }
@@ -383,7 +383,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
         Vector2 globalMousePosition = GetGlobalMousePosition();
         if (globalMousePosition < GetRect().Position || globalMousePosition > GetRect().Position + GetRect().Size) {
             GD.Print("Mouse is not over inventory frame");
-            _hasPseudoFocus = false;
+            ReleasePseudoFocus();
             return;
         }
     }

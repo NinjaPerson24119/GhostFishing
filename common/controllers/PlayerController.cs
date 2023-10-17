@@ -65,7 +65,7 @@ public partial class PlayerController : Node {
 
     public void TryOpenPlayerMenu(InputEvent inputEvent) {
         if (_playerContext == null) {
-            throw new Exception("PlayerContext must be set before _Process is called");
+            return;
         }
         if (ControlsContext != ControlsContextType.Player) {
             return;
@@ -103,7 +103,7 @@ public partial class PlayerController : Node {
 
     public bool MouseAllowed() {
         if (_playerContext == null) {
-            throw new Exception("PlayerContext null when checking if mouse is allowed");
+            return false;
         }
         return _playerContext.PlayerID == CoopManager.PlayerID.One && !CoopManager.Ref().CoopActive;
     }

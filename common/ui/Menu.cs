@@ -1,6 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
+// TODO: this is incompatible with pseudo-focus
 public partial class Menu : Control {
     protected List<string> _closeActions = new List<string>();
 
