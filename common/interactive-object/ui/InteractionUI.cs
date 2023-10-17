@@ -34,7 +34,7 @@ internal partial class InteractionUI : Control {
             return;
         }
 
-        if (inputEvent.IsActionPressed("select")) {
+        if (inputEvent.IsActionPressed(_playerContext.ActionSelect)) {
             Player player = _playerContext.Player;
             bool result = selectedObject.Activate(player);
             if (!result) {

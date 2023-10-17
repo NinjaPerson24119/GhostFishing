@@ -15,14 +15,10 @@ public partial class PlayerMenu : Menu {
     public override void _Ready() {
         base._Ready();
 
-        if (_playerContext == null) {
-            throw new Exception("PlayerContext must be set before _Ready is called");
-        }
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
         _closeActions.Add(_playerContext.ActionCancel);
         _closeActions.Add(_playerContext.ActionOpenInventory);
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
-
-        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
 
         Initialize();
     }
@@ -36,8 +32,8 @@ public partial class PlayerMenu : Menu {
         if (_initialized) {
             throw new Exception("PlayerMenu already initialized");
         }
-        PlayerStateView player = AssetManager.Ref().GetPlayerView(0);
-        _boatInventory = player.BoatInventory;
+        PlayerStateView playerView = AssetManager.Ref().GetPlayerView(0);
+        _boatInventory = playerView.BoatInventory;
         _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx) {
             Name = "BoatInventoryFrame"
         };

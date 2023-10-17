@@ -4,6 +4,9 @@ using System.Collections.Generic;
 public partial class PlayerContext : Node {
     [Export]
     public CoopManager.PlayerID PlayerID { get; private set; } = CoopManager.PlayerID.Invalid;
+    [Export]
+    public Vector3 InitialGlobalPosition { get; private set; } = Vector3.Zero;
+
     public PlayerStateView PlayerStateView {
         get => AssetManager.Ref().GetPlayerView(0);
     }

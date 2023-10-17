@@ -1,7 +1,7 @@
 using Godot;
 
 public partial class Player : BuoyantBody, ITrackableObject {
-    public PlayerContext PlayerContext { get; private set; }
+    public PlayerContext? PlayerContext { get; private set; }
 
     public string TrackingID {
         get {
@@ -49,11 +49,12 @@ public partial class Player : BuoyantBody, ITrackableObject {
         WaterDragCoefficient = 0.3f;
         WaterMomentCoefficient = 0.08f;
         SubmergedProportionOffset = 0.7f;
-
-        PlayerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
     }
 
     public override void _Ready() {
+        PlayerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        GlobalPosition = PlayerContext.InitialGlobalPosition;
+
         _ocean = DependencyInjector.Ref().GetOcean();
 
         WaterContactPointsNodePath = "Boat/WaterContactPoints";

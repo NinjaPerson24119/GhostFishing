@@ -34,7 +34,7 @@ internal partial class DebugMode : Node {
 
     public override void _Process(double delta) {
         string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
-        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
+        ControllerInputType inputType = DependencyInjector.Ref().GetPlayerOne().PlayerContext.Controller.InputType;
         if (inputType == ControllerInputType.KeyboardMouse) {
             text += "\nKEYBOARD/MOUSE INPUT";
         }

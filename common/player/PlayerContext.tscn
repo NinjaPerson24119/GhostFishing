@@ -14,15 +14,15 @@ radius = 2.0
 script = ExtResource("1_i8wqn")
 PlayerID = 1
 
-[node name="Controller" type="Node" parent="."]
-script = ExtResource("2_81fe8")
-
-[node name="PlayerHUD" parent="." instance=ExtResource("3_feyoh")]
-
 [node name="Player" parent="." instance=ExtResource("4_3lpcq")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
 collision_mask = 11
 script = ExtResource("5_av66p")
+
+[node name="PlayerController" type="Node" parent="."]
+script = ExtResource("2_81fe8")
+
+[node name="PlayerHUD" parent="." instance=ExtResource("3_feyoh")]
 
 [node name="FollowCamera" type="Node3D" parent="."]
 script = ExtResource("6_ub55a")

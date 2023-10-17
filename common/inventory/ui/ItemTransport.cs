@@ -38,7 +38,7 @@ internal partial class InventoryItemTransport : Node2D {
     }
 
     public override void _Ready() {
-        DependencyInjector.Ref().GetController().InputTypeChanged += OnControllerInputTypeChanged;
+        DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).Controller.InputTypeChanged += OnControllerInputTypeChanged;
     }
 
     public override void _ExitTree() {
@@ -46,7 +46,7 @@ internal partial class InventoryItemTransport : Node2D {
             GD.PrintErr("InventoryItemTransport was not closed before being destroyed.");
             _mutator.Dispose();
         }
-        DependencyInjector.Ref().GetController().InputTypeChanged -= OnControllerInputTypeChanged;
+        DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).Controller.InputTypeChanged -= OnControllerInputTypeChanged;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -82,7 +82,7 @@ internal partial class InventoryItemTransport : Node2D {
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
 
 
-        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
+        ControllerInputType inputType = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).Controller.InputType;
         if (inputType == ControllerInputType.Joypad) {
             _frame.GrabFocus();
         }
@@ -229,7 +229,7 @@ internal partial class InventoryItemTransport : Node2D {
         }
         _inventoryFocused = true;
 
-        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
+        ControllerInputType inputType = DependencyInjector.Ref().GetLocalPlayerContext(GetPath()).Controller.InputType;
         if (inputType == ControllerInputType.KeyboardMouse) {
             TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
         }

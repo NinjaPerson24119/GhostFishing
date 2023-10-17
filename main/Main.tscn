@@ -36,13 +36,6 @@ points = PackedVector3Array(-0.5, -0.25, -0.35, -0.5, -0.25, 0.349932, -0.5, 0.2
 process_mode = 3
 script = ExtResource("1_ihgdy")
 
-[node name="CommonController" type="Node" parent="."]
-script = ExtResource("2_mw2bk")
-
-[node name="PauseMenu" parent="." instance=ExtResource("10_sg4eq")]
-visible = false
-z_as_relative = false
-
 [node name="Pausable" type="Node" parent="."]
 process_mode = 1
 
@@ -123,5 +116,13 @@ TrackingID = "treasure-chest"
 
 [node name="PlayerContext-2" parent="Pausable" instance=ExtResource("13_myeu0")]
 PlayerID = 2
+InitialGlobalPosition = Vector3(20, 0, 20)
 
 [node name="CommonHUD" parent="Pausable" instance=ExtResource("18_0gdu0")]
+
+[node name="PauseMenu" parent="." instance=ExtResource("10_sg4eq")]
+visible = false
+z_as_relative = false
+
+[node name="CommonController" type="Node" parent="."]
+script = ExtResource("2_mw2bk")
