@@ -19,6 +19,9 @@ internal partial class Main : Node {
         for (int i = 0; i < playerContexts.Length; i++) {
             commonController.SetPlayerControlsDisabled += playerContexts[i].Player.SetControlsDisabled;
             commonController.SetPlayerControlsDisabled += playerContexts[i].FollowCamera.SetControlsDisabled;
+
+            playerContexts[i].Controller.SetPlayerControlsDisabled += playerContexts[i].Player.SetControlsDisabled;
+            playerContexts[i].Controller.SetPlayerControlsDisabled += playerContexts[i].FollowCamera.SetControlsDisabled;
         }
 
     }

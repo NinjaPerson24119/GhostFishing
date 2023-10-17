@@ -20,15 +20,6 @@ public partial class Menu : Control {
     // use this in child classes to prevent the menu from closing when the cancel action is pressed
     protected bool CloseActionClosesMenu = true;
 
-    private Timer _debounceTimer = new Timer() {
-        WaitTime = 0.1f,
-        OneShot = true,
-    };
-
-    public override void _Ready() {
-        AddChild(_debounceTimer);
-    }
-
     public override void _Input(InputEvent inputEvent) {
         if (!AcceptingInput) {
             return;
@@ -44,27 +35,18 @@ public partial class Menu : Control {
     }
 
     public virtual void Open() {
-        _ = TryOpen();
-    }
-    protected bool TryOpen() {
-        if (RequestedClose || IsOpen || !_debounceTimer.IsStopped()) {
-            return false;
+        if (RequestedClose || IsOpen) {
+            return;
         }
-        _debounceTimer.Start();
         Visible = true;
-        return true;
     }
 
     public virtual void Close() {
-        _ = TryClose();
-    }
-    protected bool TryClose() {
-        if (!_debounceTimer.IsStopped()) {
-            return false;
-        }
-        _debounceTimer.Start();
         Visible = false;
         RequestedClose = false;
-        return true;
+    }
+
+    public void RequestClose() {
+        RequestedClose = true;
     }
 }

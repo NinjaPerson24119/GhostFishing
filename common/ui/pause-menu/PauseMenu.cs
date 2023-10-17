@@ -12,8 +12,9 @@ internal partial class PauseMenu : Menu {
     public override void _Ready() {
         base._Ready();
 
-        _closeActions.Add("pause_menu");
+        //_closeActions.Add("pause_menu");
         Player[] players = DependencyInjector.Ref().GetPlayers();
+        _closeActions.Add("pause_menu");
         foreach (Player player in players) {
             if (player.PlayerContext == null) {
                 throw new System.Exception("PlayerContext must be set before _Ready is called");
@@ -35,7 +36,7 @@ internal partial class PauseMenu : Menu {
 
     public void OnResume() {
         ClearControllerPrompt();
-        Close();
+        RequestClose();
     }
 
     public void OnCoopPrompt() {
@@ -60,7 +61,7 @@ internal partial class PauseMenu : Menu {
                 _coopPrompt.Text = "Enable Co-op";
             }
             else {
-                _coopPrompt.Text = "Connect 2nd Controller";
+                _coopPrompt.Text = "Co-op\nConnect 2nd Controller";
                 disabled = true;
             }
         }

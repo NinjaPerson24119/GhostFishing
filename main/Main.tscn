@@ -117,8 +117,10 @@ TrackingID = "treasure-chest"
 [node name="CommonHUD" parent="Pausable" instance=ExtResource("18_0gdu0")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("10_sg4eq")]
+process_mode = 3
 visible = false
 z_as_relative = false
 
 [node name="CommonController" type="Node" parent="."]
+process_mode = 3
 script = ExtResource("2_mw2bk")

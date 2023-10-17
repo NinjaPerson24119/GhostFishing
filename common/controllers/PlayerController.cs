@@ -49,7 +49,17 @@ public partial class PlayerController : Node {
     }
 
     public override void _Process(double delta) {
-        ProcessPlayerMenu();
+        if (_playerContext == null) {
+            return;
+        }
+        if (Input.IsActionJustPressed(_playerContext.ActionOpenInventory)) {
+            ControlsContext = ControlsContextType.PlayerMenu;
+            _playerContext.PlayerMenu.Open();
+            GD.Print("Player menu opened");
+        }
+        else {
+            ProcessPlayerMenu();
+        }
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -58,22 +68,6 @@ public partial class PlayerController : Node {
         }
         else if (inputEvent is InputEventKey || inputEvent is InputEventMouse || inputEvent is InputEventMouseMotion || inputEvent is InputEventMouseButton) {
             InputType = ControllerInputType.KeyboardMouse;
-        }
-
-        TryOpenPlayerMenu(inputEvent);
-    }
-
-    public void TryOpenPlayerMenu(InputEvent inputEvent) {
-        if (_playerContext == null) {
-            return;
-        }
-        if (ControlsContext != ControlsContextType.Player) {
-            return;
-        }
-        if (inputEvent.IsActionPressed(_playerContext.ActionOpenInventory)) {
-            ControlsContext = ControlsContextType.PlayerMenu;
-            _playerContext.PlayerMenu.Open();
-            return;
         }
     }
 

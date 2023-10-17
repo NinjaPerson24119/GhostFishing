@@ -3,7 +3,6 @@ using Godot;
 public partial class CommonController : Node {
     static SingletonTracker<CommonController> _singletonTracker = new SingletonTracker<CommonController>();
     private static CommonController _singleton { get => _singletonTracker.Ref(); }
-    private bool _paused = false;
 
     [Signal]
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
@@ -16,23 +15,15 @@ public partial class CommonController : Node {
     }
 
     public override void _Process(double delta) {
-        ProcessPauseMenu();
-    }
-
-    public override void _Input(InputEvent inputEvent) {
         Menu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
-        if (!pauseMenu.IsOpen && inputEvent.IsActionPressed("pause_menu")) {
+        if (!pauseMenu.IsOpen && Input.IsActionJustPressed("pause_menu")) {
             OpenPauseMenu();
             pauseMenu.GrabFocus();
         }
-    }
-
-    public void ProcessPauseMenu() {
-        Menu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
-        if (pauseMenu.IsOpen && pauseMenu.RequestedClose) {
+        else if (pauseMenu.IsOpen && pauseMenu.RequestedClose) {
             pauseMenu.Close();
             UnpauseGame();
-            EmitSignal(SignalName.SetPlayerControlsDisabled, _paused);
+            EmitSignal(SignalName.SetPlayerControlsDisabled, GetTree().Paused);
         }
     }
 
@@ -44,7 +35,7 @@ public partial class CommonController : Node {
 
         PauseGame();
         pauseMenu.Open();
-        EmitSignal(SignalName.SetPlayerControlsDisabled, _paused);
+        EmitSignal(SignalName.SetPlayerControlsDisabled, GetTree().Paused);
     }
 
     public void ClosePauseMenu() {
@@ -55,7 +46,7 @@ public partial class CommonController : Node {
 
         pauseMenu.Close();
         UnpauseGame();
-        EmitSignal(SignalName.SetPlayerControlsDisabled, _paused);
+        EmitSignal(SignalName.SetPlayerControlsDisabled, GetTree().Paused);
     }
 
     public void PauseGame() {
