@@ -136,6 +136,8 @@ public partial class FollowCamera : Node3D {
                 Position = offset * radius + Vector3.Back * backAdjust,
                 HitFromInside = true,
             };
+            // collide with terrain
+            ray.SetCollisionMaskValue(2, true);
             _rayCastGroup.AddChild(ray);
         }
 

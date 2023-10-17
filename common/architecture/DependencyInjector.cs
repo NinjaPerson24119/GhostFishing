@@ -47,7 +47,7 @@ internal partial class DependencyInjector : Node {
     public PlayerContext[] GetPlayerContexts() {
         return new PlayerContext[] {
             GetPlayerOneContext(),
-            GetPlayerTwoContext(),
+            //GetPlayerTwoContext(),
         };
     }
 
@@ -55,14 +55,10 @@ internal partial class DependencyInjector : Node {
         return GetNode<Player>("/root/Main/Pausable/PlayerContext-1/Player");
     }
 
-    public Player GetPlayerTwo() {
-        return GetNode<Player>("/root/Main/Pausable/PlayerContext-2/Player");
-    }
-
     public Player[] GetPlayers() {
         return new Player[] {
             GetPlayerOne(),
-            GetPlayerTwo(),
+            //GetPlayerTwo(),
         };
     }
 

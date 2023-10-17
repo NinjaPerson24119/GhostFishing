@@ -21,4 +21,5 @@ layout_mode = 1
 layout_mode = 1
 
 [node name="PlayerMenu" parent="." instance=ExtResource("1_ityqy")]
+visible = false
 layout_mode = 1

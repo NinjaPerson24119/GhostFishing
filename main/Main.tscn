@@ -114,10 +114,6 @@ TrackingID = "treasure-chest"
 
 [node name="PlayerContext-1" parent="Pausable" instance=ExtResource("13_myeu0")]
 
-[node name="PlayerContext-2" parent="Pausable" instance=ExtResource("13_myeu0")]
-PlayerID = 2
-InitialGlobalPosition = Vector3(20, 0, 20)
-
 [node name="CommonHUD" parent="Pausable" instance=ExtResource("18_0gdu0")]
 
 [node name="PauseMenu" parent="." instance=ExtResource("10_sg4eq")]

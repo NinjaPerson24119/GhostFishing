@@ -6,7 +6,7 @@ public partial class CoopManager : Node {
         One = 1,
         Two = 2,
     }
-    public const int MaxPlayers = 2;
+    public const int MaxPlayers = 1;
 
     static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
     private static CoopManager _singleton { get => _singletonTracker.Ref(); }
