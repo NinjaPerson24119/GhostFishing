@@ -33,6 +33,12 @@ internal partial class PauseMenu : Menu {
         CoopManager.Ref().PlayerControllerActiveChanged += OnPlayerControllerActiveChanged;
     }
 
+    public override void Open() {
+        UpdateCoopPrompt();
+        UpdateControllerPrompt();
+        base.Open();
+    }
+
     public void OnResume() {
         ClearControllerPrompt();
         RequestClose();
@@ -86,6 +92,7 @@ internal partial class PauseMenu : Menu {
             }
             text += $"Player {(int)playerID} Controller Disconnected\n";
         }
+        _controllerPrompt.Text = text;
     }
 
     public void OnCoopChanged(bool coopActive) {
