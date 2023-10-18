@@ -1,6 +1,6 @@
 public class PlayerActivePrecondition : IInteractiveObjectPrecondition {
-    CoopManager.PlayerID _playerID;
-    public PlayerActivePrecondition(CoopManager.PlayerID playerID) {
+    PlayerID _playerID;
+    public PlayerActivePrecondition(PlayerID playerID) {
         _playerID = playerID;
     }
 

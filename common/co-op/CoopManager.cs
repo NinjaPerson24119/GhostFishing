@@ -3,14 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 
 public partial class CoopManager : Node {
-    public enum PlayerID {
-        Invalid = -1,
-        One = 1,
-        Two = 2,
-    }
     public readonly PlayerID[] PlayerIDs = new PlayerID[] {
         PlayerID.One,
-        PlayerID.Two
+        // TODO: Disable player 2 for now
+        //PlayerID.Two
     };
 
     static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
@@ -65,7 +61,7 @@ public partial class CoopManager : Node {
                 }
                 if (!_playerDevices.ContainsKey(id)) {
                     _playerDevices.Add(id, device);
-                    GD.Print($"Player {(int)id} connected.");
+                    GD.Print($"Player {id.PlayerNumber()} connected.");
                     EmitSignal(SignalName.PlayerControllerActiveChanged, (int)id, connected);
                     return;
                 }
@@ -76,7 +72,7 @@ public partial class CoopManager : Node {
                 var kv = _playerDevices.First(kvp => kvp.Value == device);
                 PlayerID playerID = kv.Key;
                 _playerDevices.Remove(playerID);
-                GD.Print($"Player {(int)playerID} disconnected.");
+                GD.Print($"Player {playerID.PlayerNumber()} disconnected.");
                 EmitSignal(SignalName.PlayerControllerActiveChanged, (int)playerID, connected);
             }
             catch { }

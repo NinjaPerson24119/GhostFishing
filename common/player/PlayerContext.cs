@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public partial class PlayerContext : Node {
     [Export]
-    public CoopManager.PlayerID PlayerID { get; private set; } = CoopManager.PlayerID.Invalid;
+    public PlayerID PlayerID { get; private set; } = PlayerID.Invalid;
     [Export]
     public Vector3 InitialGlobalPosition { get; private set; } = Vector3.Zero;
 
@@ -42,7 +42,7 @@ public partial class PlayerContext : Node {
     }
 
     public Vector2 MovementControlVector() {
-        int device = (int)PlayerID;
+        int device = PlayerID.PlayerControlMappingNumber();
         return Input.GetVector(
             $"turn_left_{device}",
             $"turn_right_{device}",
@@ -52,7 +52,7 @@ public partial class PlayerContext : Node {
     }
 
     public List<string> MovementActions() {
-        int device = (int)PlayerID;
+        int device = PlayerID.PlayerControlMappingNumber();
         return new List<string> {
             $"turn_left_{device}",
             $"turn_right_{device}",
@@ -62,7 +62,7 @@ public partial class PlayerContext : Node {
     }
 
     public Vector2 CameraControlVector() {
-        int device = (int)PlayerID;
+        int device = PlayerID.PlayerControlMappingNumber();
         return Input.GetVector(
             $"rotate_camera_left_{device}",
             $"rotate_camera_right_{device}",
@@ -71,37 +71,37 @@ public partial class PlayerContext : Node {
         );
     }
     public string ActionCycleZoom {
-        get => $"cycle_zoom_{(int)PlayerID}";
+        get => $"cycle_zoom_{PlayerID.PlayerControlMappingNumber()}";
     }
 
     public string ActionCancel {
-        get => $"cancel_{(int)PlayerID}";
+        get => $"cancel_{PlayerID.PlayerControlMappingNumber()}";
     }
     public string ActionSelect {
-        get => $"select_{(int)PlayerID}";
+        get => $"select_{PlayerID.PlayerControlMappingNumber()}";
     }
 
     public string ActionOpenInventory {
-        get => $"open_inventory_{(int)PlayerID}";
+        get => $"open_inventory_{PlayerID.PlayerControlMappingNumber()}";
     }
     public string ActionRotateClockwise {
-        get => $"inventory_rotate_clockwise_{(int)PlayerID}";
+        get => $"inventory_rotate_clockwise_{PlayerID.PlayerControlMappingNumber()}";
     }
     public string ActionRotateCounterClockwise {
-        get => $"inventory_rotate_counterclockwise_{(int)PlayerID}";
+        get => $"inventory_rotate_counterclockwise_{PlayerID.PlayerControlMappingNumber()}";
     }
 
     public string ActionNavigateUp {
-        get => $"navigate_up_{(int)PlayerID}";
+        get => $"navigate_up_{PlayerID.PlayerControlMappingNumber()}";
     }
     public string ActionNavigateDown {
-        get => $"navigate_down_{(int)PlayerID}";
+        get => $"navigate_down_{PlayerID.PlayerControlMappingNumber()}";
     }
     public string ActionNavigateLeft {
-        get => $"navigate_left_{(int)PlayerID}";
+        get => $"navigate_left_{PlayerID.PlayerControlMappingNumber()}";
     }
     public string ActionNavigateRight {
-        get => $"navigate_right_{(int)PlayerID}";
+        get => $"navigate_right_{PlayerID.PlayerControlMappingNumber()}";
     }
 
     public override void _Ready() {
@@ -126,7 +126,7 @@ public partial class PlayerContext : Node {
         SubViewport.ProcessMode = _usingSubviewport ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
 
 
-        if (PlayerID == CoopManager.PlayerID.Two) {
+        if (PlayerID == PlayerID.Two) {
             Player.DisableControls = !coopActive;
             if (!coopActive) {
                 PlayerMenu.Close();

@@ -92,7 +92,6 @@ public partial class Player : BuoyantBody, ITrackableObject {
             return;
         }
 
-        int device = (int)PlayerContext.PlayerID;
         var controlDirection = PlayerContext.MovementControlVector();
         Vector3 towardsFrontOfBoat = Vector3.Forward.Rotated(Vector3.Up, Rotation.Y);
         if (controlDirection.Y != 0) {

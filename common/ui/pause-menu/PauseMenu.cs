@@ -90,7 +90,7 @@ internal partial class PauseMenu : Menu {
             if (CoopManager.Ref().IsPlayerControllerActive(playerID)) {
                 continue;
             }
-            text += $"Player {(int)playerID} Controller Disconnected\n";
+            text += $"Player {playerID.PlayerNumber()} Controller Disconnected\n";
         }
         _controllerPrompt.Text = text;
     }
@@ -100,7 +100,7 @@ internal partial class PauseMenu : Menu {
         UpdateCoopPrompt();
     }
 
-    public void OnPlayerControllerActiveChanged(CoopManager.PlayerID playerID, bool connected) {
+    public void OnPlayerControllerActiveChanged(PlayerID playerID, bool connected) {
         UpdateControllerPrompt();
         UpdateCoopPrompt();
     }

@@ -179,12 +179,12 @@ internal partial class AssetManager : Node {
         GD.Print($"Loaded Asset: {id} ({typeof(DTO)}):\n{dto.Stringify()}\n\n");
     }
 
-    public PlayerStateView GetPlayerView(CoopManager.PlayerID playerID) {
-        if (playerID == CoopManager.PlayerID.Invalid) {
+    public PlayerStateView GetPlayerView(PlayerID playerID) {
+        if (playerID == PlayerID.Invalid) {
             throw new ArgumentException($"Invalid player ID: {playerID}");
         }
 
-        PlayerStateAssetIDs assetIDs = _playerStateAssetIDs[(int)playerID];
+        PlayerStateAssetIDs assetIDs = _playerStateAssetIDs[playerID.PlayerNumber()];
         return new PlayerStateView(assetIDs);
     }
 

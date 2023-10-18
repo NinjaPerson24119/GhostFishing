@@ -1,5 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://dpabijl3uxatr"]
+[gd_scene load_steps=6 format=3 uid="uid://dpabijl3uxatr"]
 
+[ext_resource type="Script" path="res://common/player/Player.cs" id="1_xsoq5"]
 [ext_resource type="PackedScene" uid="uid://byfuil0lya5ei" path="res://common/boats/SimpleBoat.tscn" id="1_yv4ua"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rweyy"]
@@ -17,6 +18,7 @@ mass = 2500.0
 center_of_mass_mode = 1
 center_of_mass = Vector3(0, -0.5, 0)
 can_sleep = false
+script = ExtResource("1_xsoq5")
 
 [node name="Boat" parent="." instance=ExtResource("1_yv4ua")]
 

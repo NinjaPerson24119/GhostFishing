@@ -99,6 +99,6 @@ public partial class PlayerController : Node {
         if (_playerContext == null) {
             return false;
         }
-        return _playerContext.PlayerID == CoopManager.PlayerID.One && !CoopManager.Ref().CoopActive;
+        return _playerContext.PlayerID == PlayerID.One && !CoopManager.Ref().CoopActive;
     }
 }

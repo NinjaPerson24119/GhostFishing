@@ -1,11 +1,10 @@
-[gd_scene load_steps=9 format=3 uid="uid://cwd4mbur2hb6p"]
+[gd_scene load_steps=8 format=3 uid="uid://cwd4mbur2hb6p"]
 
 [ext_resource type="Script" path="res://common/player/PlayerContext.cs" id="1_i8wqn"]
 [ext_resource type="Script" path="res://common/controllers/PlayerController.cs" id="2_81fe8"]
 [ext_resource type="Script" path="res://common/ui/pseudo-focus/PseudoFocusContext.cs" id="2_i23j6"]
 [ext_resource type="PackedScene" uid="uid://capn7flj3nsyn" path="res://common/ui/player-hud/PlayerHud.tscn" id="3_feyoh"]
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="4_3lpcq"]
-[ext_resource type="Script" path="res://common/player/Player.cs" id="5_av66p"]
 [ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="6_ub55a"]
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_no4lg"]
@@ -20,13 +19,10 @@ script = ExtResource("2_i23j6")
 
 [node name="PlayerHUD" parent="PseudoFocusContext" instance=ExtResource("3_feyoh")]
 
-[node name="Player" parent="." instance=ExtResource("4_3lpcq")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.0444298, 0)
-collision_mask = 11
-script = ExtResource("5_av66p")
-
 [node name="PlayerController" type="Node" parent="."]
 script = ExtResource("2_81fe8")
+
+[node name="Player" parent="." instance=ExtResource("4_3lpcq")]
 
 [node name="FollowCamera" type="Node3D" parent="."]
 script = ExtResource("6_ub55a")
