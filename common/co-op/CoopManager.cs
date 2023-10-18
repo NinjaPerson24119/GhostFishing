@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 public partial class CoopManager : Node {
     public enum PlayerID {
@@ -8,6 +9,11 @@ public partial class CoopManager : Node {
     }
     public const int MaxPlayers = 1;
 
+    private struct PlayerControllerMapping {
+        public PlayerID PlayerID;
+        public long? Device;
+    }
+
     static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
     private static CoopManager _singleton { get => _singletonTracker.Ref(); }
     public static CoopManager Ref() {
@@ -15,6 +21,16 @@ public partial class CoopManager : Node {
     }
 
     public bool CoopActive { get; private set; } = false;
+    private PlayerControllerMapping[] _playerDevices = {
+        new PlayerControllerMapping() {
+            PlayerID = PlayerID.One,
+            Device = null,
+        },
+        new PlayerControllerMapping() {
+            PlayerID = PlayerID.Two,
+            Device = null,
+        },
+    };
 
     [Signal]
     public delegate void CoopChangedEventHandler(bool coopActive);
@@ -28,25 +44,70 @@ public partial class CoopManager : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
         Input.JoyConnectionChanged += OnJoyConnectionChanged;
+
+        var devices = Input.GetConnectedJoypads();
+        for (int i = 0; i < devices.Count; i++) {
+            OnJoyConnectionChanged(devices[i], true);
+        }
     }
 
     public bool IsPlayerControllerActive(PlayerID playerID) {
-        var connectedJoypads = Input.GetConnectedJoypads();
-        switch (playerID) {
-            case PlayerID.One:
-                return connectedJoypads.Contains(0);
-            case PlayerID.Two:
-                return connectedJoypads.Contains(1);
-            default:
-                throw new System.Exception($"Invalid player ID {playerID}");
+        int p = (int)playerID;
+        if (p < 1 || p > MaxPlayers) {
+            return false;
         }
+        int device = _playerDevices[p-1];
+
+        return true;
     }
 
     public bool IsPlayerActive(PlayerID playerID) {
         return playerID == PlayerID.One || (playerID == PlayerID.Two && CoopActive);
     }
 
+    public int? GetPlayerDevice(PlayerID playerID) {
+        if (_playerDevices.ContainsKey(playerID)) {
+            return _playerDevices[playerID];
+        }
+        return null;
+    }
+
     public void OnJoyConnectionChanged(long device, bool connected) {
+        for (int i = 0; i < MaxPlayers; i++) {
+
+        }
+
+        if (connected) {
+            if (_playerDevices.ContainsKey((PlayerID)i)) {
+
+            }
+        }
+        else {
+            if (_playerDevices.ContainsValue((int)device)) {
+                _playerDevices
+                    _playerDevices.Remove((PlayerID)device);
+            }
+        }
+
+        for (int i = 0; i < MaxPlayers; i++) {
+            if () {
+
+            }
+
+            if (connected) {
+                if (!_playerDevices.ContainsValue((int)device)) {
+                    _playerDevices.Add((PlayerID)i, (int)device);
+                    GD.Print($"Player {i + 1} connected.");
+                }
+            }
+            else {
+                if (_playerDevices.ContainsValue(i)) {
+                    _playerDevices.Remove((PlayerID)i);
+                    GD.Print($"Player {i + 1} disconnected.");
+                }
+            }
+        }
+
         if (device == 1 && connected == false) {
             GD.Print("Player 2 disconnected.");
             DisableCoop();
