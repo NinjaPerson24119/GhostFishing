@@ -239,7 +239,7 @@ internal partial class AssetManager : Node {
             PlayerID playerID = kv.Key;
             PlayerStateView view = new PlayerStateView(playerID, playerStateAssetIDs[playerID]);
             _playerStateViews.Add(playerID, view);
-            GD.Print($"Added player state view for {playerID.LongIDString()}");
+            GD.Print($"Added player state view for {playerID}");
         }
     }
 }

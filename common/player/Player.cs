@@ -21,9 +21,10 @@ public partial class Player : BuoyantBody, ITrackableObject {
 
     public PlayerContext? PlayerContext { get; private set; }
 
+    // TODO: this is unused because we aren't tracking the player yet
     public string TrackingID {
         get {
-            return PlayerID.LongIDString();
+            return PlayerID.ToString();
         }
     }
 
@@ -119,32 +120,14 @@ public partial class Player : BuoyantBody, ITrackableObject {
         }
     }
 
-    public void ResetAboveWater(bool relocate = false, Vector2 globalXZ = default, float globalRotationY = 0f) {
-        if (relocate) {
-            CallDeferred(nameof(DeferredResetAboveWater), true, globalXZ, globalRotationY);
-        }
-        else {
-            CallDeferred(nameof(DeferredResetAboveWater));
-        }
+    public void ResetAboveWater() {
+        CallDeferred(nameof(DeferredResetAboveWater));
     }
 
-    // CallDeferred doesn't seem to understand default arguments, so we need to overload
     private void DeferredResetAboveWater() {
-        DeferredResetAboveWater(false);
-    }
-
-    private void DeferredResetAboveWater(bool relocate = false, Vector2 globalXZ = default, float globalRotationY = 0f) {
         float yaw = GlobalRotation.Y;
-        if (relocate) {
-            yaw = globalRotationY;
-        }
 
         Vector3 translation = new Vector3(GlobalPosition.X, _ocean.GlobalPosition.Y + 1f, GlobalPosition.Y);
-        if (relocate) {
-            translation.X = globalXZ.X;
-            translation.Z = globalXZ.Y;
-        }
-
         LinearVelocity = Vector3.Zero;
         AngularVelocity = Vector3.Zero;
 

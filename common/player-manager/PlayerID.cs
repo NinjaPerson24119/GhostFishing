@@ -13,7 +13,7 @@ public static class PlayerIDExtensions {
         return (int)playerID;
     }
 
-    public static string LongIDString(this PlayerID playerID) {
+    public static string ToString(this PlayerID playerID) {
         return $"Player-{playerID.ToString()}";
     }
 }

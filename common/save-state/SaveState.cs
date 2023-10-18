@@ -10,6 +10,8 @@ internal partial class PlayerSaveState {
     public float GlobalPositionX { get; set; }
     public float GlobalPositionZ { get; set; }
     public float GlobalRotationY { get; set; }
+    
+    public CameraStateDTO CameraState { get; set; }
 }
 
 internal partial class SaveState {

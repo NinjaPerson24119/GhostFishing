@@ -2,42 +2,6 @@ using Godot;
 using System.Linq;
 
 public partial class FollowCamera : Node3D {
-    private struct CameraState {
-        public double Time = 0;
-
-        public float Yaw = 0f;
-
-        public float Pitch {
-            get => _pitch;
-            set {
-                _pitch = Mathf.Clamp(value, _followCamera.MinPitch, _followCamera.MaxPitch);
-            }
-        }
-        private float _pitch = Mathf.DegToRad(30f);
-
-        public float Distance {
-            get => _distance;
-            set => _distance = Mathf.Clamp(value, _followCamera.MinDistance, _followCamera.MaxDistance);
-        }
-        private float _distance = 5;
-        // sets the maximum distance based on a collision
-        public float CollidingMaxDistance {
-            get {
-                return _collidingMaxDistance;
-            }
-            set {
-                _collidingMaxDistance = Mathf.Max(_followCamera.RayNearDistance, value);
-            }
-        }
-        private float _collidingMaxDistance = float.MaxValue;
-
-        private FollowCamera _followCamera;
-        public CameraState(FollowCamera followCamera, float distance) {
-            _followCamera = followCamera;
-            Distance = distance;
-        }
-    }
-
     [Export]
     public float MinDistance = 4f;
     [Export]
@@ -93,16 +57,26 @@ public partial class FollowCamera : Node3D {
     private PlayerContext? _playerContext;
     private Player? _player;
 
+    public readonly float RayNearDistance = 1f;
+    public readonly float RayPitchDistance = 3f;
     private Node3D? _rayCastGroup;
     private float _rayExtraDistance = 0.2f;
-    private float RayNearDistance = 1f;
-    private float RayPitchDistance = 3f;
     private float _rayNearPitchPerSecond = Mathf.DegToRad(90f);
     private Timer _rayPitchUpTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
     };
 
+    public CameraState CameraState {
+        get {
+            return _cameraState;
+        }
+    }
+    public void SetCameraState(CameraStateDTO dto) {
+        _cameraState = new CameraState(this, dto);
+        UpdateCameraTransform();
+        _cameraResetTimer.Start();
+    }
     private CameraState _cameraState;
 
     public FollowCamera() {

@@ -81,6 +81,9 @@ internal partial class SaveStateManager : Node {
                 GlobalPositionZ = view.GlobalPosition.Z,
                 GlobalRotationY = view.GlobalRotation.Y,
             });
+            if (view.CameraState != null) {
+                saveState.PlayerSaveState[kv.Key].CameraState = view.CameraState.Value;
+            }
         }
         return saveState;
     }
@@ -123,9 +126,16 @@ internal partial class SaveStateManager : Node {
         if (saveState.PlayerSaveState != null) {
             Dictionary<PlayerID, Player> players = PlayerInjector.Ref().GetPlayers();
             foreach (var kv in players) {
-                PlayerSaveState playerState = saveState.PlayerSaveState[kv.Key];
+                PlayerSaveState playerSaveState = saveState.PlayerSaveState[kv.Key];
                 Player player = kv.Value;
-                player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
+
+                PlayerStateView view = AssetManager.Ref().GetPlayerView(kv.Key);
+
+                view.GlobalPosition = new Vector3(playerSaveState.GlobalPositionX, 0, playerSaveState.GlobalPositionZ);
+                view.GlobalRotation = new Vector3(0, playerSaveState.GlobalRotationY, 0);
+                player.ResetAboveWater();
+
+                view.CameraState = playerSaveState.CameraState;
             }
         }
         if (saveState.InventoryStates != null) {
