@@ -18,7 +18,7 @@ internal partial class PauseMenu : Menu {
         foreach (var kv in players) {
             Player player = kv.Value;
             if (player.PlayerContext == null) {
-                throw new System.Exception("PlayerContext must be set before _Ready is called");
+                continue;
             }
             _closeActions.Add(player.PlayerContext.ActionCancel);
         }

@@ -24,7 +24,7 @@ public partial class PlayerInjector : Node {
                     _players.Add(playerID, GetPlayerOne());
                     break;
                 case PlayerID.Two:
-                    _players.Add(playerID, GetPlayerOne());
+                    _players.Add(playerID, GetPlayerTwo());
                     break;
                 default:
                     throw new System.Exception($"Unknown player ID {playerID}");

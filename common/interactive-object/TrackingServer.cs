@@ -26,7 +26,7 @@ internal partial class TrackingServer : Node {
             throw new System.ArgumentNullException("obj cannot be null");
         }
         string ID = obj.TrackingID;
-        GD.Print($"Updating {ID} to {obj.TrackingPosition}");
+        //GD.Print($"Updating {ID} to {obj.TrackingPosition}");
 
         // remove from old tile if exists
         Vector2I tileIndices = GetTile(obj.TrackingPosition);

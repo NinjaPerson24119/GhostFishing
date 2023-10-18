@@ -1,4 +1,5 @@
 using Godot;
+using System.Linq;
 
 public partial class FollowCamera : Node3D {
     private struct CameraState {
@@ -138,9 +139,11 @@ public partial class FollowCamera : Node3D {
             RayCast3D ray = new RayCast3D() {
                 Position = offset * radius + Vector3.Back * backAdjust,
                 HitFromInside = true,
+                CollisionMask = 0,
             };
-            // collide with terrain
-            ray.SetCollisionMaskValue(2, true);
+            // collide with terrain and player (so we can detect line-of-sight)
+            ray.SetCollisionMaskValue(CollisionLayers.Player, true);
+            ray.SetCollisionMaskValue(CollisionLayers.Terrain, true);
             _rayCastGroup.AddChild(ray);
         }
 
@@ -228,10 +231,18 @@ public partial class FollowCamera : Node3D {
                 ray.TargetPosition = ray.ToLocal(_player.GlobalPosition);
                 ray.ForceRaycastUpdate();
                 Rid rid = ray.GetColliderRid();
-                if (rid != _player.GetRid()) {
-                    minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
-                    hitsThisIter = true;
+
+                Rid[] playerRids = PlayerInjector.Ref().GetPlayers().Values.Select(p => p.GetRid()).ToArray();
+                //GD.Print($"playerRids: {string.Join(", ", playerRids)}, hit rid: {rid}");
+                if (playerRids.Contains(rid)) {
+                    // we can't disable the collision mask for the player layer or we won't be able to detect line of sight
+                    // so we just ignore it here
+                    continue;
                 }
+
+                // not hitting any players
+                minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
+                hitsThisIter = true;
             }
             if (minCollidingDistance < float.MaxValue && hitsThisIter) {
                 _cameraState.CollidingMaxDistance = minCollidingDistance - CollidingDistanceBuffer;

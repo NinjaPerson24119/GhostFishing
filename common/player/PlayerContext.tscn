@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cwd4mbur2hb6p"]
+[gd_scene load_steps=7 format=3 uid="uid://cwd4mbur2hb6p"]
 
 [ext_resource type="Script" path="res://common/player/PlayerContext.cs" id="1_i8wqn"]
 [ext_resource type="Script" path="res://common/controllers/PlayerController.cs" id="2_81fe8"]
@@ -6,9 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://capn7flj3nsyn" path="res://common/ui/player-hud/PlayerHud.tscn" id="3_feyoh"]
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="4_3lpcq"]
 [ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="6_ub55a"]
-
-[sub_resource type="SphereShape3D" id="SphereShape3D_no4lg"]
-radius = 2.0
 
 [node name="PlayerContext" type="Node"]
 script = ExtResource("1_i8wqn")
@@ -26,11 +23,6 @@ script = ExtResource("2_81fe8")
 
 [node name="FollowCamera" type="Node3D" parent="."]
 script = ExtResource("6_ub55a")
-
-[node name="Area3D" type="Area3D" parent="FollowCamera"]
-
-[node name="CollisionShape3D" type="CollisionShape3D" parent="FollowCamera/Area3D"]
-shape = SubResource("SphereShape3D_no4lg")
 
 [node name="Camera3D" type="Camera3D" parent="FollowCamera"]
 current = true
