@@ -52,7 +52,7 @@ public partial class PlayerInjector : Node {
             return GetNode<PlayerContext>("/root/Main/Pausable/PlayerContext-2").Player;
         }
         else {
-            return GetNode<Player>("/root/Main/Pausable/Player-2");
+            return GetNode<Player>("/root/Main/Pausable/InactivePlayer-2");
         }
     }
 }

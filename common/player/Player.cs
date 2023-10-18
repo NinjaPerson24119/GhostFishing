@@ -1,14 +1,29 @@
 using Godot;
+using System;
 
 public partial class Player : BuoyantBody, ITrackableObject {
+    [Export]
+    public PlayerID PlayerID {
+        get {
+            if (PlayerContext != null) {
+                return PlayerContext.PlayerID;
+            }
+            if (_playerID == PlayerID.Invalid) {
+                throw new Exception("Player must either define PlayerID or be a child of PlayerContext");
+            }
+            return _playerID;
+        }
+        set {
+            _playerID = value;
+        }
+    }
+    private PlayerID _playerID = PlayerID.Invalid;
+
     public PlayerContext? PlayerContext { get; private set; }
 
     public string TrackingID {
         get {
-            if (PlayerContext == null) {
-                throw new System.Exception("PlayerContext must be set before TrackingID is accessed");
-            }
-            return PlayerContext.PlayerID.ToString();
+            return PlayerID.LongIDString();
         }
     }
 
@@ -53,7 +68,9 @@ public partial class Player : BuoyantBody, ITrackableObject {
 
     public override void _Ready() {
         PlayerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
-        GlobalPosition = PlayerContext.InitialGlobalPosition;
+        if (PlayerContext != null) {
+            GlobalPosition = PlayerContext.InitialGlobalPosition;
+        }
 
         _ocean = DependencyInjector.Ref().GetOcean();
 
@@ -83,7 +100,7 @@ public partial class Player : BuoyantBody, ITrackableObject {
 
     private void ApplyForcesFromControls() {
         if (PlayerContext == null) {
-            throw new System.Exception("PlayerContext must be set before ApplyForcesFromControls is called");
+            return;
         }
         if (DisableControls) {
             return;
@@ -143,7 +160,7 @@ public partial class Player : BuoyantBody, ITrackableObject {
 
     public bool IsMoving() {
         if (PlayerContext == null) {
-            throw new System.Exception("PlayerContext must be set before IsMoving is called");
+            return false;
         }
 
         bool isMoving = false;
@@ -157,23 +174,17 @@ public partial class Player : BuoyantBody, ITrackableObject {
     }
 
     public void AddChildInteractiveObject() {
-        if (PlayerContext == null) {
-            throw new System.Exception("PlayerContext must be set before AddChildInteractiveObject is called");
-        }
-        if (PlayerContext.PlayerStateView == null) {
-            throw new System.Exception("PlayerStateView must be set before AddChildInteractiveObject is called");
-        }
-
         // Player's inventory can only be accessed if
         // - Player cannot access its own inventory as an interactive object
         // - Player is not active
         InteractiveObject interactiveObject = new InteractiveObject() {
-            TrackingID = $"PlayerBoatInventory-{PlayerContext.PlayerID}",
+            TrackingID = $"PlayerBoatInventory-{PlayerID}",
             Description = "Open Boat Inventory",
         };
-        InteractiveObjectAction action = new OpenInventoryAction(PlayerContext.PlayerStateView.BoatInventory.InventoryInstanceID);
-        action.AddPrecondition(new NotPrecondition(new IsPlayerPrecondition(PlayerContext.PlayerID)));
-        action.AddPrecondition(new NotPrecondition(new PlayerActivePrecondition(PlayerContext.PlayerID)));
+        PlayerStateView view = AssetManager.Ref().GetPlayerView(PlayerID);
+        InteractiveObjectAction action = new OpenInventoryAction(view.BoatInventory.InventoryInstanceID);
+        action.AddPrecondition(new NotPrecondition(new IsPlayerPrecondition(PlayerID)));
+        action.AddPrecondition(new NotPrecondition(new PlayerActivePrecondition(PlayerID)));
         interactiveObject.AddAction(action);
         AddChild(interactiveObject);
     }

@@ -93,6 +93,9 @@ internal partial class InventoryFrame : PseudoFocusControl {
         AssetManager.Ref().PersistImage(_containerFrameImagePath);
 
         _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
         _inputActionToDirection = new Dictionary<string, Vector2I> {
             {_playerContext.ActionNavigateUp, new Vector2I(0, -1)},
             {_playerContext.ActionNavigateDown, new Vector2I(0, 1)},

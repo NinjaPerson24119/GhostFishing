@@ -40,7 +40,7 @@ internal partial class DependencyInjector : Node {
 
     // resources local to each player
     private T NearestResourceInSubtree<T>(string relativeToNodePath) where T : Node {
-        Node? node = GetNodeOrNull(relativeToNodePath);
+        Node node = GetNodeOrNull(relativeToNodePath);
         if (node == null) {
             throw new System.Exception($"Could not find node {relativeToNodePath}");
         }
@@ -54,8 +54,13 @@ internal partial class DependencyInjector : Node {
         return NearestResourceInSubtree<T>(parent.GetPath());
     }
 
-    public PlayerContext GetLocalPlayerContext(string relativeToNodePath) {
-        return NearestResourceInSubtree<PlayerContext>(relativeToNodePath);
+    public PlayerContext? GetLocalPlayerContext(string relativeToNodePath) {
+        try {
+            return NearestResourceInSubtree<PlayerContext>(relativeToNodePath);
+        }
+        catch {
+            return null;
+        }
     }
 
     public PseudoFocusContext GetLocalPseudoFocusContext(string relativeToNodePath) {

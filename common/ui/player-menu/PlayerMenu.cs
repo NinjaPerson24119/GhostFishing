@@ -20,6 +20,9 @@ public partial class PlayerMenu : Menu {
         base._Ready();
 
         _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
         _closeActions.Add(_playerContext.ActionCancel);
         _closeActions.Add(_playerContext.ActionOpenInventory);
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
@@ -36,7 +39,10 @@ public partial class PlayerMenu : Menu {
         if (_initialized) {
             throw new Exception("PlayerMenu already initialized");
         }
-        PlayerStateView playerView = AssetManager.Ref().GetPlayerView(0);
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        PlayerStateView playerView = AssetManager.Ref().GetPlayerView(_playerContext.PlayerID);
         _boatInventory = playerView.BoatInventory;
         _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx) {
             Name = "BoatInventoryFrame"

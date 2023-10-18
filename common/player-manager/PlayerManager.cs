@@ -5,8 +5,7 @@ using System.Linq;
 public partial class PlayerManager : Node {
     public static PlayerID[] PlayerIDs = new PlayerID[] {
         PlayerID.One,
-        // TODO: Disable player 2 for now
-        //PlayerID.Two
+        PlayerID.Two
     };
 
     static SingletonTracker<PlayerManager> _singletonTracker = new SingletonTracker<PlayerManager>();

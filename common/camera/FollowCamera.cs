@@ -111,6 +111,9 @@ public partial class FollowCamera : Node3D {
 
     public override void _Ready() {
         _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        if (_playerContext == null) {
+            throw new System.Exception("Player context is null. FollowCamera should be in the subtree of a PlayerContext");
+        }
         _player = _playerContext.Player;
         _cameraState.Yaw = _player.GlobalRotation.Y;
 

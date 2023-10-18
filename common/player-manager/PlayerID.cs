@@ -10,6 +10,10 @@ public static class PlayerIDExtensions {
     }
 
     public static int PlayerControlMappingNumber(this PlayerID playerID) {
-        return (int)playerID - 1;
+        return (int)playerID;
+    }
+
+    public static string LongIDString(this PlayerID playerID) {
+        return $"Player-{playerID.ToString()}";
     }
 }

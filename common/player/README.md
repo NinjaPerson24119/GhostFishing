@@ -1,3 +1,11 @@
+# Player Context vs Player
+
+The `PlayerContext` is everything adjacent to the player, but not the player itself.
+- Every "active" / "controlled" player has a `PlayerContext`.
+
+The `Player` is just the object that represents the player in the world.
+- Every **possible** player (active or not, but existing in the game world) has a `Player`.
+
 # Player Physics
 
 ## What doesn't work

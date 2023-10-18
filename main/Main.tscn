@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=20 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://common/water/WaterTileCPU.cs" id="9_sht6q"]
 [ext_resource type="PackedScene" uid="uid://btubjkxhs3o87" path="res://common/ui/pause-menu/PauseMenu.tscn" id="10_sg4eq"]
 [ext_resource type="Script" path="res://common/physics/BuoyantBody.cs" id="11_l167g"]
+[ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="12_adbi1"]
 [ext_resource type="Script" path="res://common/interactive-object/interactive-objects/InventoryInteractiveObject.cs" id="12_iy7x1"]
 [ext_resource type="PackedScene" uid="uid://cwd4mbur2hb6p" path="res://common/player/PlayerContext.tscn" id="13_myeu0"]
 [ext_resource type="PackedScene" uid="uid://d3od5e8fu5ime" path="res://common/ui/common-hud/CommonHUD.tscn" id="18_0gdu0"]
@@ -113,6 +114,10 @@ InventoryInstanceID = "INVENTORY_INSTANCE-3cfd6920-fa38-4529-80cd-3bc9ebb3a405"
 TrackingID = "treasure-chest"
 
 [node name="PlayerContext-1" parent="Pausable" instance=ExtResource("13_myeu0")]
+
+[node name="InactivePlayer-2" parent="Pausable" instance=ExtResource("12_adbi1")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -20)
+PlayerID = 2
 
 [node name="CommonHUD" parent="Pausable" instance=ExtResource("18_0gdu0")]
 
