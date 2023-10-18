@@ -12,7 +12,6 @@ internal partial class PauseMenu : Menu {
     public override void _Ready() {
         base._Ready();
 
-        //_closeActions.Add("pause_menu");
         Player[] players = DependencyInjector.Ref().GetPlayers();
         _closeActions.Add("pause_menu");
         foreach (Player player in players) {
@@ -57,11 +56,11 @@ internal partial class PauseMenu : Menu {
             _coopPrompt.Text = "Disable Co-op";
         }
         else {
-            if (CoopManager.Ref().IsPlayerControllerActive(CoopManager.PlayerID.Two)) {
+            if (CoopManager.Ref().CanEnableCoop()) {
                 _coopPrompt.Text = "Enable Co-op";
             }
             else {
-                _coopPrompt.Text = "Co-op\nConnect 2nd Controller";
+                _coopPrompt.Text = "Co-op\nConnect a controller for each player";
                 disabled = true;
             }
         }
@@ -81,34 +80,21 @@ internal partial class PauseMenu : Menu {
         }
 
         string text = "";
-        CoopManager.PlayerID[] playerIDs = new CoopManager.PlayerID[] {
-            CoopManager.PlayerID.One,
-            CoopManager.PlayerID.Two
-        };
-        foreach (var playerID in playerIDs) {
+        foreach (var playerID in CoopManager.Ref().PlayerIDs) {
             if (CoopManager.Ref().IsPlayerControllerActive(playerID)) {
                 continue;
             }
-            text += $"Player {((int)playerID) + 1} Controller Disconnected\n";
+            text += $"Player {(int)playerID} Controller Disconnected\n";
         }
     }
 
     public void OnCoopChanged(bool coopActive) {
+        UpdateControllerPrompt();
         UpdateCoopPrompt();
-
-        if (_resume == null) {
-            throw new System.Exception("Resume button null");
-        }
-        if (coopActive && !CoopManager.Ref().IsPlayerControllerActive(CoopManager.PlayerID.Two)) {
-            _resume.Disabled = true;
-        }
-        else {
-            _resume.Disabled = false;
-        }
     }
 
     public void OnPlayerControllerActiveChanged(CoopManager.PlayerID playerID, bool connected) {
-        UpdateCoopPrompt();
         UpdateControllerPrompt();
+        UpdateCoopPrompt();
     }
 }

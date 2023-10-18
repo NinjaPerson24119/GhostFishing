@@ -68,15 +68,15 @@ internal partial class SaveStateManager : Node {
             CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
-            PlayerSaveState = new PlayerSaveState[CoopManager.MaxPlayers],
+            PlayerSaveState = new PlayerSaveState[CoopManager.Ref().PlayerIDs.Length],
             InventoryStates = AssetManager.Ref().GetInventoryInstanceDTOs(),
         };
 
         Player[] players = DependencyInjector.Ref().GetPlayers();
-        if (players.Length != CoopManager.MaxPlayers) {
-            throw new Exception($"Player count {players.Length} does not match expected count {CoopManager.MaxPlayers}");
+        if (players.Length != CoopManager.Ref().PlayerIDs.Length) {
+            throw new Exception($"Player count {players.Length} does not match expected count {CoopManager.Ref().PlayerIDs.Length}");
         }
-        for (int i = 0; i < CoopManager.MaxPlayers; i++) {
+        for (int i = 0; i < CoopManager.Ref().PlayerIDs.Length; i++) {
             Player player = players[i];
             saveState.PlayerSaveState[i] = new PlayerSaveState() {
                 GlobalPositionX = player.GlobalPosition.X,
