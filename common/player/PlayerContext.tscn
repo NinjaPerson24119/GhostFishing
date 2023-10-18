@@ -10,7 +10,7 @@
 [sub_resource type="SphereShape3D" id="SphereShape3D_no4lg"]
 radius = 2.0
 
-[node name="PlayerContext-1" type="Node"]
+[node name="PlayerContext" type="Node"]
 script = ExtResource("1_i8wqn")
 PlayerID = 1
 
@@ -43,5 +43,3 @@ far = 500.0
 [node name="RayCast3D" type="RayCast3D" parent="FollowCamera/RayCastGroup"]
 
 [node name="SubViewport" type="SubViewport" parent="."]
-
-[node name="Node" type="Node" parent="."]

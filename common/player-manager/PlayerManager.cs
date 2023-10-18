@@ -2,16 +2,16 @@ using Godot;
 using System.Collections.Generic;
 using System.Linq;
 
-public partial class CoopManager : Node {
-    public readonly PlayerID[] PlayerIDs = new PlayerID[] {
+public partial class PlayerManager : Node {
+    public static PlayerID[] PlayerIDs = new PlayerID[] {
         PlayerID.One,
         // TODO: Disable player 2 for now
         //PlayerID.Two
     };
 
-    static SingletonTracker<CoopManager> _singletonTracker = new SingletonTracker<CoopManager>();
-    private static CoopManager _singleton { get => _singletonTracker.Ref(); }
-    public static CoopManager Ref() {
+    static SingletonTracker<PlayerManager> _singletonTracker = new SingletonTracker<PlayerManager>();
+    private static PlayerManager _singleton { get => _singletonTracker.Ref(); }
+    public static PlayerManager Ref() {
         return _singleton;
     }
 
@@ -23,7 +23,7 @@ public partial class CoopManager : Node {
     [Signal]
     public delegate void PlayerControllerActiveChangedEventHandler(PlayerID playerID, bool active);
 
-    public CoopManager() {
+    public PlayerManager() {
         ProcessMode = ProcessModeEnum.Always;
     }
 

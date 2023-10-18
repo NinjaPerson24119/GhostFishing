@@ -15,6 +15,6 @@ internal partial class PlayerSaveState {
 internal partial class SaveState {
     public int Version { get; set; }
     public CommonSaveState? CommonSaveState { get; set; }
-    public PlayerSaveState[]? PlayerSaveState { get; set; }
+    public Dictionary<PlayerID, PlayerSaveState> PlayerSaveState { get; set; } = new Dictionary<PlayerID, PlayerSaveState>();
     public Dictionary<string, InventoryInstanceDTO> InventoryStates { get; set; } = new Dictionary<string, InventoryInstanceDTO>();
 }

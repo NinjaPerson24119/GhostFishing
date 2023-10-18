@@ -17,17 +17,30 @@ public class PlayerStateView {
     public InventoryInstance QuestInventory;
     public InventoryInstance StorageInventory;
 
+    public readonly PlayerID PlayerID;
     public Vector3 GlobalPosition {
-        get => _player.GlobalPosition;
+        get {
+            var players = PlayerInjector.Ref().GetPlayers();
+            if (!players.ContainsKey(PlayerID)) {
+                throw new System.Exception($"Player {PlayerID} not found");
+            }
+            return players[PlayerID].GlobalPosition;
+        }
+    }
+    public Vector3 GlobalRotation {
+        get {
+            var players = PlayerInjector.Ref().GetPlayers();
+            if (!players.ContainsKey(PlayerID)) {
+                throw new System.Exception($"Player {PlayerID} not found");
+            }
+            return players[PlayerID].GlobalRotation;
+        }
     }
 
-    private Player _player;
-
-    public PlayerStateView(PlayerStateAssetIDs assetIDs, Player player) {
+    public PlayerStateView(PlayerID playerID, PlayerStateAssetIDs assetIDs) {
+        PlayerID = playerID;
         BoatInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.BoatInventoryInstanceID);
         QuestInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.QuestInventoryInstanceID);
         StorageInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.StorageInventoryInstanceID);
-
-        _player = player;
     }
 }

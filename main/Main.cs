@@ -8,21 +8,24 @@ internal partial class Main : Node {
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
 
         // TODO: update ocean based on both players
-        Player playerOne = DependencyInjector.Ref().GetPlayerOne();
-        PlayerContext playerOneContext = DependencyInjector.Ref().GetPlayerOneContext();
+        Player playerOne = PlayerInjector.Ref().GetPlayers()[PlayerID.One];
         playerOne.PositionChangedSignificantly += ocean.OnOriginChanged;
 
         GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ocean.ConfigureTileDebugVisuals;
         GameClock.ConnectGameSecondsChanged(timeDisplay.Update);
 
-        PlayerContext[] playerContexts = DependencyInjector.Ref().GetPlayerContexts();
-        for (int i = 0; i < playerContexts.Length; i++) {
-            commonController.SetPlayerControlsDisabled += playerContexts[i].Player.SetControlsDisabled;
-            commonController.SetPlayerControlsDisabled += playerContexts[i].FollowCamera.SetControlsDisabled;
+        var players = PlayerInjector.Ref().GetPlayers();
+        foreach (var kv in players) {
+            PlayerContext? playerContext = kv.Value.PlayerContext;
+            if (playerContext == null) {
+                continue;
+            }
 
-            playerContexts[i].Controller.SetPlayerControlsDisabled += playerContexts[i].Player.SetControlsDisabled;
-            playerContexts[i].Controller.SetPlayerControlsDisabled += playerContexts[i].FollowCamera.SetControlsDisabled;
+            commonController.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
+            commonController.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
+
+            playerContext.Controller.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
+            playerContext.Controller.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
         }
-
     }
 }

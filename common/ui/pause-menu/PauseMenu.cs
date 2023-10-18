@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 internal partial class PauseMenu : Menu {
     private Button? _resume;
@@ -12,9 +13,10 @@ internal partial class PauseMenu : Menu {
     public override void _Ready() {
         base._Ready();
 
-        Player[] players = DependencyInjector.Ref().GetPlayers();
+        Dictionary<PlayerID, Player> players = PlayerInjector.Ref().GetPlayers();
         _closeActions.Add("pause_menu");
-        foreach (Player player in players) {
+        foreach (var kv in players) {
+            Player player = kv.Value;
             if (player.PlayerContext == null) {
                 throw new System.Exception("PlayerContext must be set before _Ready is called");
             }
@@ -29,8 +31,8 @@ internal partial class PauseMenu : Menu {
         _coopPrompt.Pressed += OnCoopPrompt;
         GetNode<Button>("BoxContainer/ExitToOS").Pressed += OnExitToOS;
 
-        CoopManager.Ref().CoopChanged += OnCoopChanged;
-        CoopManager.Ref().PlayerControllerActiveChanged += OnPlayerControllerActiveChanged;
+        PlayerManager.Ref().CoopChanged += OnCoopChanged;
+        PlayerManager.Ref().PlayerControllerActiveChanged += OnPlayerControllerActiveChanged;
     }
 
     public override void Open() {
@@ -45,7 +47,7 @@ internal partial class PauseMenu : Menu {
     }
 
     public void OnCoopPrompt() {
-        CoopManager.Ref().EnableCoop();
+        PlayerManager.Ref().EnableCoop();
     }
 
     public void OnExitToOS() {
@@ -58,11 +60,11 @@ internal partial class PauseMenu : Menu {
         }
 
         bool disabled = false;
-        if (CoopManager.Ref().CoopActive) {
+        if (PlayerManager.Ref().CoopActive) {
             _coopPrompt.Text = "Disable Co-op";
         }
         else {
-            if (CoopManager.Ref().CanEnableCoop()) {
+            if (PlayerManager.Ref().CanEnableCoop()) {
                 _coopPrompt.Text = "Enable Co-op";
             }
             else {
@@ -86,8 +88,8 @@ internal partial class PauseMenu : Menu {
         }
 
         string text = "";
-        foreach (var playerID in CoopManager.Ref().PlayerIDs) {
-            if (CoopManager.Ref().IsPlayerControllerActive(playerID)) {
+        foreach (var playerID in PlayerManager.PlayerIDs) {
+            if (PlayerManager.Ref().IsPlayerControllerActive(playerID)) {
                 continue;
             }
             text += $"Player {playerID.PlayerNumber()} Controller Disconnected\n";

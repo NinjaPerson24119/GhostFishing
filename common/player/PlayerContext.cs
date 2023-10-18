@@ -8,7 +8,7 @@ public partial class PlayerContext : Node {
     public Vector3 InitialGlobalPosition { get; private set; } = Vector3.Zero;
 
     public PlayerStateView PlayerStateView {
-        get => AssetManager.Ref().GetPlayerView(0);
+        get => AssetManager.Ref().GetPlayerView(PlayerID);
     }
     public Player Player {
         get => GetNode<Player>("Player");
@@ -105,7 +105,7 @@ public partial class PlayerContext : Node {
     }
 
     public override void _Ready() {
-        CoopManager.Ref().CoopChanged += OnCoopChanged;
+        PlayerManager.Ref().CoopChanged += OnCoopChanged;
     }
 
     public async void OnCoopChanged(bool coopActive) {

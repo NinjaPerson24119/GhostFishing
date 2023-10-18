@@ -5,6 +5,6 @@ public class PlayerActivePrecondition : IInteractiveObjectPrecondition {
     }
 
     public bool Check(InteractiveObject interactiveObject, Player player) {
-        return CoopManager.Ref().IsPlayerActive(_playerID);
+        return PlayerManager.Ref().IsPlayerActive(_playerID);
     }
 }

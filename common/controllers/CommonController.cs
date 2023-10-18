@@ -10,7 +10,7 @@ public partial class CommonController : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
 
-        CoopManager.Ref().CoopChanged += OnCoopChanged;
+        PlayerManager.Ref().CoopChanged += OnCoopChanged;
         Input.JoyConnectionChanged += OnJoyConnectionChanged;
     }
 

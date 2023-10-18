@@ -26,7 +26,7 @@ internal partial class AssetManager : Node {
 
     private const string _questDefinitionsPath = "res://data/quests.json";
 
-    private PlayerStateAssetIDs[] _playerStateAssetIDs;
+    private Dictionary<PlayerID, PlayerStateView> _playerStateViews = new Dictionary<PlayerID, PlayerStateView>();
 
     private AssetStore<InventoryItemCategoryDTO, InventoryItemCategory> _inventoryItemCategoryStore;
     private AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition> _inventoryItemDefinitionStore;
@@ -78,18 +78,28 @@ internal partial class AssetManager : Node {
             persistedTexturesStore: null
         );
 
-        _playerStateAssetIDs = new PlayerStateAssetIDs[2]{
-            new PlayerStateAssetIDs(
-                boatInventoryInstanceID: "INVENTORY_INSTANCE-31cdec79-2a3b-4f4d-9e23-a878915f3973",
-                questInventoryInstanceID: "INVENTORY_INSTANCE-96c151e3-2436-406c-967c-79a1cc89c3ac",
-                storageInventoryInstanceID: _storageInventoryID
-            ),
-            new PlayerStateAssetIDs(
-                boatInventoryInstanceID: "INVENTORY_INSTANCE-e158299f-a54e-42b0-964a-3ac732ec3631",
-                questInventoryInstanceID: "INVENTORY_INSTANCE-f7091de2-6804-4f22-b8f1-d17be782adf6",
-                storageInventoryInstanceID: _storageInventoryID
-            )
+        Dictionary<PlayerID, PlayerStateAssetIDs> playerStateAssetIDs = new Dictionary<PlayerID, PlayerStateAssetIDs>() {
+            {
+                PlayerID.One,
+                new PlayerStateAssetIDs(
+                    boatInventoryInstanceID: "INVENTORY_INSTANCE-31cdec79-2a3b-4f4d-9e23-a878915f3973",
+                    questInventoryInstanceID: "INVENTORY_INSTANCE-96c151e3-2436-406c-967c-79a1cc89c3ac",
+                    storageInventoryInstanceID: _storageInventoryID
+                )
+            },
+            {
+                PlayerID.Two,
+                new PlayerStateAssetIDs(
+                    boatInventoryInstanceID: "INVENTORY_INSTANCE-e158299f-a54e-42b0-964a-3ac732ec3631",
+                    questInventoryInstanceID: "INVENTORY_INSTANCE-f7091de2-6804-4f22-b8f1-d17be782adf6",
+                    storageInventoryInstanceID: _storageInventoryID
+                )
+            }
         };
+        foreach (PlayerID playerID in PlayerManager.PlayerIDs) {
+            PlayerStateView view = new PlayerStateView(playerID, playerStateAssetIDs[playerID]);
+            _playerStateViews.Add(playerID, view);
+        }
     }
 
     public override void _Ready() {
@@ -180,12 +190,10 @@ internal partial class AssetManager : Node {
     }
 
     public PlayerStateView GetPlayerView(PlayerID playerID) {
-        if (playerID == PlayerID.Invalid) {
-            throw new ArgumentException($"Invalid player ID: {playerID}");
+        if (!_playerStateViews.ContainsKey(playerID)) {
+            throw new ArgumentException($"Player state view not found for player ID: {playerID}");
         }
-
-        PlayerStateAssetIDs assetIDs = _playerStateAssetIDs[playerID.PlayerNumber()];
-        return new PlayerStateView(assetIDs);
+        return _playerStateViews[playerID];
     }
 
     public InventoryDefinition GetInventoryDefinition(string uuid) {

@@ -36,32 +36,6 @@ internal partial class DependencyInjector : Node {
         return GetNode<CommonController>("/root/Main/CommonController");
     }
 
-    public PlayerContext GetPlayerOneContext() {
-        return GetNode<PlayerContext>("/root/Main/Pausable/PlayerContext-1");
-    }
-
-    public PlayerContext GetPlayerTwoContext() {
-        return GetNode<PlayerContext>("/root/Main/Pausable/PlayerContext-2");
-    }
-
-    public PlayerContext[] GetPlayerContexts() {
-        return new PlayerContext[] {
-            GetPlayerOneContext(),
-            //GetPlayerTwoContext(),
-        };
-    }
-
-    public Player GetPlayerOne() {
-        return GetNode<Player>("/root/Main/Pausable/PlayerContext-1/Player");
-    }
-
-    public Player[] GetPlayers() {
-        return new Player[] {
-            GetPlayerOne(),
-            //GetPlayerTwo(),
-        };
-    }
-
     // do not provide other singletons. they provide themselves.
 
     // resources local to each player
