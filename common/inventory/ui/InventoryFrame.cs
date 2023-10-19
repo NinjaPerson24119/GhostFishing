@@ -18,7 +18,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
         get {
             return _selectedPosition;
         }
-        private set {
+        set {
             Vector2I clampedPosition = value.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
             if (clampedPosition == _selectedPosition) {
                 return;

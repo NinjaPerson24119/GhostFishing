@@ -142,9 +142,13 @@ internal partial class InventoryItemTransport : Node2D {
         if (_playerContext == null) {
             throw new Exception("PlayerContext null");
         }
+        Vector2I firstTileOffset = _item.FirstUsedTileOffset();
         if (_playerContext.Controller.InputType == InputType.KeyboardMouse) {
-            Vector2I firstTileOffset = _item.FirstUsedTileOffset();
+
             _frame.MoveMouseToTile(new Vector2I(_item.X, _item.Y) + firstTileOffset);
+        }
+        else {
+            _frame.SelectedPosition = new Vector2I(_item.X, _item.Y) + firstTileOffset;
         }
 
         ClearItem();
@@ -167,6 +171,9 @@ internal partial class InventoryItemTransport : Node2D {
         }
         if (_playerContext.Controller.InputType == InputType.KeyboardMouse) {
             _frame.MoveMouseToTile(new Vector2I(_item.X, _item.Y));
+        }
+        else {
+            _frame.SelectedPosition = new Vector2I(_item.X, _item.Y);
         }
 
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
