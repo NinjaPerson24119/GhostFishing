@@ -37,7 +37,8 @@ internal partial class InventoryItemTransport : Node2D {
     // position of the tile we're currently hovering over in the inventory
     public Vector2I TilePosition;
 
-    private SortedDictionary<string, OpenedInventory> _openedInventories = new SortedDictionary<string, OpenedInventory>();
+    private List<string> _openedInventoryOrder = new List<string>();
+    private Dictionary<string, OpenedInventory> _openedInventories = new Dictionary<string, OpenedInventory>();
     private OpenedInventory? _currentInventory = null;
 
     private InventoryItemTransportSelector _selector;
@@ -95,6 +96,7 @@ internal partial class InventoryItemTransport : Node2D {
         inventoryFrame.SelectedPositionChanged += OnSelectedPositionChanged;
 
         _openedInventories.Add(inventory.InventoryInstanceID, openedInventory);
+        _openedInventoryOrder.Add(inventory.InventoryInstanceID);
     }
 
     public bool IsOpen(string inventoryInstanceID) {
@@ -133,6 +135,7 @@ internal partial class InventoryItemTransport : Node2D {
             o.Mutator.Dispose();
         }
         _openedInventories.Remove(inventoryInstanceID);
+        _openedInventoryOrder.Remove(inventoryInstanceID);
     }
 
     public bool HasItem() {
@@ -277,6 +280,7 @@ internal partial class InventoryItemTransport : Node2D {
     }
 
     public void OnInventoryFocused(string inventoryInstanceID) {
+        GD.Print($"Focused: {inventoryInstanceID}");
         _currentInventory = _openedInventories[inventoryInstanceID];
         if (_currentInventory == null) {
             throw new Exception("Failed to get inventory from focus");
@@ -302,6 +306,7 @@ internal partial class InventoryItemTransport : Node2D {
         if (_currentInventory == null) {
             return;
         }
+        GD.Print($"Unfocused: {inventoryInstanceID}");
         if (inventoryInstanceID == _currentInventory.Inventory.InventoryInstanceID) {
             _selector.SetHoveringInventory(false);
             _currentInventory.Frame.ClearItemTilesAppearance();
@@ -330,30 +335,18 @@ internal partial class InventoryItemTransport : Node2D {
         if (_openedInventories.Count == 0) {
             return;
         }
-        if (_openedInventories.Count == 1) {
-            _currentInventory = _openedInventories.First().Value;
-            _currentInventory.Frame.GrabPseudoFocus();
-            return;
-        }
         if (_currentInventory == null) {
             _currentInventory = _openedInventories.First().Value;
             _currentInventory.Frame.GrabPseudoFocus();
             return;
         }
-        string currentKey = _currentInventory.Inventory.InventoryInstanceID;
-        var enumerator = _openedInventories.GetEnumerator();
-        do {
-            if (enumerator.Current.Key == currentKey) {
-                GD.Print("Found current inventory");
-                if (!enumerator.MoveNext()) {
-                    // next would be the end, so go back to the start
-                    _currentInventory = _openedInventories.First().Value;
-                    return;
-                }
-                _currentInventory = enumerator.Current.Value;
-                return;
-            }
-        } while (!enumerator.MoveNext());
-        throw new Exception("Could not select next inventory frame. Failed to find current inventory in opened inventories.");
+        int currentIndex = _openedInventoryOrder.IndexOf(_currentInventory.Inventory.InventoryInstanceID);
+        if (currentIndex == -1) {
+            throw new Exception("Failed to find current inventory in opened inventory order.");
+        }
+        int nextIndex = (currentIndex + 1) % _openedInventoryOrder.Count;
+        _currentInventory.Frame.ClearItemTilesAppearance();
+        _currentInventory = _openedInventories[_openedInventoryOrder[nextIndex]];
+        _currentInventory.Frame.GrabPseudoFocus();
     }
 }
