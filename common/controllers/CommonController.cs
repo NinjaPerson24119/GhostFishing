@@ -25,7 +25,6 @@ public partial class CommonController : Node {
         Menu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
         if (!pauseMenu.IsOpen && Input.IsActionJustPressed("pause_menu")) {
             OpenPauseMenu();
-            pauseMenu.GrabFocus();
         }
         else if (pauseMenu.IsOpen && pauseMenu.RequestedClose) {
             pauseMenu.Close();

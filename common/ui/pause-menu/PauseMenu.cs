@@ -32,6 +32,11 @@ internal partial class PauseMenu : Menu {
         UpdateCoopPrompt();
         UpdateControllerPrompt();
         base.Open();
+
+        if (_resume == null) {
+            throw new System.Exception("Resume button null");
+        }
+        _resume.GrabFocus();
     }
 
     public void OnResume() {
