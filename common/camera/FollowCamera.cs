@@ -287,6 +287,10 @@ public partial class FollowCamera : Node3D {
                 _cameraState.Yaw = Mathf.LerpAngle(_cameraState.Yaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
             }
         }
+        else {
+            // avoid immediate camera reset once controls are restored
+            _cameraResetTimer.Start();
+        }
 
         UpdateCameraTransform();
     }
