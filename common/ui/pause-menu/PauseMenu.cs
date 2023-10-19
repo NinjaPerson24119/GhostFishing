@@ -113,7 +113,7 @@ internal partial class PauseMenu : Menu {
         UpdateCoopPrompt();
     }
 
-    public void OnPlayerActiveChanged() {
+    public void OnPlayerActiveChanged(PlayerID playerID, bool active) {
         SetCloseActions();
     }
 }

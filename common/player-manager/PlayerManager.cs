@@ -102,6 +102,7 @@ public partial class PlayerManager : Node {
         Input.MouseMode = Input.MouseModeEnum.Hidden;
 
         EmitSignal(SignalName.CoopChanged, CoopActive);
+        EmitSignal(SignalName.PlayerActiveChanged, (int)PlayerID.Two, true);
         GD.Print($"Co-op enabled.");
     }
 
@@ -114,6 +115,7 @@ public partial class PlayerManager : Node {
         Input.MouseMode = Input.MouseModeEnum.Visible;
 
         EmitSignal(SignalName.CoopChanged, CoopActive);
+        EmitSignal(SignalName.PlayerActiveChanged, (int)PlayerID.Two, false);
         GD.Print($"Co-op disabled.");
     }
 }

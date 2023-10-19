@@ -1,8 +1,7 @@
-[gd_scene load_steps=20 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=19 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
-[ext_resource type="Script" path="res://common/controllers/CommonController.cs" id="2_mw2bk"]
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
 [ext_resource type="Script" path="res://common/interactive-object/TrackingServer.cs" id="5_hh4xg"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
@@ -125,7 +124,3 @@ PlayerID = 2
 process_mode = 3
 visible = false
 z_as_relative = false
-
-[node name="CommonController" type="Node" parent="."]
-process_mode = 3
-script = ExtResource("2_mw2bk")

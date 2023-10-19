@@ -3,9 +3,16 @@ using Godot;
 public partial class CommonController : Node {
     static SingletonTracker<CommonController> _singletonTracker = new SingletonTracker<CommonController>();
     private static CommonController _singleton { get => _singletonTracker.Ref(); }
+    public static CommonController Ref() {
+        return _singleton;
+    }
 
     [Signal]
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
+
+    public CommonController() {
+        ProcessMode = ProcessModeEnum.Always;
+    }
 
     public override void _Ready() {
         _singletonTracker.Ready(this);

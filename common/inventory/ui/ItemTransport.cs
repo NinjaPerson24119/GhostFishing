@@ -92,8 +92,8 @@ internal partial class InventoryItemTransport : Node2D {
         if (_playerContext == null) {
             throw new Exception("PlayerContext null");
         }
-        ControllerInputType inputType = _playerContext.Controller.InputType;
-        if (inputType == ControllerInputType.Joypad) {
+        InputType inputType = _playerContext.Controller.InputType;
+        if (inputType == InputType.Joypad) {
             _frame.GrabPseudoFocus();
         }
     }
@@ -242,11 +242,11 @@ internal partial class InventoryItemTransport : Node2D {
         if (_playerContext == null) {
             throw new Exception("PlayerContext null");
         }
-        ControllerInputType inputType = _playerContext.Controller.InputType;
-        if (inputType == ControllerInputType.KeyboardMouse) {
+        InputType inputType = _playerContext.Controller.InputType;
+        if (inputType == InputType.KeyboardMouse) {
             TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
         }
-        else if (inputType == ControllerInputType.Joypad) {
+        else if (inputType == InputType.Joypad) {
             TilePosition = _frame.SelectedPosition;
         }
 
@@ -264,14 +264,14 @@ internal partial class InventoryItemTransport : Node2D {
         _frame.ClearItemTilesAppearance();
     }
 
-    public void OnControllerInputTypeChanged(ControllerInputType inputType) {
+    public void OnControllerInputTypeChanged(InputType inputType) {
         if (_frame == null) {
             return;
         }
-        if (inputType == ControllerInputType.Joypad && !_inventoryFocused) {
+        if (inputType == InputType.Joypad && !_inventoryFocused) {
             _frame.GrabPseudoFocus();
         }
-        else if (inputType == ControllerInputType.KeyboardMouse && _inventoryFocused) {
+        else if (inputType == InputType.KeyboardMouse && _inventoryFocused) {
             _frame.CheckMouseIsOver();
         }
     }

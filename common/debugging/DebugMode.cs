@@ -34,11 +34,11 @@ internal partial class DebugMode : Node {
 
     public override void _Process(double delta) {
         string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
-        ControllerInputType inputType = PlayerInjector.Ref().GetPlayerOneContext().Controller.InputType;
-        if (inputType == ControllerInputType.KeyboardMouse) {
+        InputType inputType = PlayerInjector.Ref().GetPlayerOneContext().Controller.InputType;
+        if (inputType == InputType.KeyboardMouse) {
             text += "\nKEYBOARD/MOUSE INPUT";
         }
-        else if (inputType == ControllerInputType.Joypad) {
+        else if (inputType == InputType.Joypad) {
             text += "\nJOYPAD INPUT";
         }
         if (GameClock.Paused) {

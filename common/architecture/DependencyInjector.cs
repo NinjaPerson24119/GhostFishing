@@ -32,10 +32,6 @@ internal partial class DependencyInjector : Node {
         return GetNode<TrackingServer>("/root/Main/Pausable/TrackingServer");
     }
 
-    public CommonController GetCommonController() {
-        return GetNode<CommonController>("/root/Main/CommonController");
-    }
-
     // do not provide other singletons. they provide themselves.
 
     // resources local to each player

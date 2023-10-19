@@ -3,7 +3,6 @@ using Godot;
 internal partial class Main : Node {
     public override void _Ready() {
         Ocean ocean = DependencyInjector.Ref().GetOcean();
-        CommonController commonController = DependencyInjector.Ref().GetCommonController();
         TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
 
@@ -21,8 +20,8 @@ internal partial class Main : Node {
                 continue;
             }
 
-            commonController.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
-            commonController.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
+            CommonController.Ref().SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
+            CommonController.Ref().SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
 
             playerContext.Controller.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
             playerContext.Controller.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;

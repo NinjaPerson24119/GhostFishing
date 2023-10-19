@@ -25,10 +25,19 @@ public partial class PlayerController : Node {
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
     [Signal]
     public delegate void PlayerControlsContextChangedEventHandler(ControlsContextType controlsContext);
+    [Signal]
+    public delegate void InputTypeChangedEventHandler(InputType inputType);
+
 
     public override void _Ready() {
         _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
         EmitSignal(SignalName.PlayerControlsContextChanged, (int)_controlsContext);
+
+        InputModeController.Ref().InputTypeChanged += OnInputTypeChanged;
+    }
+
+    public override void _ExitTree() {
+        InputModeController.Ref().InputTypeChanged -= OnInputTypeChanged;
     }
 
     public override void _Process(double delta) {
@@ -67,5 +76,10 @@ public partial class PlayerController : Node {
     public InputType InputType {
         // for now, the input mode is independent of the player
         get => InputModeController.Ref().InputType;
+    }
+
+    public void OnInputTypeChanged(InputType inputType) {
+        // Forward the signal to remove tight coupling
+        EmitSignal(SignalName.InputTypeChanged, (int)inputType);
     }
 }
