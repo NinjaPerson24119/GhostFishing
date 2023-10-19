@@ -28,6 +28,7 @@ internal partial class InventoryItemTransport : Node2D {
     private InventoryFrame? _frame;
     private InventoryItemTransportSelector _selector;
     private bool _inventoryFocused = false;
+    private PlayerContext? _playerContext;
 
     public InventoryItemTransport(int TileSize) {
         Name = "ItemTransport";
@@ -38,7 +39,11 @@ internal partial class InventoryItemTransport : Node2D {
     }
 
     public override void _Ready() {
-        InputModeController.Ref().InputTypeChanged += OnControllerInputTypeChanged;
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        _playerContext.Controller.InputTypeChanged += OnControllerInputTypeChanged;
     }
 
     public override void _ExitTree() {
@@ -46,7 +51,10 @@ internal partial class InventoryItemTransport : Node2D {
             GD.PrintErr("InventoryItemTransport was not closed before being destroyed.");
             _mutator.Dispose();
         }
-        InputModeController.Ref().InputTypeChanged -= OnControllerInputTypeChanged;
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        _playerContext.Controller.InputTypeChanged -= OnControllerInputTypeChanged;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -81,7 +89,10 @@ internal partial class InventoryItemTransport : Node2D {
         _frame.PseudoFocusExited += OnInventoryUnfocused;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
 
-        ControllerInputType inputType = InputModeController.Ref().InputType;
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        ControllerInputType inputType = _playerContext.Controller.InputType;
         if (inputType == ControllerInputType.Joypad) {
             _frame.GrabPseudoFocus();
         }
@@ -228,7 +239,10 @@ internal partial class InventoryItemTransport : Node2D {
         }
         _inventoryFocused = true;
 
-        ControllerInputType inputType = InputModeController.Ref().InputType;
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        ControllerInputType inputType = _playerContext.Controller.InputType;
         if (inputType == ControllerInputType.KeyboardMouse) {
             TilePosition = _frame.SelectNearestTile(_selector.GlobalPosition);
         }
