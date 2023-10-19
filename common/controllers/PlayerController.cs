@@ -1,51 +1,34 @@
 using Godot;
 using System;
 
-public enum ControllerInputType {
-    KeyboardMouse = 0,
-    Joypad = 1,
+public enum ControlsContextType {
+    // player can open menus
+    Player = 0,
+    // player is in a menu so cannot be controlled
+    PlayerMenu = 1,
 }
 
 public partial class PlayerController : Node {
-    private enum ControlsContextType {
-        // player can open menus
-        Player = 0,
-        // player is in a menu so cannot be controlled
-        PlayerMenu = 1,
-    }
-
-    private ControlsContextType ControlsContext {
+    public ControlsContextType ControlsContext {
         get => _controlsContext;
-        set {
+        private set {
             _controlsContext = value;
+            EmitSignal(SignalName.PlayerControlsContextChanged, (int)_controlsContext);
             EmitSignal(SignalName.SetPlayerControlsDisabled, value != ControlsContextType.Player);
         }
     }
     private ControlsContextType _controlsContext = ControlsContextType.Player;
 
-    public ControllerInputType InputType {
-        get => _inputType;
-        private set {
-            if (value != _inputType) {
-                if (value != ControllerInputType.KeyboardMouse || MouseAllowed()) {
-                    EmitSignal(SignalName.InputTypeChanged, (int)value);
-                }
-            }
-            OnInputTypeChanged(value);
-            _inputType = value;
-        }
-    }
-    private ControllerInputType _inputType = ControllerInputType.KeyboardMouse;
-
     private PlayerContext? _playerContext;
 
     [Signal]
-    public delegate void InputTypeChangedEventHandler(ControllerInputType inputType);
-    [Signal]
     public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
+    [Signal]
+    public delegate void PlayerControlsContextChangedEventHandler(ControlsContextType controlsContext);
 
     public override void _Ready() {
         _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        EmitSignal(SignalName.PlayerControlsContextChanged, (int)_controlsContext);
     }
 
     public override void _Process(double delta) {
@@ -59,15 +42,6 @@ public partial class PlayerController : Node {
         }
         else {
             ProcessPlayerMenu();
-        }
-    }
-
-    public override void _Input(InputEvent inputEvent) {
-        if (inputEvent is InputEventJoypadButton || inputEvent is InputEventJoypadMotion) {
-            InputType = ControllerInputType.Joypad;
-        }
-        else if (inputEvent is InputEventKey || inputEvent is InputEventMouse || inputEvent is InputEventMouseMotion || inputEvent is InputEventMouseButton) {
-            InputType = ControllerInputType.KeyboardMouse;
         }
     }
 
@@ -85,20 +59,13 @@ public partial class PlayerController : Node {
         }
     }
 
-    public void OnInputTypeChanged(ControllerInputType inputType) {
-        if (inputType == ControllerInputType.KeyboardMouse) {
-            // TODO: set this to confined once I'm OK with the mouse getting locked constantly
-            Input.MouseMode = ControlsContext == ControlsContextType.Player ? Input.MouseModeEnum.Visible : Input.MouseModeEnum.Visible;
-        }
-        else if (inputType == ControllerInputType.Joypad) {
-            //Input.MouseMode = Input.MouseModeEnum.ConfinedHidden;
-        }
+    public bool MouseAllowed() {
+        // for now, the input mode is independent of the player
+        return InputModeController.Ref().MouseAllowed();
     }
 
-    public bool MouseAllowed() {
-        if (_playerContext == null) {
-            return false;
-        }
-        return _playerContext.PlayerID == PlayerID.One && !PlayerManager.Ref().CoopActive;
+    public InputType InputType {
+        // for now, the input mode is independent of the player
+        get => InputModeController.Ref().InputType;
     }
 }

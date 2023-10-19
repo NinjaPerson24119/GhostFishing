@@ -13,15 +13,7 @@ internal partial class PauseMenu : Menu {
     public override void _Ready() {
         base._Ready();
 
-        Dictionary<PlayerID, Player> players = PlayerInjector.Ref().GetPlayers();
-        _closeActions.Add("pause_menu");
-        foreach (var kv in players) {
-            Player player = kv.Value;
-            if (player.PlayerContext == null) {
-                continue;
-            }
-            _closeActions.Add(player.PlayerContext.ActionCancel);
-        }
+        SetCloseActions();
 
         _resume = GetNode<Button>("BoxContainer/Resume");
         _coopPrompt = GetNode<Button>("BoxContainer/CoopPrompt");
@@ -33,6 +25,7 @@ internal partial class PauseMenu : Menu {
 
         PlayerManager.Ref().CoopChanged += OnCoopChanged;
         PlayerManager.Ref().PlayerControllerActiveChanged += OnPlayerControllerActiveChanged;
+        PlayerManager.Ref().PlayerActiveChanged += OnPlayerActiveChanged;
     }
 
     public override void Open() {
@@ -97,6 +90,19 @@ internal partial class PauseMenu : Menu {
         _controllerPrompt.Text = text;
     }
 
+    public void SetCloseActions() {
+        _closeActions.Clear();
+        _closeActions.Add("pause_menu");
+        Dictionary<PlayerID, Player> players = PlayerInjector.Ref().GetPlayers();
+        foreach (var kv in players) {
+            Player player = kv.Value;
+            if (player.PlayerContext == null) {
+                continue;
+            }
+            _closeActions.Add(player.PlayerContext.ActionCancel);
+        }
+    }
+
     public void OnCoopChanged(bool coopActive) {
         UpdateControllerPrompt();
         UpdateCoopPrompt();
@@ -105,5 +111,9 @@ internal partial class PauseMenu : Menu {
     public void OnPlayerControllerActiveChanged(PlayerID playerID, bool connected) {
         UpdateControllerPrompt();
         UpdateCoopPrompt();
+    }
+
+    public void OnPlayerActiveChanged() {
+        SetCloseActions();
     }
 }

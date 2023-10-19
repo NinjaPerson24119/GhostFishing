@@ -21,6 +21,8 @@ public partial class PlayerManager : Node {
     public delegate void CoopChangedEventHandler(bool coopActive);
     [Signal]
     public delegate void PlayerControllerActiveChangedEventHandler(PlayerID playerID, bool active);
+    [Signal]
+    public delegate void PlayerActiveChangedEventHandler(PlayerID playerID, bool active);
 
     public PlayerManager() {
         ProcessMode = ProcessModeEnum.Always;
@@ -92,6 +94,7 @@ public partial class PlayerManager : Node {
 
     public void EnableCoop() {
         if (!CanEnableCoop()) {
+            GD.Print("Failed to enable co-op. Because preconditions were not met.");
             return;
         }
         CoopActive = true;
