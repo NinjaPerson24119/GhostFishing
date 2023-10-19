@@ -14,9 +14,12 @@ internal class OpenInventoryAction : InteractiveObjectAction {
             return false;
         }
 
+        PlayerContext? playerContext = player.PlayerContext;
+        if (playerContext == null) {
+            throw new System.Exception("PlayerContext null");
+        }
         GD.Print($"Activated inventory {_inventoryInstanceID}");
-        // TODO: call high-level API to open this inventory and player inventory side-by-side
-        // also need to predicate by player
-        return true;
+        InventoryInstance inventoryInstance = AssetManager.Ref().GetInventoryInstance(_inventoryInstanceID);
+        return playerContext.OpenInventoryWithOthers(new InventoryInstance[] { inventoryInstance });
     }
 }

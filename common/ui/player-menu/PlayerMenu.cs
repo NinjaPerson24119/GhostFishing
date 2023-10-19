@@ -109,12 +109,8 @@ public partial class PlayerMenu : Menu {
             throw new Exception("Cannot OpenInventory because PlayerMenu not initialized");
         }
         if (!_itemTransport.IsOpen()) {
-            GD.Print($"Opening inventory {_boatInventory.InventoryInstanceID}");
             _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
             GD.Print("Opened inventory.");
-        }
-        else {
-            GD.PrintErr("Cannot open item transport because it's already open.");
         }
     }
 
@@ -156,5 +152,11 @@ public partial class PlayerMenu : Menu {
         }
         Initialize();
         CallDeferred(nameof(OpenInventory));
+    }
+
+    public bool OpenInventoryWithOthers(InventoryInstance[] inventories) {
+        GD.Print("Would open other inventories");
+        Open();
+        return true;
     }
 }

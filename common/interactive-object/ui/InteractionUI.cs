@@ -20,6 +20,14 @@ internal partial class InteractionUI : Control {
             Refresh();
         }
 
+        if (_playerContext == null) {
+            throw new System.Exception("PlayerContext null");
+        }
+        if (_playerContext.Controller.ControlsContext != ControlsContextType.Player) {
+            Visible = false;
+            return;
+        }
+
         Label label = GetNode<Label>("Label");
         if (selectedObject != null) {
             label.Text = selectedObject.Description;
@@ -31,6 +39,9 @@ internal partial class InteractionUI : Control {
             throw new System.Exception("PlayerContext must be set before _Input is called");
         }
         if (selectedObject == null) {
+            return;
+        }
+        if (_playerContext.Controller.ControlsContext != ControlsContextType.Player) {
             return;
         }
 

@@ -20,6 +20,9 @@ public partial class Menu : Control {
     // use this in child classes to prevent the menu from closing when the cancel action is pressed
     protected bool CloseActionClosesMenu = true;
 
+    [Signal]
+    public delegate void OpenedEventHandler();
+
     public override void _Input(InputEvent inputEvent) {
         if (!AcceptingInput) {
             return;
@@ -39,6 +42,7 @@ public partial class Menu : Control {
             return;
         }
         Visible = true;
+        EmitSignal(SignalName.Opened);
     }
 
     public virtual void Close() {

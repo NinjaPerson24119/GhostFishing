@@ -2,6 +2,8 @@
 
 The `PlayerContext` is everything adjacent to the player, but not the player itself.
 - Every "active" / "controlled" player has a `PlayerContext`.
+- `PlayerContext` also provides "glue" methods for the `Player` to interact with the world.
+  - Such as opening multiple inventories together.
 
 The `Player` is just the object that represents the player in the world.
 - Every **possible** player (active or not, but existing in the game world) has a `Player`.

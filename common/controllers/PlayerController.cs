@@ -34,6 +34,10 @@ public partial class PlayerController : Node {
         EmitSignal(SignalName.PlayerControlsContextChanged, (int)_controlsContext);
 
         InputModeController.Ref().InputTypeChanged += OnInputTypeChanged;
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        _playerContext.PlayerMenu.Opened += OnPlayerMenuOpened;
     }
 
     public override void _ExitTree() {
@@ -45,7 +49,6 @@ public partial class PlayerController : Node {
             return;
         }
         if (Input.IsActionJustPressed(_playerContext.ActionOpenInventory)) {
-            ControlsContext = ControlsContextType.PlayerMenu;
             _playerContext.PlayerMenu.Open();
             GD.Print("Player menu opened");
         }
@@ -81,5 +84,9 @@ public partial class PlayerController : Node {
     public void OnInputTypeChanged(InputType inputType) {
         // Forward the signal to remove tight coupling
         EmitSignal(SignalName.InputTypeChanged, (int)inputType);
+    }
+
+    public void OnPlayerMenuOpened() {
+        ControlsContext = ControlsContextType.PlayerMenu;
     }
 }

@@ -136,4 +136,8 @@ public partial class PlayerContext : Node {
             FollowCamera.ProcessMode = coopActive ? ProcessModeEnum.Inherit : ProcessModeEnum.Disabled;
         }
     }
+
+    public bool OpenInventoryWithOthers(InventoryInstance[] inventories) {
+        return PlayerMenu.OpenInventoryWithOthers(inventories);
+    }
 }
