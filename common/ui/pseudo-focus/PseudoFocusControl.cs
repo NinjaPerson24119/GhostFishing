@@ -70,7 +70,7 @@ public partial class PseudoFocusControl : Control {
 
     public bool IsMouseOver() {
         Vector2 globalMousePosition = GetGlobalMousePosition();
-        if (globalMousePosition > GetGlobalRect().Position & globalMousePosition < GetGlobalRect().Position + GetGlobalRect().Size) {
+        if (GetGlobalRect().HasPoint(globalMousePosition)) {
             return true;
         }
         if (_debugLogs) {

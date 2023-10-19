@@ -125,7 +125,7 @@ public partial class PlayerMenu : Menu {
         }
         if (!_itemTransport.IsOpen(_boatInventory.InventoryInstanceID)) {
             _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
-            _itemTransport.SelectNextInventoryFrame();
+            _itemTransport.SelectInventoryFrame(_boatInventory.InventoryInstanceID);
             GD.Print("Opened inventory.");
         }
         if (_playerContext == null) {

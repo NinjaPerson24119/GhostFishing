@@ -43,12 +43,14 @@ internal partial class InventoryItemTransport : Node2D {
 
     private InventoryItemTransportSelector _selector;
     private PlayerContext? _playerContext;
+    private int _tileSize;
 
     public InventoryItemTransport(int TileSize) {
         Name = "ItemTransport";
         _selector = new InventoryItemTransportSelector(TileSize) {
             Name = "Selector"
         };
+        _tileSize = TileSize;
         CallDeferred("add_child", _selector);
     }
 
@@ -69,13 +71,14 @@ internal partial class InventoryItemTransport : Node2D {
     }
 
     public override void _Input(InputEvent inputEvent) {
-        if (_currentInventory == null) {
-            return;
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
         }
-        if (!_currentInventory.Frame.HasPseudoFocus()) {
+        if (_currentInventory == null && _item != null) {
             InputEventMouse? mouseEvent = inputEvent as InputEventMouse;
-            if (mouseEvent != null) {
-                _selector.GlobalPosition = mouseEvent.GlobalPosition;
+            if (mouseEvent != null && _playerContext.Controller.MouseAllowed()) {
+                // shift cursor to center of item for more natural UX
+                _selector.GlobalPosition = mouseEvent.GlobalPosition - new Vector2I(_item.Width, _item.Height) * _tileSize / 2;
             }
         }
     }
@@ -281,6 +284,9 @@ internal partial class InventoryItemTransport : Node2D {
 
     public void OnInventoryFocused(string inventoryInstanceID) {
         GD.Print($"Focused: {inventoryInstanceID}");
+        if (_currentInventory != null) {
+            _currentInventory.Frame.ClearItemTilesAppearance();
+        }
         _currentInventory = _openedInventories[inventoryInstanceID];
         if (_currentInventory == null) {
             throw new Exception("Failed to get inventory from focus");
@@ -323,6 +329,17 @@ internal partial class InventoryItemTransport : Node2D {
                 SelectNextInventoryFrame();
             }
         }
+    }
+
+    public void SelectInventoryFrame(string inventoryInstanceID) {
+        if (!_openedInventories.ContainsKey(inventoryInstanceID)) {
+            throw new Exception("Failed to select inventory frame because it's not open.");
+        }
+        if (_currentInventory != null) {
+            _currentInventory.Frame.ClearItemTilesAppearance();
+        }
+        _currentInventory = _openedInventories[inventoryInstanceID];
+        _currentInventory.Frame.GrabPseudoFocus();
     }
 
     public void SelectNextInventoryFrame() {
