@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class PlayerMenu : Menu {
     [Export]
@@ -8,9 +9,11 @@ public partial class PlayerMenu : Menu {
     private InventoryItemTransport? _itemTransport;
     private InventoryInstance? _boatInventory;
     private InventoryFrame? _boatInventoryFrame;
+    private List<InventoryFrame> _additionalInventoryFrames = new List<InventoryFrame>();
     private bool _initialized = false;
     private SaveStateManager.Lock? _saveStateLock;
     private PlayerContext? _playerContext;
+    private BoxContainer? _framesContainer;
 
     public PlayerMenu() {
         Visible = false;
@@ -27,6 +30,8 @@ public partial class PlayerMenu : Menu {
         _closeActions.Add(_playerContext.ActionOpenInventory);
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
 
+        _framesContainer = GetNode<BoxContainer>("InventoryFramesContainer");
+
         Initialize();
     }
 
@@ -42,12 +47,15 @@ public partial class PlayerMenu : Menu {
         if (_playerContext == null) {
             throw new Exception("PlayerContext null");
         }
+        if (_framesContainer == null) {
+            throw new Exception("InventoryFramesContainer null");
+        }
         PlayerStateView playerView = AssetManager.Ref().GetPlayerView(_playerContext.PlayerID);
         _boatInventory = playerView.BoatInventory;
         _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx);
         _boatInventoryFrame.SetAnchorsPreset(LayoutPreset.TopRight);
         _boatInventoryFrame.Resized += OnInventoryFrameResized;
-        AddChild(_boatInventoryFrame);
+        _framesContainer.AddChild(_boatInventoryFrame);
 
         _itemTransport = new InventoryItemTransport(TileSizePx);
         AddChild(_itemTransport);
@@ -88,6 +96,9 @@ public partial class PlayerMenu : Menu {
         if (inputEvent.IsActionPressed(_playerContext.ActionRotateCounterClockwise)) {
             _itemTransport.RotateCounterClockwise();
         }
+        if (inputEvent.IsActionPressed(_playerContext.ActionNextInventoryFrame)) {
+            _itemTransport.SelectNextInventoryFrame();
+        }
 
         CloseActionClosesMenu = !_itemTransport.HasItem();
         if (_itemTransport.HasItem() && _saveStateLock == null) {
@@ -105,19 +116,42 @@ public partial class PlayerMenu : Menu {
     }
 
     public void OpenInventory() {
+        OpenInventories(null);
+    }
+
+    public void OpenInventories(InventoryInstance[]? additionalInventories) {
         if (_itemTransport == null || _boatInventory == null || _boatInventoryFrame == null || !_initialized) {
             throw new Exception("Cannot OpenInventory because PlayerMenu not initialized");
         }
-        if (!_itemTransport.IsOpen()) {
+        if (!_itemTransport.IsOpen(_boatInventory.InventoryInstanceID)) {
             _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
+            _itemTransport.SelectNextInventoryFrame();
             GD.Print("Opened inventory.");
+        }
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+
+        if (_framesContainer == null) {
+            throw new Exception("InventoryFramesContainer null");
+        }
+        if (additionalInventories != null) {
+            foreach (InventoryInstance inventory in additionalInventories) {
+                InventoryFrame frame = new InventoryFrame(inventory, TileSizePx);
+                _framesContainer.AddChild(frame);
+                _additionalInventoryFrames.Add(frame);
+
+                _itemTransport.OpenInventory(inventory, frame);
+                GD.Print("Opened additional inventory.");
+            }
         }
     }
 
     public override void Close() {
         if (_itemTransport != null) {
-            _itemTransport.CloseInventory();
-            GD.Print("Closed inventory.");
+            _itemTransport.CloseInventories();
+            ClearAdditionalInventoryFrames();
+            GD.Print("Closed inventories.");
         }
         base.Close();
     }
@@ -137,7 +171,7 @@ public partial class PlayerMenu : Menu {
 
         _initialized = false;
         if (_itemTransport != null) {
-            _itemTransport.CloseInventory();
+            _itemTransport.CloseInventories();
             _itemTransport.QueueFree();
             _itemTransport = null;
         }
@@ -150,13 +184,23 @@ public partial class PlayerMenu : Menu {
             _saveStateLock.Dispose();
             _saveStateLock = null;
         }
+        ClearAdditionalInventoryFrames();
+
         Initialize();
         CallDeferred(nameof(OpenInventory));
     }
 
     public bool OpenInventoryWithOthers(InventoryInstance[] inventories) {
         GD.Print("Would open other inventories");
-        Open();
+        base.Open();
+        OpenInventories(inventories);
         return true;
+    }
+
+    public void ClearAdditionalInventoryFrames() {
+        foreach (InventoryFrame frame in _additionalInventoryFrames) {
+            frame.QueueFree();
+        }
+        _additionalInventoryFrames.Clear();
     }
 }

@@ -90,6 +90,9 @@ public partial class PlayerContext : Node {
     public string ActionRotateCounterClockwise {
         get => $"inventory_rotate_counterclockwise_{PlayerID.PlayerControlMappingNumber()}";
     }
+    public string ActionNextInventoryFrame {
+        get => $"inventory_next_frame_{PlayerID.PlayerControlMappingNumber()}";
+    }
 
     public string ActionNavigateUp {
         get => $"navigate_up_{PlayerID.PlayerControlMappingNumber()}";

@@ -69,6 +69,10 @@ internal partial class InventoryFrame : PseudoFocusControl {
 
     [Signal]
     public delegate void SelectedPositionChangedEventHandler(Vector2I position);
+    [Signal]
+    public delegate void InventoryFocusedEventHandler(string inventoryInstanceID);
+    [Signal]
+    public delegate void InventoryUnfocusedEventHandler(string inventoryInstanceID);
 
     public InventoryFrame(InventoryInstance inventory, int tileSizePx) {
         _mouseFocusSloppy = true;
@@ -76,6 +80,10 @@ internal partial class InventoryFrame : PseudoFocusControl {
 
         _inventory = inventory;
         _inventory.Updated += OnInventoryUpdated;
+
+        // self-subscribe to attach inventory instance ID to events
+        PseudoFocusEntered += OnPseudoFocusEntered;
+        PseudoFocusExited += OnPseudoFocusExited;
     }
 
     public override void _Ready() {
@@ -373,5 +381,12 @@ internal partial class InventoryFrame : PseudoFocusControl {
         }
         Vector2 topLeft = _inventoryGrid.GetGlobalPositionFromTilePosition(tilePosition);
         Input.WarpMouse(topLeft + new Vector2(TileSizePx / 2, TileSizePx / 2));
+    }
+
+    public void OnPseudoFocusEntered() {
+        EmitSignal(SignalName.InventoryFocused, _inventory.InventoryInstanceID);
+    }
+    public void OnPseudoFocusExited() {
+        EmitSignal(SignalName.InventoryUnfocused, _inventory.InventoryInstanceID);
     }
 }
