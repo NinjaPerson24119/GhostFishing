@@ -13,11 +13,18 @@ public struct PlayerStateAssetIDs {
 }
 
 public class PlayerStateView {
-    public InventoryInstance BoatInventory;
-    public InventoryInstance QuestInventory;
-    public InventoryInstance StorageInventory;
-
     public readonly PlayerID PlayerID;
+    private readonly PlayerStateAssetIDs playerStateAssetIDs;
+
+    public InventoryInstance BoatInventory {
+        get => AssetManager.Ref().GetInventoryInstance(playerStateAssetIDs.BoatInventoryInstanceID);
+    }
+    public InventoryInstance QuestInventory {
+        get => AssetManager.Ref().GetInventoryInstance(playerStateAssetIDs.QuestInventoryInstanceID);
+    }
+    public InventoryInstance StorageInventory {
+        get => AssetManager.Ref().GetInventoryInstance(playerStateAssetIDs.StorageInventoryInstanceID);
+    }
 
     public Vector3 GlobalPosition {
         get {
@@ -82,8 +89,6 @@ public class PlayerStateView {
 
     public PlayerStateView(PlayerID playerID, PlayerStateAssetIDs assetIDs) {
         PlayerID = playerID;
-        BoatInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.BoatInventoryInstanceID);
-        QuestInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.QuestInventoryInstanceID);
-        StorageInventory = AssetManager.Ref().GetInventoryInstance(assetIDs.StorageInventoryInstanceID);
+        playerStateAssetIDs = assetIDs;
     }
 }

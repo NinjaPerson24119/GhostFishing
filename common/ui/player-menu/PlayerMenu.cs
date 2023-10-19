@@ -109,6 +109,7 @@ public partial class PlayerMenu : Menu {
             throw new Exception("Cannot OpenInventory because PlayerMenu not initialized");
         }
         if (!_itemTransport.IsOpen()) {
+            GD.Print($"Opening inventory {_boatInventory.InventoryInstanceID}");
             _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
             GD.Print("Opened inventory.");
         }
