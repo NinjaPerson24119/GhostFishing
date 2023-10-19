@@ -80,8 +80,6 @@ internal partial class InventoryItemTransport : Node2D {
             throw new Exception("Failed to get mutator from inventory. It's probably already opened.");
         }
         _frame = inventoryFrame;
-        _frame.SelectedPositionChanged += OnSelectedPositionChanged;
-
         _frame.PseudoFocusEntered += OnInventoryFocused;
         _frame.PseudoFocusExited += OnInventoryUnfocused;
         _frame.SelectedPositionChanged += OnSelectedPositionChanged;
