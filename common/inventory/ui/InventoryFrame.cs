@@ -366,4 +366,12 @@ internal partial class InventoryFrame : PseudoFocusControl {
         selectionBoundBottomRight = bottomRight;
         return SelectedPosition;
     }
+
+    public void MoveMouseToTile(Vector2I tilePosition) {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot get top left of item because inventory grid is null.");
+        }
+        Vector2 topLeft = _inventoryGrid.GetGlobalPositionFromTilePosition(tilePosition);
+        Input.WarpMouse(topLeft + new Vector2(TileSizePx / 2, TileSizePx / 2));
+    }
 }

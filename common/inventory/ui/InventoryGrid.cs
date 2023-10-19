@@ -110,4 +110,8 @@ internal partial class InventoryGrid : Node2D {
         }
         return new Vector2I(x, y);
     }
+
+    public Vector2 GetGlobalPositionFromTilePosition(Vector2I tilePosition) {
+        return GlobalPosition + _tileSizePx * new Vector2(tilePosition.X, tilePosition.Y);
+    }
 }

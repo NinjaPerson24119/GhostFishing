@@ -134,6 +134,19 @@ internal partial class InventoryItemTransport : Node2D {
             GD.Print("Can't place item");
             return;
         }
+
+        // move mouse to first used tile of item so we don't have to move mouse to re-select it
+        if (_frame == null) {
+            throw new Exception("Frame null");
+        }
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        if (_playerContext.Controller.InputType == InputType.KeyboardMouse) {
+            Vector2I firstTileOffset = _item.FirstUsedTileOffset();
+            _frame.MoveMouseToTile(new Vector2I(_item.X, _item.Y) + firstTileOffset);
+        }
+
         ClearItem();
     }
 
@@ -147,6 +160,14 @@ internal partial class InventoryItemTransport : Node2D {
             return;
         }
         _lastTake = new TakeItemAction(_inventory, _mutator, _item);
+
+        // move mouse to top-left of item so the item doesn't automatically move when we take it
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        if (_playerContext.Controller.InputType == InputType.KeyboardMouse) {
+            _frame.MoveMouseToTile(new Vector2I(_item.X, _item.Y));
+        }
 
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
         TilePosition = _frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_inventory.Width - itemDef.Space.Width, _inventory.Height - itemDef.Space.Height));
