@@ -201,8 +201,12 @@ internal partial class InventoryItemTransport : Node2D {
             _currentInventory.Frame.SelectedPosition = new Vector2I(_item.X, _item.Y);
         }
 
+        // bounds need to be set for each frame to avoid edge conditions when transporting items between inventories
         InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
         TilePosition = _currentInventory.Frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_currentInventory.Inventory.Width - itemDef.Space.Width, _currentInventory.Inventory.Height - itemDef.Space.Height));
+        foreach (OpenedInventory openedInventory in _openedInventories.Values) {
+            _ = openedInventory.Frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(openedInventory.Inventory.Width - itemDef.Space.Width, openedInventory.Inventory.Height - itemDef.Space.Height));
+        }
 
         _selector.AssignItem(_item);
         SetItemTileAppearance();
@@ -257,7 +261,10 @@ internal partial class InventoryItemTransport : Node2D {
         _selector.UnassignItem();
         if (_currentInventory != null) {
             _currentInventory.Frame.ClearItemTilesAppearance();
-            _currentInventory.Frame.ResetSelectionBound();
+            // bounds need to be set for each frame to avoid edge conditions when transporting items between inventories
+            foreach (OpenedInventory openedInventory in _openedInventories.Values) {
+                openedInventory.Frame.ResetSelectionBound();
+            }
         }
     }
 
