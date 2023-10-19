@@ -106,6 +106,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
 
     public override void _ExitTree() {
         _inventory.Updated -= OnInventoryUpdated;
+        GD.Print("Frame exited tree");
     }
 
     public override void _Input(InputEvent inputEvent) {

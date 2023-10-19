@@ -95,6 +95,7 @@ internal partial class InventoryItemTransport : Node2D {
         InputType inputType = _playerContext.Controller.InputType;
         if (inputType == InputType.Joypad) {
             _frame.GrabPseudoFocus();
+            GD.Print("Grab pseudo-focus");
         }
     }
 
