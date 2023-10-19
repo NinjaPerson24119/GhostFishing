@@ -37,6 +37,13 @@ public partial class PseudoFocusControl : Control {
         _pseudoFocusContext = DependencyInjector.Ref().GetLocalPseudoFocusContext(GetPath());
     }
 
+    public override void _ExitTree() {
+        if (HasPseudoFocus()) {
+            ReleasePseudoFocus();
+            GD.Print("Released pseudo focus on exit");
+        }
+    }
+
     public new void GrabFocus() {
         throw new System.Exception("PseudoFocusControl does not support GrabFocus");
     }
@@ -45,7 +52,7 @@ public partial class PseudoFocusControl : Control {
         throw new System.Exception("PseudoFocusControl does not support ReleaseFocus");
     }
 
-    public new void HasFocus() {
+    public new bool HasFocus() {
         throw new System.Exception("PseudoFocusControl does not support HasFocus");
     }
 }

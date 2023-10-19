@@ -25,6 +25,10 @@ internal partial class InventoryGrid : Node2D {
         _inventory.Updated += OnInventoryUpdated;
     }
 
+    public override void _ExitTree() {
+        _inventory.Updated -= OnInventoryUpdated;
+    }
+
     public override void _Ready() {
         for (int y = 0; y < _inventory.Height; y++) {
             for (int x = 0; x < _inventory.Width; x++) {

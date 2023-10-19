@@ -47,10 +47,7 @@ internal partial class InventoryItemTransport : Node2D {
     }
 
     public override void _ExitTree() {
-        if (_mutator != null) {
-            GD.PrintErr("InventoryItemTransport was not closed before being destroyed.");
-            _mutator.Dispose();
-        }
+        CloseInventory();
         if (_playerContext == null) {
             throw new Exception("PlayerContext null");
         }

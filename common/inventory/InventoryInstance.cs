@@ -28,6 +28,7 @@ public class InventoryInstanceDTO : IGameAssetDTO {
     }
 }
 
+// this is only a Node because we want to use Signals, don't try to add it to the tree
 public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInstanceDTO> {
     public readonly string InventoryInstanceID;
     private readonly string? _inventoryDefinitionID;
@@ -314,5 +315,9 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
     public bool IsTouched() {
         // we can't write inventory instances without a corresponding definition
         return Touched && !string.IsNullOrEmpty(_inventoryDefinitionID);
+    }
+
+    public new void QueueFree() {
+        throw new Exception("InventoryInstance.QueueFree() is not supported. It's a Node only so we can use signals.");
     }
 }

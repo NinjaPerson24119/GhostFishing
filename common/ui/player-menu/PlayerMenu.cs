@@ -44,9 +44,7 @@ public partial class PlayerMenu : Menu {
         }
         PlayerStateView playerView = AssetManager.Ref().GetPlayerView(_playerContext.PlayerID);
         _boatInventory = playerView.BoatInventory;
-        _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx) {
-            Name = "BoatInventoryFrame"
-        };
+        _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx);
         _boatInventoryFrame.SetAnchorsPreset(LayoutPreset.TopRight);
         _boatInventoryFrame.Resized += OnInventoryFrameResized;
         AddChild(_boatInventoryFrame);
@@ -60,6 +58,9 @@ public partial class PlayerMenu : Menu {
     public override void _Input(InputEvent inputEvent) {
         base._Input(inputEvent);
 
+        if (!_initialized) {
+            throw new Exception("PlayerMenu not initialized");
+        }
         if (_itemTransport == null) {
             return;
         }
@@ -104,12 +105,15 @@ public partial class PlayerMenu : Menu {
     }
 
     public void OpenInventory() {
-        if (_itemTransport == null || _boatInventory == null || _boatInventoryFrame == null) {
+        if (_itemTransport == null || _boatInventory == null || _boatInventoryFrame == null || !_initialized) {
             throw new Exception("Cannot OpenInventory because PlayerMenu not initialized");
         }
         if (!_itemTransport.IsOpen()) {
             _itemTransport.OpenInventory(_boatInventory, _boatInventoryFrame);
             GD.Print("Opened inventory.");
+        }
+        else {
+            GD.PrintErr("Cannot open item transport because it's already open.");
         }
     }
 
@@ -132,19 +136,22 @@ public partial class PlayerMenu : Menu {
         if (_initialized == false) {
             return;
         }
+        GD.Print("PlayerMenu.OnLoadedSaveState");
 
         _initialized = false;
         if (_itemTransport != null) {
             _itemTransport.CloseInventory();
+            _itemTransport.QueueFree();
             _itemTransport = null;
         }
-        _itemTransport = null;
         _boatInventory = null;
-        _boatInventoryFrame = null;
-        var children = GetChildren();
-        for (int i = 0; i < children.Count; i++) {
-            RemoveChild(children[i]);
-            children[i].QueueFree();
+        if (_boatInventoryFrame != null) {
+            _boatInventoryFrame.QueueFree();
+            _boatInventoryFrame = null;
+        }
+        if (_saveStateLock != null) {
+            _saveStateLock.Dispose();
+            _saveStateLock = null;
         }
         Initialize();
         CallDeferred(nameof(OpenInventory));
