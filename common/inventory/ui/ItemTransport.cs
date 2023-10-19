@@ -267,8 +267,5 @@ internal partial class InventoryItemTransport : Node2D {
         if (inputType == InputType.Joypad && !_inventoryFocused) {
             _frame.GrabPseudoFocus();
         }
-        else if (inputType == InputType.KeyboardMouse && _inventoryFocused) {
-            _frame.CheckMouseIsOver();
-        }
     }
 }

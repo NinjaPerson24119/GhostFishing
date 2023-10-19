@@ -5,6 +5,14 @@ public partial class PseudoFocusControl : Control {
     // We use a PseudoFocusContext to track which control has focus
     private PseudoFocusContext? _pseudoFocusContext;
 
+    Timer _mouseFocusTimer = new Timer() {
+        Name = "MouseFocusTimer",
+        WaitTime = 0.2f,
+        Autostart = true,
+    };
+    protected bool _mouseFocusSloppy = false;
+    protected bool _debugLogs = false;
+
     [Signal]
     public delegate void PseudoFocusEnteredEventHandler();
     [Signal]
@@ -35,12 +43,16 @@ public partial class PseudoFocusControl : Control {
 
     public override void _Ready() {
         _pseudoFocusContext = DependencyInjector.Ref().GetLocalPseudoFocusContext(GetPath());
+        AddChild(_mouseFocusTimer);
+        _mouseFocusTimer.Timeout += UpdateMouseSloppyFocus;
     }
 
     public override void _ExitTree() {
         if (HasPseudoFocus()) {
             ReleasePseudoFocus();
-            GD.Print("Released pseudo focus on exit");
+            if (_debugLogs) {
+                GD.Print("Released pseudo focus on exit");
+            }
         }
     }
 
@@ -54,5 +66,38 @@ public partial class PseudoFocusControl : Control {
 
     public new bool HasFocus() {
         throw new System.Exception("PseudoFocusControl does not support HasFocus");
+    }
+
+    public bool IsMouseOver() {
+        Vector2 globalMousePosition = GetGlobalMousePosition();
+        if (globalMousePosition > GetGlobalRect().Position & globalMousePosition < GetGlobalRect().Position + GetGlobalRect().Size) {
+            return true;
+        }
+        if (_debugLogs) {
+            GD.Print("Mouse is not over pseudo-focus control");
+        }
+        return false;
+    }
+
+    public void UpdateMouseSloppyFocus() {
+        if (_pseudoFocusContext == null) {
+            throw new System.Exception("PseudoFocusControl must be added to a PseudoFocusContext");
+        }
+        if (!_pseudoFocusContext.MouseAllowed() || !_mouseFocusSloppy) {
+            return;
+        }
+
+        if (IsMouseOver()) {
+            if (_debugLogs) {
+                GD.Print("Mouse is over pseudo-focus control");
+            }
+            GrabPseudoFocus();
+        }
+        else {
+            if (_debugLogs) {
+                GD.Print("Mouse is not over pseudo-focus control");
+            }
+            ReleasePseudoFocus();
+        }
     }
 }

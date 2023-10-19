@@ -3,6 +3,9 @@ using Godot;
 public partial class PseudoFocusContext : Node {
     PseudoFocusControl? _currentPseudoFocus = null;
     public void GrabPseudoFocus(PseudoFocusControl control) {
+        if (control == _currentPseudoFocus) {
+            return;
+        }
         _currentPseudoFocus = control;
         if (_currentPseudoFocus != null) {
             _currentPseudoFocus.EmitSignal(PseudoFocusControl.SignalName.PseudoFocusEntered);
@@ -15,12 +18,13 @@ public partial class PseudoFocusContext : Node {
             _currentPseudoFocus = null;
             oldPseudoFocus.EmitSignal(PseudoFocusControl.SignalName.PseudoFocusExited);
         }
-        else {
-            GD.PrintErr("Attempted to release pseudo-focus on a control that doesn't have it");
-        }
     }
 
     public bool HasPseudoFocus(PseudoFocusControl control) {
         return _currentPseudoFocus == control;
+    }
+
+    public bool MouseAllowed() {
+        return InputModeController.Ref().InputType == InputType.KeyboardMouse;
     }
 }

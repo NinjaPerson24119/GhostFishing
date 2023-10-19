@@ -70,14 +70,12 @@ internal partial class InventoryFrame : PseudoFocusControl {
     [Signal]
     public delegate void SelectedPositionChangedEventHandler(Vector2I position);
 
-
     public InventoryFrame(InventoryInstance inventory, int tileSizePx) {
+        _mouseFocusSloppy = true;
         TileSizePx = tileSizePx;
 
         _inventory = inventory;
         _inventory.Updated += OnInventoryUpdated;
-
-        TileSizePx = tileSizePx;
     }
 
     public override void _Ready() {
@@ -153,21 +151,6 @@ internal partial class InventoryFrame : PseudoFocusControl {
                 _inputRepeatDebounceTimer.Start();
                 break;
             }
-        }
-    }
-
-    public override void _Notification(int what) {
-        if (_playerContext == null || !_playerContext.Controller.MouseAllowed()) {
-            return;
-        }
-
-        switch (what) {
-            case (int)NotificationMouseEnter:
-                GrabPseudoFocus();
-                break;
-            case (int)NotificationMouseExit:
-                ReleasePseudoFocus();
-                break;
         }
     }
 
@@ -382,14 +365,5 @@ internal partial class InventoryFrame : PseudoFocusControl {
         selectionBoundTopLeft = topLeft;
         selectionBoundBottomRight = bottomRight;
         return SelectedPosition;
-    }
-
-    public void CheckMouseIsOver() {
-        Vector2 globalMousePosition = GetGlobalMousePosition();
-        if (globalMousePosition < GetRect().Position || globalMousePosition > GetRect().Position + GetRect().Size) {
-            GD.Print("Mouse is not over inventory frame");
-            ReleasePseudoFocus();
-            return;
-        }
     }
 }
