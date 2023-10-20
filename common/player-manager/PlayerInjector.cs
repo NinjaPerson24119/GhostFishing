@@ -78,11 +78,11 @@ public partial class PlayerInjector : Node {
 
     public PlayerContext GetPlayerOneContext() {
         if (_usingSubviewports) {
-            GD.PrintErr($"GetPlayerOneContext: {CoopPlayerContextPath(PlayerID.One)}");
+            //GD.PrintErr($"GetPlayerOneContext: {CoopPlayerContextPath(PlayerID.One)}");
             return GetNode<PlayerContext>(CoopPlayerContextPath(PlayerID.One));
         }
         else {
-            GD.PrintErr($"GetPlayerOneContext: {SinglePlayerContextPath(PlayerID.One)}");
+            //GD.PrintErr($"GetPlayerOneContext: {SinglePlayerContextPath(PlayerID.One)}");
             return GetNode<PlayerContext>(SinglePlayerContextPath(PlayerID.One));
         }
     }
@@ -93,7 +93,9 @@ public partial class PlayerInjector : Node {
 
     private Player GetPlayerTwo() {
         if (_usingSubviewports) {
-            return GetNode<Player>(CoopPlayerContextPath(PlayerID.Two));
+            GD.Print($"(player injector) GetPlayerTwo (using subviewports): {CoopPlayerContextPath(PlayerID.Two)}");
+            PlayerContext playerContext = GetNode<PlayerContext>(CoopPlayerContextPath(PlayerID.Two));
+            return playerContext.Player;
         }
         else {
             return GetNode<Player>(InactivePlayerPath(PlayerID.Two));
@@ -126,11 +128,6 @@ public partial class PlayerInjector : Node {
             if (coopActive) {
                 // activate co-op
                 GD.Print($"(player injector) Activating player {playerID}");
-                if (player.PlayerContext == null) {
-                    GD.Print($"(player injector) Player {playerID} is inactive, replacing with active player");
-                    ReplaceInactivePlayerWithSubViewportAndPlayerContext(playerID);
-                    continue;
-                }
                 if (playerID == PlayerID.One) {
                     GD.Print($"(player injector) Moving Player One to subviewport");
                     SubViewport subViewport = CreateSubViewport(playerID);
@@ -138,21 +135,26 @@ public partial class PlayerInjector : Node {
                     _playersWorkingParent.AddChild(subViewport);
                     continue;
                 }
+                if (player.PlayerContext == null) {
+                    GD.Print($"(player injector) Player {playerID} is inactive, replacing with active player");
+                    ReplaceInactivePlayerWithSubViewportAndPlayerContext(playerID);
+                    continue;
+                }
                 throw new System.Exception("Player inactive but PlayerContext exists");
             }
             else {
                 // deactivate co-op
                 GD.Print($"(player injector) Deactivating player {playerID}");
-                if (player.PlayerContext != null) {
-                    GD.Print($"(player injector) Player {playerID} is active, replacing with inactive player");
-                    ReplaceSubViewportAndPlayerContextWithInactivePlayer(playerID);
-                    continue;
-                }
                 if (playerID == PlayerID.One) {
                     GD.Print($"(player injector) Moving Player One to root");
                     SubViewport subViewport = GetNode<SubViewport>(SubViewportPath(playerID));
                     MoveNode(CoopPlayerContextPath(playerID), subViewport.GetParent());
                     subViewport.QueueFree();
+                    continue;
+                }
+                if (player.PlayerContext != null) {
+                    GD.Print($"(player injector) Player {playerID} is active, replacing with inactive player");
+                    ReplaceSubViewportAndPlayerContextWithInactivePlayer(playerID);
                     continue;
                 }
                 throw new System.Exception("Player active but PlayerContext does not exist");
@@ -161,7 +163,7 @@ public partial class PlayerInjector : Node {
 
         _usingSubviewports = coopActive;
         RebuildPlayers();
-        EmitSignal(SignalName.SplitScreenChanged);
+        EmitSignal(SignalName.SplitScreenChanged, _usingSubviewports);
     }
 
     private SubViewport CreateSubViewport(PlayerID playerID) {
@@ -236,6 +238,5 @@ public partial class PlayerInjector : Node {
         var node = GetNode(nodePath);
         node.GetParent().RemoveChild(node);
         newParent.AddChild(node);
-        GD.Print($"Added {nodePath} to {newParent.GetPath()}");
     }
 }

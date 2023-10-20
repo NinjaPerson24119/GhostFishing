@@ -42,7 +42,17 @@ internal partial class PauseMenu : Menu {
     }
 
     public void OnCoopPrompt() {
-        PlayerManager.Ref().EnableCoop();
+        if (_coopPrompt == null) {
+            throw new System.Exception("CoopPrompt null");
+        }
+        if (PlayerManager.Ref().CoopActive) {
+            PlayerManager.Ref().DisableCoop();
+        }
+        else {
+            PlayerManager.Ref().EnableCoop();
+        }
+        // disable button until the co-op system finished and issues a signal
+        //_coopPrompt.Disabled = true;
     }
 
     public void OnExitToOS() {
@@ -65,9 +75,11 @@ internal partial class PauseMenu : Menu {
             else {
                 _coopPrompt.Text = "Co-op\nConnect a controller for each player";
                 disabled = true;
+                GD.Print("Disabled button");
             }
         }
         _coopPrompt.Disabled = disabled;
+        GD.Print($"LE WHY: {_coopPrompt.Disabled}");
     }
 
     public void ClearControllerPrompt() {
@@ -106,8 +118,10 @@ internal partial class PauseMenu : Menu {
     }
 
     public void OnCoopChanged(bool coopActive) {
+        GD.Print($"(PauseMenu): OnCoopChanged {coopActive}");
         UpdateControllerPrompt();
         UpdateCoopPrompt();
+        GD.Print("LE EXITO");
     }
 
     public void OnPlayerControllerActiveChanged(PlayerID playerID, bool connected) {
