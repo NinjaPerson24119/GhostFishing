@@ -1,4 +1,4 @@
-[gd_scene load_steps=20 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=21 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
@@ -14,6 +14,7 @@
 [ext_resource type="Script" path="res://common/interactive-object/interactive-objects/InventoryInteractiveObject.cs" id="12_iy7x1"]
 [ext_resource type="PackedScene" uid="uid://cwd4mbur2hb6p" path="res://common/player/PlayerContext.tscn" id="13_myeu0"]
 [ext_resource type="Script" path="res://common/split-screen/SplitScreen.cs" id="15_0e3de"]
+[ext_resource type="Script" path="res://common/split-screen/SplashScreen.cs" id="16_28vkw"]
 [ext_resource type="PackedScene" uid="uid://d3od5e8fu5ime" path="res://common/ui/common-hud/CommonHUD.tscn" id="18_0gdu0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qugdi"]
@@ -130,3 +131,13 @@ script = ExtResource("15_0e3de")
 process_mode = 3
 visible = false
 z_as_relative = false
+
+[node name="SplashScreen" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 1)
+script = ExtResource("16_28vkw")

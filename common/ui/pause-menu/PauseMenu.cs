@@ -120,7 +120,6 @@ internal partial class PauseMenu : Menu {
         GD.Print($"(PauseMenu): OnCoopChanged {coopActive}");
         UpdateControllerPrompt();
         UpdateCoopPrompt();
-        RequestClose();
     }
 
     public void OnPlayerControllerActiveChanged(PlayerID playerID, bool connected) {

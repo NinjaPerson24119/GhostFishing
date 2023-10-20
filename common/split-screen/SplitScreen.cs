@@ -22,11 +22,19 @@ public partial class SplitScreen : ColorRect {
     private string _shaderPath = "res://common/split-screen/SplitScreen.gdshader";
     private ShaderMaterial _material = new ShaderMaterial();
 
+    private Timer _splashTimer = new Timer() {
+        WaitTime = 0.5f,
+        OneShot = true,
+    };
+
     public override void _Ready() {
         Visible = false;
 
         _material.Shader = GD.Load<Shader>(_shaderPath);
         Material = _material;
+
+        _splashTimer.Timeout += OnSplashTimeout;
+        AddChild(_splashTimer);
 
         PlayerInjector.Ref().SplitScreenChanged += OnSplitScreenChanged;
         _ready = true;
@@ -55,6 +63,8 @@ public partial class SplitScreen : ColorRect {
             }
         }
         Size = DisplayServer.WindowGetSize();
+        _splashTimer.Start();
+        DependencyInjector.Ref().GetSplashScreen().Visible = true;
         Visible = splitScreenActive;
 
         GD.Print($"(split-screen) Reconfigured, {splitScreenActive}");
@@ -77,5 +87,10 @@ public partial class SplitScreen : ColorRect {
     public void OnSplitScreenChanged(bool splitScreenActive) {
         GD.Print($"(split-screen) Split-screen coop changed, {splitScreenActive}");
         Reconfigure(splitScreenActive);
+        DependencyInjector.Ref().GetPauseMenu().RequestClose();
+    }
+
+    public void OnSplashTimeout() {
+        DependencyInjector.Ref().GetSplashScreen().Visible = false;
     }
 }
