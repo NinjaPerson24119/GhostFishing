@@ -1,5 +1,5 @@
 // TODO: there exists an O(c) implementation of this
-public class MovingAverage {
+internal class MovingAverage {
     private double[] _history;
     private int _windowSize;
     private int _currentIndex = 0;

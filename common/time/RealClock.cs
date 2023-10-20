@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class RealClock : Node {
+internal partial class RealClock : Node {
     static SingletonTracker<RealClock> _singletonTracker = new SingletonTracker<RealClock>();
     public override void _Ready() {
         _singletonTracker.Ready(this);

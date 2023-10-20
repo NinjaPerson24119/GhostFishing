@@ -2,7 +2,7 @@ using System;
 using Godot;
 
 // Controls the ocean surface as a grid of water tiles
-public partial class Ocean : Node3D {
+internal partial class Ocean : Node3D {
     // The farthest distance from the origin that a water tile will be spawned
     [ExportGroup("Rendering")]
     [Export]
@@ -339,7 +339,8 @@ public partial class Ocean : Node3D {
     private Vector2 GetTileIndices(Vector2 globalXZ) {
         Vector2 relativeToOcean = new Vector2(globalXZ.X - GlobalPosition.X, globalXZ.Y - GlobalPosition.Z);
         Vector2 shiftedPosition = AlignPositionToOceanOriginCorner(relativeToOcean);
-        return new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Y / TileSize));
+        var t = new Vector2(Mathf.Floor(shiftedPosition.X / TileSize), Mathf.Floor(shiftedPosition.Y / TileSize));
+        return t;
     }
 
     public Vector3 GetDisplacement(Vector2 globalXZ) {
@@ -351,7 +352,7 @@ public partial class Ocean : Node3D {
             return waterTile.GetDisplacement(globalXZ);
         }
         catch (Exception) {
-            GD.PrintErr($"Failed to GetHeight(). Couldn't find water tile {tileName}");
+            GD.PrintErr($"Failed to GetDisplacement(). Couldn't find water tile {tileName}");
             return Vector3.Zero;
         }
     }

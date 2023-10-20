@@ -19,7 +19,7 @@ public class InventoryItemFlagsDTO : IGameAssetDTO {
     }
 }
 
-public class InventoryItemFlags {
+internal class InventoryItemFlags {
     public bool CanPutInStorage { get; set; } = true;
     public bool CanBeMovedByPlayer { get; set; } = true;
     public bool CanDelete { get; set; } = true;

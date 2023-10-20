@@ -1,42 +1,7 @@
 using Godot;
+using System.Linq;
 
 public partial class FollowCamera : Node3D {
-    private struct CameraState {
-        public double Time = 0;
-
-        public float Yaw = 0f;
-
-        public float Pitch {
-            get => _pitch;
-            set {
-                _pitch = Mathf.Clamp(value, _followCamera.MinPitch, _followCamera.MaxPitch);
-            }
-        }
-        private float _pitch = Mathf.DegToRad(30f);
-
-        public float Distance {
-            get => _distance;
-            set => _distance = Mathf.Clamp(value, _followCamera.MinDistance, _followCamera.MaxDistance);
-        }
-        private float _distance = 5;
-        // sets the maximum distance based on a collision
-        public float CollidingMaxDistance {
-            get {
-                return _collidingMaxDistance;
-            }
-            set {
-                _collidingMaxDistance = Mathf.Max(_followCamera.RayNearDistance, value);
-            }
-        }
-        private float _collidingMaxDistance = float.MaxValue;
-
-        private FollowCamera _followCamera;
-        public CameraState(FollowCamera followCamera, float distance) {
-            _followCamera = followCamera;
-            Distance = distance;
-        }
-    }
-
     [Export]
     public float MinDistance = 4f;
     [Export]
@@ -89,18 +54,29 @@ public partial class FollowCamera : Node3D {
     }
     private bool _isCameraDefault = true;
 
+    private PlayerContext? _playerContext;
     private Player? _player;
 
+    public readonly float RayNearDistance = 1f;
+    public readonly float RayPitchDistance = 3f;
     private Node3D? _rayCastGroup;
     private float _rayExtraDistance = 0.2f;
-    private float RayNearDistance = 1f;
-    private float RayPitchDistance = 3f;
     private float _rayNearPitchPerSecond = Mathf.DegToRad(90f);
     private Timer _rayPitchUpTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
     };
 
+    public CameraState CameraState {
+        get {
+            return _cameraState;
+        }
+    }
+    public void SetCameraState(CameraStateDTO dto) {
+        _cameraState = new CameraState(this, dto);
+        UpdateCameraTransform();
+        _cameraResetTimer.Start();
+    }
     private CameraState _cameraState;
 
     public FollowCamera() {
@@ -109,7 +85,11 @@ public partial class FollowCamera : Node3D {
     }
 
     public override void _Ready() {
-        _player = DependencyInjector.Ref().GetPlayer();
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        if (_playerContext == null) {
+            throw new System.Exception("Player context is null. FollowCamera should be in the subtree of a PlayerContext");
+        }
+        _player = _playerContext.Player;
         _cameraState.Yaw = _player.GlobalRotation.Y;
 
         _rayCastGroup = GetNode<Node3D>("RayCastGroup");
@@ -133,7 +113,11 @@ public partial class FollowCamera : Node3D {
             RayCast3D ray = new RayCast3D() {
                 Position = offset * radius + Vector3.Back * backAdjust,
                 HitFromInside = true,
+                CollisionMask = 0,
             };
+            // collide with terrain and player (so we can detect line-of-sight)
+            ray.SetCollisionMaskValue(CollisionLayers.Player, true);
+            ray.SetCollisionMaskValue(CollisionLayers.Terrain, true);
             _rayCastGroup.AddChild(ray);
         }
 
@@ -143,10 +127,27 @@ public partial class FollowCamera : Node3D {
     }
 
     public override void _Input(InputEvent inputEvent) {
+        if (_playerContext == null) {
+            throw new System.Exception("Player context is null");
+        }
         if (DisableControls) {
             return;
         }
 
+        if (_playerContext.Controller.MouseAllowed()) {
+            HandleMouseInput(inputEvent);
+        }
+
+        if (inputEvent.IsActionPressed(_playerContext.ActionCycleZoom)) {
+            _zoomTimer.Stop();
+            float[] zoomSteps = GetZoomSteps();
+            _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
+            _zoomDistanceTarget = zoomSteps[_zoomStep];
+            _cameraResetTimer.Start();
+        }
+    }
+
+    public void HandleMouseInput(InputEvent inputEvent) {
         if (inputEvent is InputEventMouseMotion mouseMotion) {
             _cameraState.Yaw -= mouseMotion.Relative.X * MouseSensitivity;
             if (mouseMotion.Relative.Y > 0 || !IsAutoPitchEnabled()) {
@@ -170,14 +171,6 @@ public partial class FollowCamera : Node3D {
                     break;
             }
         }
-
-        if (inputEvent.IsActionPressed("cycle_zoom")) {
-            _zoomTimer.Stop();
-            float[] zoomSteps = GetZoomSteps();
-            _zoomStep = (_zoomStep + 1) % zoomSteps.Length;
-            _zoomDistanceTarget = zoomSteps[_zoomStep];
-            _cameraResetTimer.Start();
-        }
     }
 
     public float[] GetZoomSteps() {
@@ -196,6 +189,9 @@ public partial class FollowCamera : Node3D {
         if (_player == null) {
             throw new System.Exception("Player is null");
         }
+        if (_playerContext == null) {
+            throw new System.Exception("Player context is null");
+        }
 
         _cameraState.CollidingMaxDistance = float.MaxValue;
         int maxRaycastIters = 2;
@@ -209,10 +205,18 @@ public partial class FollowCamera : Node3D {
                 ray.TargetPosition = ray.ToLocal(_player.GlobalPosition);
                 ray.ForceRaycastUpdate();
                 Rid rid = ray.GetColliderRid();
-                if (rid != DependencyInjector.Ref().GetPlayer().GetRid()) {
-                    minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
-                    hitsThisIter = true;
+
+                Rid[] playerRids = PlayerInjector.Ref().GetPlayers().Values.Select(p => p.GetRid()).ToArray();
+                //GD.Print($"playerRids: {string.Join(", ", playerRids)}, hit rid: {rid}");
+                if (playerRids.Contains(rid)) {
+                    // we can't disable the collision mask for the player layer or we won't be able to detect line of sight
+                    // so we just ignore it here
+                    continue;
                 }
+
+                // not hitting any players
+                minCollidingDistance = Mathf.Min(minCollidingDistance, ray.GetCollisionPoint().DistanceTo(_player.GlobalPosition));
+                hitsThisIter = true;
             }
             if (minCollidingDistance < float.MaxValue && hitsThisIter) {
                 _cameraState.CollidingMaxDistance = minCollidingDistance - CollidingDistanceBuffer;
@@ -255,7 +259,7 @@ public partial class FollowCamera : Node3D {
         }
 
         if (!DisableControls) {
-            Vector2 controlDirection = Input.GetVector("rotate_camera_left", "rotate_camera_right", "rotate_camera_down", "rotate_camera_up");
+            Vector2 controlDirection = _playerContext.CameraControlVector();
             bool updated = controlDirection != Vector2.Zero;
             if (controlDirection.X != 0) {
                 IsCameraDefault = false;
@@ -282,6 +286,10 @@ public partial class FollowCamera : Node3D {
             if (IsCameraDefault) {
                 _cameraState.Yaw = Mathf.LerpAngle(_cameraState.Yaw, _player.GlobalRotation.Y, (float)delta * 0.9f);
             }
+        }
+        else {
+            // avoid immediate camera reset once controls are restored
+            _cameraResetTimer.Start();
         }
 
         UpdateCameraTransform();

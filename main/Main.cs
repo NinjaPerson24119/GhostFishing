@@ -1,25 +1,27 @@
 using Godot;
 
-public partial class Main : Node {
+internal partial class Main : Node {
     public override void _Ready() {
-        SetupSignals();
-    }
-
-    private void SetupSignals() {
-        Player player = DependencyInjector.Ref().GetPlayer();
         Ocean ocean = DependencyInjector.Ref().GetOcean();
-        Controller controller = DependencyInjector.Ref().GetController();
         TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
-        PlayerMenu playerMenu = DependencyInjector.Ref().GetPlayerMenu();
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
-        FollowCamera followCamera = DependencyInjector.Ref().GetFollowCamera();
+
+        // TODO: update ocean based on both players
+        Player playerOne = PlayerInjector.Ref().GetPlayers()[PlayerID.One];
+        playerOne.PositionChangedSignificantly += ocean.OnOriginChanged;
 
         GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ocean.ConfigureTileDebugVisuals;
-
         GameClock.ConnectGameSecondsChanged(timeDisplay.Update);
 
-        player.PositionChangedSignificantly += ocean.OnOriginChanged;
-        controller.SetPlayerControlsDisabled += player.SetControlsDisabled;
-        controller.SetPlayerControlsDisabled += followCamera.SetControlsDisabled;
+        var players = PlayerInjector.Ref().GetPlayers();
+        foreach (var kv in players) {
+            PlayerContext? playerContext = kv.Value.PlayerContext;
+            if (playerContext == null) {
+                continue;
+            }
+
+            playerContext.Controller.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
+            playerContext.Controller.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
+        }
     }
 }

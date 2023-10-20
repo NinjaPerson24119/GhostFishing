@@ -1,0 +1,25 @@
+[gd_scene load_steps=5 format=3 uid="uid://capn7flj3nsyn"]
+
+[ext_resource type="PackedScene" uid="uid://bevgtpu6amfkd" path="res://common/ui/player-menu/PlayerMenu.tscn" id="1_ityqy"]
+[ext_resource type="PackedScene" uid="uid://blrhw840cqm81" path="res://common/interactive-object/ui/InteractionUI.tscn" id="1_l2wmw"]
+[ext_resource type="Script" path="res://common/ui/ScreenPadding.cs" id="1_o0ir3"]
+[ext_resource type="PackedScene" uid="uid://ss8863hcm3cu" path="res://common/ui/player-status-ui/PlayerStatusUI.tscn" id="4_l55bu"]
+
+[node name="PlayerHUD" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_o0ir3")
+
+[node name="InteractionUI" parent="." instance=ExtResource("1_l2wmw")]
+layout_mode = 1
+
+[node name="PlayerStatusUI" parent="." instance=ExtResource("4_l55bu")]
+layout_mode = 1
+
+[node name="PlayerMenu" parent="." instance=ExtResource("1_ityqy")]
+visible = false
+layout_mode = 1

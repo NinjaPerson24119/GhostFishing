@@ -69,7 +69,12 @@ public class InventoryDefinition {
         Width = dto.Width;
         Height = dto.Height;
         BackgroundImagePath = dto.BackgroundImagePath;
-        UsableMask = dto.UsableMask ?? new bool[Width * Height];
+        if (dto.UsableMask != null) {
+            UsableMask = dto.UsableMask;
+        }
+        else {
+            UsableMask = Enumerable.Repeat(true, Width * Height).ToArray();
+        }
     }
 
     public InventoryDefinition(int width, int height) {

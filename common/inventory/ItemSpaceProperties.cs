@@ -41,7 +41,7 @@ public class InventoryItemSpacePropertiesDTO : IGameAssetDTO {
     }
 }
 
-public class InventoryItemSpaceProperties {
+internal class InventoryItemSpaceProperties {
     public int Width { get; private set; }
     public int Height { get; private set; }
     private bool[] _filledMaskClockwise0;

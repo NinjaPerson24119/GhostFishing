@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class InventoryItemSprite : Sprite2D {
+internal partial class InventoryItemSprite : Sprite2D {
     public string ItemInstanceID { get; private set; }
 
     public InventoryItemSprite(string itemInstanceID) {

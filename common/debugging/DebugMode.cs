@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class DebugMode : Node {
+internal partial class DebugMode : Node {
     private bool debugMode = true;
 
     [Signal]
@@ -34,11 +34,11 @@ public partial class DebugMode : Node {
 
     public override void _Process(double delta) {
         string text = $"DEBUG MODE\n{Engine.GetFramesPerSecond()} FPS";
-        ControllerInputType inputType = DependencyInjector.Ref().GetController().InputType;
-        if (inputType == ControllerInputType.KeyboardMouse) {
+        InputType inputType = PlayerInjector.Ref().GetPlayerOneContext().Controller.InputType;
+        if (inputType == InputType.KeyboardMouse) {
             text += "\nKEYBOARD/MOUSE INPUT";
         }
-        else if (inputType == ControllerInputType.Joypad) {
+        else if (inputType == InputType.Joypad) {
             text += "\nJOYPAD INPUT";
         }
         if (GameClock.Paused) {
@@ -93,7 +93,7 @@ public partial class DebugMode : Node {
             GameClock.TogglePause();
         }
         if (inputEvent.IsActionPressed("debug_reset_boat")) {
-            DependencyInjector.Ref().GetPlayer().ResetAboveWater();
+            PlayerInjector.Ref().GetPlayerOne().ResetAboveWater();
         }
     }
 

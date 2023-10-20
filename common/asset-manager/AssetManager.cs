@@ -4,11 +4,11 @@ using System.IO;
 using System.Text.Json;
 using Godot;
 
-public class AssetDefinitionArray<T> {
+internal class AssetDefinitionArray<T> {
     public T[]? Array { get; set; }
 }
 
-public partial class AssetManager : Node {
+internal partial class AssetManager : Node {
     static SingletonTracker<AssetManager> _singletonTracker = new SingletonTracker<AssetManager>();
     private static AssetManager _singleton { get => _singletonTracker.Ref(); }
     public static AssetManager Ref() {
@@ -26,7 +26,7 @@ public partial class AssetManager : Node {
 
     private const string _questDefinitionsPath = "res://data/quests.json";
 
-    private PlayerStateAssetIDs[] _playerStateAssetIDs;
+    private Dictionary<PlayerID, PlayerStateView> _playerStateViews = new Dictionary<PlayerID, PlayerStateView>();
 
     private AssetStore<InventoryItemCategoryDTO, InventoryItemCategory> _inventoryItemCategoryStore;
     private AssetStore<InventoryItemDefinitionDTO, InventoryItemDefinition> _inventoryItemDefinitionStore;
@@ -77,19 +77,6 @@ public partial class AssetManager : Node {
             isValidID: AssetIDUtil.IsInventoryInstanceID,
             persistedTexturesStore: null
         );
-
-        _playerStateAssetIDs = new PlayerStateAssetIDs[2]{
-            new PlayerStateAssetIDs(
-                boatInventoryInstanceID: "INVENTORY_INSTANCE-31cdec79-2a3b-4f4d-9e23-a878915f3973",
-                questInventoryInstanceID: "INVENTORY_INSTANCE-96c151e3-2436-406c-967c-79a1cc89c3ac",
-                storageInventoryInstanceID: _storageInventoryID
-            ),
-            new PlayerStateAssetIDs(
-                boatInventoryInstanceID: "INVENTORY_INSTANCE-e158299f-a54e-42b0-964a-3ac732ec3631",
-                questInventoryInstanceID: "INVENTORY_INSTANCE-f7091de2-6804-4f22-b8f1-d17be782adf6",
-                storageInventoryInstanceID: _storageInventoryID
-            )
-        };
     }
 
     public override void _Ready() {
@@ -97,10 +84,12 @@ public partial class AssetManager : Node {
 
         GD.Print("Asset Manager: Loading assets...");
         LoadAssets();
-        GD.Print("Asset Manager: Done");
+        GD.Print("Asset Manager: Assets Done Loading");
 
-        var playerStateView = GetPlayerView(0);
-        GD.Print($"Player Default Inventory:\n{playerStateView.BoatInventory.StringRepresentationOfGrid()}");
+        DefinePlayerStateViews();
+        GD.Print($"Defined player state views");
+
+        GD.Print("Asset Manager: Completed Ready");
     }
 
     private void LoadAssets() {
@@ -140,7 +129,10 @@ public partial class AssetManager : Node {
         try {
             string globalizedPath = ProjectSettings.GlobalizePath(filePath);
             string jsonString = File.ReadAllText(globalizedPath);
-            return JsonSerializer.Deserialize<T>(jsonString);
+            var options = new JsonSerializerOptions {
+                ReadCommentHandling = JsonCommentHandling.Skip
+            };
+            return JsonSerializer.Deserialize<T>(jsonString, options);
         }
         catch (FileNotFoundException) {
             GD.PrintErr("File not found: " + filePath);
@@ -176,12 +168,11 @@ public partial class AssetManager : Node {
         GD.Print($"Loaded Asset: {id} ({typeof(DTO)}):\n{dto.Stringify()}\n\n");
     }
 
-    public PlayerStateView GetPlayerView(int playerIndex) {
-        if (playerIndex < 0 || playerIndex >= _playerStateAssetIDs.Length) {
-            throw new IndexOutOfRangeException($"Player index {playerIndex} is out of range");
+    public PlayerStateView GetPlayerView(PlayerID playerID) {
+        if (!_playerStateViews.ContainsKey(playerID)) {
+            throw new ArgumentException($"Player state view not found for player ID: {playerID}");
         }
-        PlayerStateAssetIDs assetIDs = _playerStateAssetIDs[playerIndex];
-        return new PlayerStateView(assetIDs);
+        return _playerStateViews[playerID];
     }
 
     public InventoryDefinition GetInventoryDefinition(string uuid) {
@@ -222,6 +213,33 @@ public partial class AssetManager : Node {
             catch (Exception e) {
                 GD.PrintErr($"Error adding inventory instance DTO with ID {kv.Key}: {e}");
             }
+        }
+    }
+
+    private void DefinePlayerStateViews() {
+        Dictionary<PlayerID, PlayerStateAssetIDs> playerStateAssetIDs = new Dictionary<PlayerID, PlayerStateAssetIDs>() {
+            {
+                PlayerID.One,
+                new PlayerStateAssetIDs(
+                    boatInventoryInstanceID: "INVENTORY_INSTANCE-31cdec79-2a3b-4f4d-9e23-a878915f3973",
+                    questInventoryInstanceID: "INVENTORY_INSTANCE-96c151e3-2436-406c-967c-79a1cc89c3ac",
+                    storageInventoryInstanceID: _storageInventoryID
+                )
+            },
+            {
+                PlayerID.Two,
+                new PlayerStateAssetIDs(
+                    boatInventoryInstanceID: "INVENTORY_INSTANCE-e158299f-a54e-42b0-964a-3ac732ec3631",
+                    questInventoryInstanceID: "INVENTORY_INSTANCE-f7091de2-6804-4f22-b8f1-d17be782adf6",
+                    storageInventoryInstanceID: _storageInventoryID
+                )
+            }
+        };
+        foreach (var kv in PlayerInjector.Ref().GetPlayers()) {
+            PlayerID playerID = kv.Key;
+            PlayerStateView view = new PlayerStateView(playerID, playerStateAssetIDs[playerID]);
+            _playerStateViews.Add(playerID, view);
+            GD.Print($"Added player state view for {playerID}");
         }
     }
 }

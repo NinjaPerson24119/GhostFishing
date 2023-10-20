@@ -1,4 +1,4 @@
-public class SingletonTracker<T> {
+internal class SingletonTracker<T> {
     private T? _singleton;
     public T Ref() {
         if (_singleton != null) {

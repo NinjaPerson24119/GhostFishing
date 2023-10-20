@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public partial class InventoryFrame : Control {
+internal partial class InventoryFrame : PseudoFocusControl {
     public float ContainerWidthPx = 800;
     public float ContainerHeightPx = 800;
     // if this is set then the container dimensions are ignored
@@ -18,43 +18,45 @@ public partial class InventoryFrame : Control {
         get {
             return _selectedPosition;
         }
-        private set {
+        set {
             Vector2I clampedPosition = value.Clamp(_selectionBoundTopLeft, _selectionBoundBottomRight);
             if (clampedPosition == _selectedPosition) {
                 return;
             }
             _selectedPosition = clampedPosition;
-            EmitSignal(SignalName.SelectedPositionChanged, _selectedPosition);
+            EmitSignal(SignalName.SelectedPositionChanged, _inventory.InventoryInstanceID, _selectedPosition);
         }
     }
     private Vector2I _selectedPosition = Vector2I.Zero;
-    public Vector2I selectionBoundTopLeft {
+    private Vector2I _selectionBoundTopLeft {
         get {
-            return _selectionBoundTopLeft;
+            return _selectionBoundTopLeftInnerProp;
         }
         set {
-            _selectionBoundTopLeft = value;
+            _selectionBoundTopLeftInnerProp = value;
             // reassign selected position to clamp it
             SelectedPosition = SelectedPosition;
         }
     }
-    private Vector2I _selectionBoundTopLeft = new Vector2I(0, 0);
-    public Vector2I selectionBoundBottomRight {
+    private Vector2I _selectionBoundTopLeftInnerProp = new Vector2I(0, 0);
+    private Vector2I _selectionBoundBottomRight {
         get {
-            return _selectionBoundBottomRight;
+            return _selectionBoundBottomRightInnerProp;
         }
         set {
-            _selectionBoundBottomRight = value;
+            _selectionBoundBottomRightInnerProp = value;
             // reassign selected position to clamp it
             SelectedPosition = SelectedPosition;
         }
     }
-    private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
+    private Vector2I _selectionBoundBottomRightInnerProp = new Vector2I(0, 0);
 
     private InventoryInstance _inventory;
     private InventoryGrid? _inventoryGrid;
     private List<InventoryItemSprite> _itemSprites = new List<InventoryItemSprite>();
 
+    private PlayerContext? _playerContext;
+    private Dictionary<string, Vector2I>? _inputActionToDirection;
     private Timer _inputRepeatDebounceTimer = new Timer() {
         WaitTime = 0.1f,
         OneShot = true,
@@ -63,27 +65,29 @@ public partial class InventoryFrame : Control {
         WaitTime = 0.5f,
         OneShot = true,
     };
-    private Dictionary<string, Vector2I> _inputActionToDirection = new Dictionary<string, Vector2I> {
-            {"ui_up", new Vector2I(0, -1)},
-            {"ui_down", new Vector2I(0, 1)},
-            {"ui_left", new Vector2I(-1, 0)},
-            {"ui_right", new Vector2I(1, 0)}
-        };
-
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
     [Signal]
-    public delegate void SelectedPositionChangedEventHandler(Vector2I position);
+    public delegate void SelectedPositionChangedEventHandler(string inventoryInstanceID, Vector2I position);
+    [Signal]
+    public delegate void InventoryFocusedEventHandler(string inventoryInstanceID);
+    [Signal]
+    public delegate void InventoryUnfocusedEventHandler(string inventoryInstanceID);
 
     public InventoryFrame(InventoryInstance inventory, int tileSizePx) {
-        FocusMode = FocusModeEnum.All;
+        _mouseFocusSloppy = true;
         TileSizePx = tileSizePx;
 
         _inventory = inventory;
         _inventory.Updated += OnInventoryUpdated;
 
-        TileSizePx = tileSizePx;
+        // self-subscribe to attach inventory instance ID to events
+        PseudoFocusEntered += OnPseudoFocusEntered;
+        PseudoFocusExited += OnPseudoFocusExited;
+    }
 
+    public override void _Ready() {
+        base._Ready();
         AddChild(_inputRepeatDebounceTimer);
         AddChild(_inputRepeatDelayTimer);
         SpawnFrame();
@@ -93,17 +97,33 @@ public partial class InventoryFrame : Control {
         SelectDefaultPosition();
 
         AssetManager.Ref().PersistImage(_containerFrameImagePath);
+
+        _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
+        if (_playerContext == null) {
+            throw new Exception("PlayerContext null");
+        }
+        _inputActionToDirection = new Dictionary<string, Vector2I> {
+            {_playerContext.ActionNavigateUp, new Vector2I(0, -1)},
+            {_playerContext.ActionNavigateDown, new Vector2I(0, 1)},
+            {_playerContext.ActionNavigateLeft, new Vector2I(-1, 0)},
+            {_playerContext.ActionNavigateRight, new Vector2I(1, 0)}
+        };
     }
 
     public override void _ExitTree() {
+        base._ExitTree();
         _inventory.Updated -= OnInventoryUpdated;
+        GD.Print("Frame exited tree");
     }
 
     public override void _Input(InputEvent inputEvent) {
         if (_inventoryGrid == null) {
             return;
         }
-        if (!HasFocus()) {
+        if (!HasPseudoFocus()) {
+            return;
+        }
+        if (_playerContext == null || !_playerContext.Controller.MouseAllowed()) {
             return;
         }
 
@@ -117,10 +137,13 @@ public partial class InventoryFrame : Control {
     }
 
     public override void _Process(double delta) {
-        if (!HasFocus()) {
+        if (!HasPseudoFocus()) {
             return;
         }
         if (_inputRepeatDelayTimer == null || _inputRepeatDebounceTimer == null) {
+            return;
+        }
+        if (_inputActionToDirection == null) {
             return;
         }
 
@@ -139,17 +162,6 @@ public partial class InventoryFrame : Control {
         }
     }
 
-    public override void _Notification(int what) {
-        switch (what) {
-            case (int)NotificationMouseEnter:
-                GrabFocus();
-                break;
-            case (int)NotificationMouseExit:
-                ReleaseFocus();
-                break;
-        }
-    }
-
     public void SpawnFrame() {
         GD.Print("Spawning inventory frame");
         DebugTools.Assert(TileSizePx > 0, "TileSizePx must be greater than 0");
@@ -164,7 +176,7 @@ public partial class InventoryFrame : Control {
         ColorRect containerBackgroundColor = new ColorRect() {
             Name = "ContainerBackgroundColor",
             Color = BackgroundColor,
-            Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+            CustomMinimumSize = CustomMinimumSize,
         };
         CallDeferred("add_child", containerBackgroundColor);
 
@@ -172,7 +184,7 @@ public partial class InventoryFrame : Control {
             TextureRect backgroundImage = new TextureRect() {
                 Name = "BackgroundImage",
                 Texture = GD.Load<Texture2D>(_inventory.BackgroundImagePath),
-                Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+                CustomMinimumSize = CustomMinimumSize,
             };
             CallDeferred("add_child", backgroundImage);
         }
@@ -181,7 +193,8 @@ public partial class InventoryFrame : Control {
         TextureRect containerFrameImage = new TextureRect() {
             Name = "ContainerFrameImage",
             Texture = GD.Load<Texture2D>(_containerFrameImagePath),
-            Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+            CustomMinimumSize = CustomMinimumSize,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize
         };
         CallDeferred("add_child", containerFrameImage);
 
@@ -358,17 +371,23 @@ public partial class InventoryFrame : Control {
         if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width || bottomRight.Y >= _inventory.Height) {
             throw new Exception("Cannot set selections bound beyond inventory bounds.");
         }
-        selectionBoundTopLeft = topLeft;
-        selectionBoundBottomRight = bottomRight;
+        _selectionBoundTopLeft = topLeft;
+        _selectionBoundBottomRight = bottomRight;
         return SelectedPosition;
     }
 
-    public void CheckMouseIsOver() {
-        Vector2 globalMousePosition = GetGlobalMousePosition();
-        if (globalMousePosition < GetRect().Position || globalMousePosition > GetRect().Position + GetRect().Size) {
-            GD.Print("Mouse is not over inventory frame");
-            ReleaseFocus();
-            return;
+    public void MoveMouseToTile(Vector2I tilePosition) {
+        if (_inventoryGrid == null) {
+            throw new Exception("Cannot get top left of item because inventory grid is null.");
         }
+        Vector2 topLeft = _inventoryGrid.GetGlobalPositionFromTilePosition(tilePosition);
+        Input.WarpMouse(topLeft + new Vector2(TileSizePx / 2, TileSizePx / 2));
+    }
+
+    public void OnPseudoFocusEntered() {
+        EmitSignal(SignalName.InventoryFocused, _inventory.InventoryInstanceID);
+    }
+    public void OnPseudoFocusExited() {
+        EmitSignal(SignalName.InventoryUnfocused, _inventory.InventoryInstanceID);
     }
 }

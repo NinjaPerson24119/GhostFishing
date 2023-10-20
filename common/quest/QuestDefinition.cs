@@ -1,6 +1,6 @@
 using System;
 
-public class QuestDefinitionDTO : IGameAssetDTO {
+internal class QuestDefinitionDTO : IGameAssetDTO {
     public string? Name { get; set; }
     public string? Description { get; set; }
 
@@ -13,7 +13,7 @@ public class QuestDefinitionDTO : IGameAssetDTO {
     }
 }
 
-public class QuestDefinition {
+internal class QuestDefinition {
     public string Name { get; set; }
     public string Description { get; set; }
 

@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class Sky : Node3D {
+internal partial class Sky : Node3D {
 	private const string _sunPathLight = "SunLight";
 	private const string _moonPathLight = "MoonLight";
 	private const string _worldEnvironmentPath = "WorldEnvironment";

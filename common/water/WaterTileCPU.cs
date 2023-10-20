@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class WaterTileCPU : MeshInstance3D {
+internal partial class WaterTileCPU : MeshInstance3D {
     private Ocean _ocean = null!;
     private PlaneMesh _planeMesh = null!;
 

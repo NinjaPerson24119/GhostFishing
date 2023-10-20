@@ -2,7 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
-public struct WaveSetConfig {
+internal struct WaveSetConfig {
     public int noWaves;
 
     public float wavelengthAverage;
@@ -17,7 +17,7 @@ public struct WaveSetConfig {
     public float waterDepth;
 }
 
-public class WaveSet {
+internal class WaveSet {
     private const float _wavelengthClampFactor = 2;
     private const float _windAngleClampRadius = Mathf.Pi / 2;
 
@@ -87,7 +87,7 @@ public class WaveSet {
             wavelengthStdDev = 2f * Mathf.Sqrt(intensity),
             // divide by noWaves to keep the total amplitude constant as we vary the number of summed waves
             // TODO
-            amplitudeAverage = 0.165f * intensity * (1-damping),
+            amplitudeAverage = 0.165f * intensity * (1 - damping),
             windAngleAverage = windAngle,
             windAngleStdDev = Mathf.DegToRad(30f),
             waterDepth = waterDepth,

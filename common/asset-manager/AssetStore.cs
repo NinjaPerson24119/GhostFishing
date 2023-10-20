@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Godot;
 
-public class AssetStore<DTO, T> where DTO : IGameAssetDTO {
+internal class AssetStore<DTO, T> where DTO : IGameAssetDTO {
     private Dictionary<string, T> _assets = new Dictionary<string, T>();
 
     // this should not have a second ID argument

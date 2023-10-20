@@ -2,8 +2,9 @@ using System.Text.Json;
 using System.IO;
 using Godot;
 using System;
+using System.Collections.Generic;
 
-public partial class SaveStateManager : Node {
+internal partial class SaveStateManager : Node {
     public class Lock : IDisposable {
         private SaveStateManager _saveStateManager;
         private bool _released;
@@ -33,9 +34,8 @@ public partial class SaveStateManager : Node {
     }
 
     private string _saveStatePath = ProjectSettings.GlobalizePath("user://save-state.json");
-    private int _noPlayers;
     private int _locks = 0;
-    private int version = 0;
+    private const int VERSION = 0;
 
     [Signal]
     public delegate void LoadedSaveStateEventHandler();
@@ -52,7 +52,6 @@ public partial class SaveStateManager : Node {
 
     public override void _Ready() {
         _singletonTracker.Ready(this);
-        _noPlayers = CoopManager.Ref().NoPlayers;
     }
 
     public override void _Input(InputEvent inputEvent) {
@@ -66,21 +65,25 @@ public partial class SaveStateManager : Node {
 
     private SaveState CaptureState() {
         SaveState saveState = new SaveState() {
-            Version = version,
+            Version = VERSION,
             CommonSaveState = new CommonSaveState() {
                 GameSeconds = GameClock.GameSeconds % GameClock.SecondsPerDay,
             },
-            PlayerSaveState = new PlayerSaveState[_noPlayers],
+            PlayerSaveState = new Dictionary<PlayerID, PlayerSaveState>(),
             InventoryStates = AssetManager.Ref().GetInventoryInstanceDTOs(),
         };
 
-        for (int i = 0; i < _noPlayers; i++) {
-            Player player = DependencyInjector.Ref().GetPlayer();
-            saveState.PlayerSaveState[i] = new PlayerSaveState() {
-                GlobalPositionX = player.GlobalPosition.X,
-                GlobalPositionZ = player.GlobalPosition.Z,
-                GlobalRotationY = player.GlobalRotation.Y,
-            };
+        Dictionary<PlayerID, Player> players = PlayerInjector.Ref().GetPlayers();
+        foreach (var kv in players) {
+            PlayerStateView view = AssetManager.Ref().GetPlayerView(kv.Key);
+            saveState.PlayerSaveState.Add(kv.Key, new PlayerSaveState() {
+                GlobalPositionX = view.GlobalPosition.X,
+                GlobalPositionZ = view.GlobalPosition.Z,
+                GlobalRotationY = view.GlobalRotation.Y,
+            });
+            if (view.CameraState != null) {
+                saveState.PlayerSaveState[kv.Key].CameraState = view.CameraState.Value;
+            }
         }
         return saveState;
     }
@@ -90,8 +93,15 @@ public partial class SaveStateManager : Node {
             GD.PrintErr("Cannot save. SaveStateManager is locked.");
             return;
         }
+        SaveState saveState;
+        try {
+            saveState = CaptureState();
+        }
+        catch (Exception e) {
+            GD.PrintErr($"Cannot save. Error capturing state: {e}");
+            return;
+        }
 
-        SaveState saveState = CaptureState();
         if (saveState.PlayerSaveState == null) {
             GD.PrintErr("PlayerSaveState is null");
             return;
@@ -104,18 +114,28 @@ public partial class SaveStateManager : Node {
     }
 
     void SetState(SaveState saveState) {
-        if (saveState.Version != version) {
-            GD.PrintErr($"Save state version {saveState.Version} does not match expected version {version}");
+        if (saveState.Version != VERSION) {
+            GD.PrintErr($"Save state version {saveState.Version} does not match expected version {VERSION}");
             return;
         }
         if (saveState.CommonSaveState != null) {
             GameClock.GameSeconds = saveState.CommonSaveState.GameSeconds;
         }
+
+
         if (saveState.PlayerSaveState != null) {
-            for (int i = 0; i < saveState.PlayerSaveState.Length; i++) {
-                PlayerSaveState playerState = saveState.PlayerSaveState[i];
-                Player player = DependencyInjector.Ref().GetPlayer();
-                player.ResetAboveWater(true, new Vector2(playerState.GlobalPositionX, playerState.GlobalPositionZ), playerState.GlobalRotationY);
+            Dictionary<PlayerID, Player> players = PlayerInjector.Ref().GetPlayers();
+            foreach (var kv in players) {
+                PlayerSaveState playerSaveState = saveState.PlayerSaveState[kv.Key];
+                Player player = kv.Value;
+
+                PlayerStateView view = AssetManager.Ref().GetPlayerView(kv.Key);
+
+                view.GlobalPosition = new Vector3(playerSaveState.GlobalPositionX, 0, playerSaveState.GlobalPositionZ);
+                view.GlobalRotation = new Vector3(0, playerSaveState.GlobalRotationY, 0);
+                player.ResetAboveWater();
+
+                view.CameraState = playerSaveState.CameraState;
             }
         }
         if (saveState.InventoryStates != null) {

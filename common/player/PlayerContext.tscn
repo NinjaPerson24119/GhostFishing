@@ -1,0 +1,35 @@
+[gd_scene load_steps=7 format=3 uid="uid://cwd4mbur2hb6p"]
+
+[ext_resource type="Script" path="res://common/player/PlayerContext.cs" id="1_i8wqn"]
+[ext_resource type="Script" path="res://common/controllers/PlayerController.cs" id="2_81fe8"]
+[ext_resource type="Script" path="res://common/ui/pseudo-focus/PseudoFocusContext.cs" id="2_i23j6"]
+[ext_resource type="PackedScene" uid="uid://capn7flj3nsyn" path="res://common/ui/player-hud/PlayerHud.tscn" id="3_feyoh"]
+[ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="4_3lpcq"]
+[ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="6_ub55a"]
+
+[node name="PlayerContext" type="Node"]
+script = ExtResource("1_i8wqn")
+PlayerID = 1
+
+[node name="PseudoFocusContext" type="Node" parent="."]
+script = ExtResource("2_i23j6")
+
+[node name="PlayerHUD" parent="PseudoFocusContext" instance=ExtResource("3_feyoh")]
+
+[node name="PlayerController" type="Node" parent="."]
+script = ExtResource("2_81fe8")
+
+[node name="Player" parent="." instance=ExtResource("4_3lpcq")]
+
+[node name="FollowCamera" type="Node3D" parent="."]
+script = ExtResource("6_ub55a")
+
+[node name="Camera3D" type="Camera3D" parent="FollowCamera"]
+current = true
+fov = 100.0
+near = 0.1
+far = 500.0
+
+[node name="RayCastGroup" type="Node3D" parent="FollowCamera"]
+
+[node name="RayCast3D" type="RayCast3D" parent="FollowCamera/RayCastGroup"]

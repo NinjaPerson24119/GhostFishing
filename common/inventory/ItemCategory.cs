@@ -25,7 +25,7 @@ public class InventoryItemCategoryDTO : IGameAssetDTO, IGameAssetDTOWithImages {
     }
 }
 
-public class InventoryItemCategory {
+internal class InventoryItemCategory {
     public string Name { get; set; }
     public string IconImagePath { get; set; }
     public Color BackgroundColor { get; set; }

@@ -73,7 +73,7 @@ public class InventoryItemDefinitionDTO : IGameAssetDTO, IGameAssetDTOWithImages
     }
 }
 
-public class InventoryItemDefinition {
+internal class InventoryItemDefinition {
     public string Name { get; set; }
     public string Description { get; set; }
     public int CurrencyValue { get; set; }

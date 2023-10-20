@@ -1,8 +1,8 @@
 using Godot;
 using System.Collections.Generic;
 
-public partial class InventoryGrid : Node2D {
-    public struct TileAppearanceOverride {
+internal partial class InventoryGrid : Node2D {
+    internal struct TileAppearanceOverride {
         public Vector2I Position;
         public Color TileColor;
         public bool Filled;
@@ -23,6 +23,10 @@ public partial class InventoryGrid : Node2D {
         _backgroundColor = backgroundColor;
 
         _inventory.Updated += OnInventoryUpdated;
+    }
+
+    public override void _ExitTree() {
+        _inventory.Updated -= OnInventoryUpdated;
     }
 
     public override void _Ready() {
@@ -105,5 +109,9 @@ public partial class InventoryGrid : Node2D {
             throw new System.Exception($"Tile position {x}, {y} is out of bounds ({_inventory.Width},{_inventory.Height}), but this should be impossible by construction");
         }
         return new Vector2I(x, y);
+    }
+
+    public Vector2 GetGlobalPositionFromTilePosition(Vector2I tilePosition) {
+        return GlobalPosition + _tileSizePx * new Vector2(tilePosition.X, tilePosition.Y);
     }
 }

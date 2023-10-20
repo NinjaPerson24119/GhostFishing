@@ -39,6 +39,24 @@ public class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO
     public string ItemDefinitionID { get; set; }
     public int X { get; set; }
     public int Y { get; set; }
+    public int Width {
+        get {
+            InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(ItemDefinitionID);
+            return itemDef.Space.Width;
+        }
+    }
+    public int Height {
+        get {
+            InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(ItemDefinitionID);
+            return itemDef.Space.Height;
+        }
+    }
+    public bool[] FilledMask {
+        get {
+            InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(ItemDefinitionID);
+            return itemDef.Space.GetFilledMask(Rotation);
+        }
+    }
     public InventoryItemRotation Rotation { get; set; }
     public float RotationRadians {
         get {
@@ -89,6 +107,18 @@ public class InventoryItemInstance : IGameAssetWritable<InventoryItemInstanceDTO
             Rotation = Rotation
         };
         return dto;
+    }
+
+    public Vector2I FirstUsedTileOffset() {
+        bool[] filledMask = FilledMask;
+        for (int y = 0; y < Height; y++) {
+            for (int x = 0; x < Width; x++) {
+                if (filledMask[y * Width + x]) {
+                    return new Vector2I(x, y);
+                }
+            }
+        }
+        throw new Exception("No used tiles found");
     }
 
     public bool IsTouched() {
