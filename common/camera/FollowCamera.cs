@@ -39,8 +39,15 @@ public partial class FollowCamera : Node3D {
     [Export]
     public float ResetRadiansPerSecond = Mathf.DegToRad(90f);
 
-    [Export]
-    public bool DisableControls = false;
+    public bool DisableControls {
+        get {
+            if (_playerContext != null) {
+                return _playerContext.Controller.ControlsContext != ControlsContextType.Player;
+            }
+            // camera is always disabled if there is no player context
+            return true;
+        }
+    }
 
     private Timer _cameraResetTimer = new Timer() {
         WaitTime = 3f,
@@ -327,10 +334,6 @@ public partial class FollowCamera : Node3D {
         tf = tf.Translated(_player.GlobalTransform.Origin);
 
         return tf;
-    }
-
-    public void SetControlsDisabled(bool controlsDisabled) {
-        DisableControls = controlsDisabled;
     }
 
     public bool IsAutoPitchEnabled() {

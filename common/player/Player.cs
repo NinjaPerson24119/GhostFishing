@@ -36,7 +36,24 @@ public partial class Player : BuoyantBody, ITrackableObject {
     public float TurnForce = 2.5f;
 
     [Export]
-    public bool DisableControls = false;
+    public bool DisableControls {
+        get {
+            // if manually disabled, defer to that
+            if (_disableControls) {
+                return true;
+            }
+            if (PlayerContext != null) {
+                return PlayerContext.Controller.ControlsContext != ControlsContextType.Player;
+            }
+            // if there's no player context then it's automatically disabled
+            return true;
+        }
+        set {
+            _disableControls = value;
+        }
+    }
+    private bool _disableControls = false;
+
     [Export]
     public float PositionChangedSignificanceEpsilon = Mathf.Pow(2f, 2);
     private Vector3 _lastSignificantPosition = Vector3.Zero;
@@ -103,7 +120,7 @@ public partial class Player : BuoyantBody, ITrackableObject {
         if (PlayerContext == null) {
             return;
         }
-        if (DisableControls) {
+        if (DisableControls || PlayerContext.Controller.ControlsContext != ControlsContextType.Player) {
             return;
         }
         if (DepthInWater <= 0) {
@@ -135,10 +152,6 @@ public partial class Player : BuoyantBody, ITrackableObject {
         transform = transform.Rotated(Vector3.Up, yaw);
         transform = transform.Translated(translation);
         Transform = transform;
-    }
-
-    public void SetControlsDisabled(bool controlsDisabled) {
-        DisableControls = controlsDisabled;
     }
 
     public bool IsMoving() {

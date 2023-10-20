@@ -12,16 +12,5 @@ internal partial class Main : Node {
 
         GetNode<DebugMode>("/root/DebugMode").DebugOceanChanged += ocean.ConfigureTileDebugVisuals;
         GameClock.ConnectGameSecondsChanged(timeDisplay.Update);
-
-        var players = PlayerInjector.Ref().GetPlayers();
-        foreach (var kv in players) {
-            PlayerContext? playerContext = kv.Value.PlayerContext;
-            if (playerContext == null) {
-                continue;
-            }
-
-            playerContext.Controller.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
-            playerContext.Controller.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
-        }
     }
 }
