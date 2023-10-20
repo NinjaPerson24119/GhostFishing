@@ -52,7 +52,7 @@ internal partial class PauseMenu : Menu {
             PlayerManager.Ref().EnableCoop();
         }
         // disable button until the co-op system finished and issues a signal
-        //_coopPrompt.Disabled = true;
+        _coopPrompt.Disabled = true;
     }
 
     public void OnExitToOS() {
@@ -79,7 +79,6 @@ internal partial class PauseMenu : Menu {
             }
         }
         _coopPrompt.Disabled = disabled;
-        GD.Print($"LE WHY: {_coopPrompt.Disabled}");
     }
 
     public void ClearControllerPrompt() {
@@ -121,7 +120,7 @@ internal partial class PauseMenu : Menu {
         GD.Print($"(PauseMenu): OnCoopChanged {coopActive}");
         UpdateControllerPrompt();
         UpdateCoopPrompt();
-        GD.Print("LE EXITO");
+        RequestClose();
     }
 
     public void OnPlayerControllerActiveChanged(PlayerID playerID, bool connected) {

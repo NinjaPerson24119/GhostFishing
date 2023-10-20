@@ -11,7 +11,7 @@ public partial class SplitScreen : ColorRect {
             ReconfigureShader();
         }
     }
-    private float _dividerSize = 0.01f;
+    private float _dividerSize = 0.001f;
 
     private bool _ready = false;
 
@@ -35,7 +35,7 @@ public partial class SplitScreen : ColorRect {
     }
 
     public void Reconfigure(bool splitScreenActive) {
-        if (_ready) {
+        if (!_ready) {
             return;
         }
 
@@ -62,7 +62,7 @@ public partial class SplitScreen : ColorRect {
     }
 
     private void ReconfigureShader() {
-        if (_ready) {
+        if (!_ready) {
             return;
         }
 

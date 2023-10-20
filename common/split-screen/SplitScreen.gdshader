@@ -1,6 +1,6 @@
 shader_type canvas_item;
 
-uniform float divider_size = 0.01;
+uniform float divider_size = 0.001;
 uniform sampler2D player_one_texture : source_color;
 uniform sampler2D player_two_texture : source_color;
 
