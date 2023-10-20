@@ -65,17 +65,23 @@ internal partial class PauseMenu : Menu {
         }
 
         bool disabled = false;
-        if (PlayerManager.Ref().CoopActive) {
-            _coopPrompt.Text = "Disable Co-op";
+        if (!PlayerManager.Ref().CanUpdateCoop()) {
+            _coopPrompt.Text = "Can't change Co-op right now.";
+            disabled = true;
         }
         else {
-            if (PlayerManager.Ref().CanEnableCoop()) {
-                _coopPrompt.Text = "Enable Co-op";
+            if (PlayerManager.Ref().CoopActive) {
+                _coopPrompt.Text = "Disable Co-op";
             }
             else {
-                _coopPrompt.Text = "Co-op\nConnect a controller for each player";
-                disabled = true;
-                GD.Print("Disabled button");
+                if (PlayerManager.Ref().CanEnableCoop()) {
+                    _coopPrompt.Text = "Enable Co-op";
+                }
+                else {
+                    _coopPrompt.Text = "Co-op\nConnect a controller for each player";
+                    disabled = true;
+                    GD.Print("Disabled button");
+                }
             }
         }
         _coopPrompt.Disabled = disabled;
