@@ -72,7 +72,7 @@ public partial class CommonController : Node {
     }
 
     public void OnJoyConnectionChanged(long device, bool connected) {
-        if (!connected) {
+        if (!connected && InputTypeController.Ref().InputType == InputType.Joypad) {
             OpenPauseMenu();
         }
     }
