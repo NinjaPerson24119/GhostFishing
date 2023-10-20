@@ -20,9 +20,6 @@ internal partial class Main : Node {
                 continue;
             }
 
-            CommonController.Ref().SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
-            CommonController.Ref().SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
-
             playerContext.Controller.SetPlayerControlsDisabled += playerContext.Player.SetControlsDisabled;
             playerContext.Controller.SetPlayerControlsDisabled += playerContext.FollowCamera.SetControlsDisabled;
         }

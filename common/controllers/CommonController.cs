@@ -7,9 +7,6 @@ public partial class CommonController : Node {
         return _singleton;
     }
 
-    [Signal]
-    public delegate void SetPlayerControlsDisabledEventHandler(bool disabled);
-
     public CommonController() {
         ProcessMode = ProcessModeEnum.Always;
     }
@@ -29,7 +26,6 @@ public partial class CommonController : Node {
         else if (pauseMenu.IsOpen && pauseMenu.RequestedClose) {
             pauseMenu.Close();
             UnpauseGame();
-            EmitSignal(SignalName.SetPlayerControlsDisabled, GetTree().Paused);
         }
     }
 
@@ -41,7 +37,6 @@ public partial class CommonController : Node {
 
         PauseGame();
         pauseMenu.Open();
-        EmitSignal(SignalName.SetPlayerControlsDisabled, GetTree().Paused);
     }
 
     public void ClosePauseMenu() {
@@ -52,7 +47,6 @@ public partial class CommonController : Node {
 
         pauseMenu.Close();
         UnpauseGame();
-        EmitSignal(SignalName.SetPlayerControlsDisabled, GetTree().Paused);
     }
 
     public void PauseGame() {
