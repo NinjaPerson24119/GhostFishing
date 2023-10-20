@@ -130,8 +130,15 @@ public partial class PlayerInjector : Node {
                 GD.Print($"(player injector) Activating player {playerID}");
                 if (playerID == PlayerID.One) {
                     GD.Print($"(player injector) Moving Player One to subviewport");
+
+                    PlayerContext spContext = GetNode<PlayerContext>(SinglePlayerContextPath(playerID));
+                    spContext.QueueFree();
+
+                    Transform3D tf = spContext.Player.GlobalTransform;
+                    PlayerContext playerContext = CreatePlayerContext(playerID, tf);
+
                     SubViewport subViewport = CreateSubViewport(playerID);
-                    MoveNode(SinglePlayerContextPath(playerID), subViewport);
+                    subViewport.AddChild(playerContext);
                     _playersWorkingParent.AddChild(subViewport);
                     continue;
                 }
@@ -147,9 +154,13 @@ public partial class PlayerInjector : Node {
                 GD.Print($"(player injector) Deactivating player {playerID}");
                 if (playerID == PlayerID.One) {
                     GD.Print($"(player injector) Moving Player One to root");
+
                     SubViewport subViewport = GetNode<SubViewport>(SubViewportPath(playerID));
-                    MoveNode(CoopPlayerContextPath(playerID), subViewport.GetParent());
                     subViewport.QueueFree();
+
+                    Transform3D tf = GetNode<PlayerContext>(CoopPlayerContextPath(playerID)).Player.GlobalTransform;
+                    PlayerContext playerContext = CreatePlayerContext(playerID, tf);
+                    subViewport.GetParent().AddChild(playerContext);
                     continue;
                 }
                 if (player.PlayerContext != null) {
@@ -185,14 +196,7 @@ public partial class PlayerInjector : Node {
         }
         Transform3D transform3D = _players[playerID].GlobalTransform;
         RemoveNode(InactivePlayerPath(playerID));
-        PackedScene playerCtxScene = ResourceLoader.Load<PackedScene>("res://common/player/PlayerContext.tscn");
-        PlayerContext? playerCtx = playerCtxScene.Instantiate() as PlayerContext;
-        if (playerCtx == null) {
-            throw new System.Exception("Failed to instantiate player context");
-        }
-        playerCtx.Name = PlayerContextName(playerID);
-        playerCtx.PlayerID = playerID;
-        playerCtx.Player.GlobalTransform = transform3D;
+        PlayerContext playerCtx = CreatePlayerContext(playerID, transform3D);
 
         SubViewport subViewport = CreateSubViewport(playerID);
         subViewport.AddChild(playerCtx);
@@ -226,17 +230,26 @@ public partial class PlayerInjector : Node {
             throw new System.Exception("Players working parent is null");
         }
         _playersWorkingParent.AddChild(player);
+
+        GetNode<SubViewport>(SubViewportPath(playerID)).QueueFree();
+    }
+
+    private PlayerContext CreatePlayerContext(PlayerID playerID, Transform3D globalTransform) {
+        PackedScene playerCtxScene = ResourceLoader.Load<PackedScene>("res://common/player/PlayerContext.tscn");
+        PlayerContext? playerCtx = playerCtxScene.Instantiate() as PlayerContext;
+        if (playerCtx == null) {
+            throw new System.Exception("Failed to instantiate player context");
+        }
+        playerCtx.Name = PlayerContextName(playerID);
+        playerCtx.PlayerID = playerID;
+        playerCtx.Player.GlobalTransform = globalTransform;
+
+        return playerCtx;
     }
 
     private void RemoveNode(string nodePath) {
         var node = GetNode(nodePath);
         node.GetParent().RemoveChild(node);
         node.QueueFree();
-    }
-
-    private void MoveNode(string nodePath, Node newParent) {
-        var node = GetNode(nodePath);
-        node.GetParent().RemoveChild(node);
-        newParent.AddChild(node);
     }
 }
