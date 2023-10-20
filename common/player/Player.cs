@@ -142,14 +142,12 @@ public partial class Player : BuoyantBody, ITrackableObject {
     }
 
     private void DeferredResetAboveWater() {
-        float yaw = GlobalRotation.Y;
-
-        Vector3 translation = new Vector3(GlobalPosition.X, _ocean.GlobalPosition.Y + 1f, GlobalPosition.Y);
+        Vector3 translation = new Vector3(GlobalPosition.X, _ocean.GlobalPosition.Y + 1f, GlobalPosition.Z);
         LinearVelocity = Vector3.Zero;
         AngularVelocity = Vector3.Zero;
 
         Transform3D transform = new Transform3D(Basis.Identity, Vector3.Zero);
-        transform = transform.Rotated(Vector3.Up, yaw);
+        transform = transform.Rotated(Vector3.Up, GlobalRotation.Y);
         transform = transform.Translated(translation);
         Transform = transform;
     }
