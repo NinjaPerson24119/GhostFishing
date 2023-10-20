@@ -1,6 +1,6 @@
 using Godot;
 
-public partial class SplitScreenSprite : Sprite2D {
+public partial class SplitScreen : ColorRect {
     [Export]
     public float DividerSize {
         get {
@@ -19,10 +19,12 @@ public partial class SplitScreenSprite : Sprite2D {
     private ViewportTexture? _playerOneTexture = null;
     private ViewportTexture? _playerTwoTexture = null;
 
-    private string _shaderPath = "res://common/split-screen/SplitScreenShader.shader";
+    private string _shaderPath = "res://common/split-screen/SplitScreen.gdshader";
     private ShaderMaterial _material = new ShaderMaterial();
 
     public override void _Ready() {
+        Visible = false;
+
         _material.Shader = GD.Load<Shader>(_shaderPath);
         Material = _material;
 
@@ -52,6 +54,7 @@ public partial class SplitScreenSprite : Sprite2D {
                 _playerTwoTexture = GetNode<SubViewport>(subviewportPath).GetTexture();
             }
         }
+        Size = DisplayServer.WindowGetSize();
         Visible = coopActive;
 
         ReconfigureShader();

@@ -13,7 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="12_adbi1"]
 [ext_resource type="Script" path="res://common/interactive-object/interactive-objects/InventoryInteractiveObject.cs" id="12_iy7x1"]
 [ext_resource type="PackedScene" uid="uid://cwd4mbur2hb6p" path="res://common/player/PlayerContext.tscn" id="13_myeu0"]
-[ext_resource type="Script" path="res://common/split-screen/SplitScreenSprite.cs" id="15_u6tl1"]
+[ext_resource type="Script" path="res://common/split-screen/SplitScreen.cs" id="15_0e3de"]
 [ext_resource type="PackedScene" uid="uid://d3od5e8fu5ime" path="res://common/ui/common-hud/CommonHUD.tscn" id="18_0gdu0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qugdi"]
@@ -126,5 +126,6 @@ process_mode = 3
 visible = false
 z_as_relative = false
 
-[node name="SplitScreenRenderer" type="Sprite2D" parent="."]
-script = ExtResource("15_u6tl1")
+[node name="SplitScreen" type="ColorRect" parent="."]
+color = Color(1, 1, 0.231373, 1)
+script = ExtResource("15_0e3de")
