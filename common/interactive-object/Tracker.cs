@@ -16,6 +16,10 @@ internal class Tracker {
         Update();
     }
 
+    ~Tracker() {
+        _server.Remove(_trackableObject);
+    }
+
     public void Update() {
         if (TrackerDistance.DistanceSquared(_trackableObject.TrackingPosition, _lastEmittedPosition) > _distanceSignificanceEpsilonSquared) {
             _lastEmittedPosition = _trackableObject.TrackingPosition;
