@@ -21,17 +21,15 @@ script = ExtResource("2_81fe8")
 
 [node name="Player" parent="." instance=ExtResource("4_3lpcq")]
 
-[node name="SubViewport" type="SubViewport" parent="."]
-
-[node name="FollowCamera" type="Node3D" parent="SubViewport"]
+[node name="FollowCamera" type="Node3D" parent="."]
 script = ExtResource("6_ub55a")
 
-[node name="Camera3D" type="Camera3D" parent="SubViewport/FollowCamera"]
+[node name="Camera3D" type="Camera3D" parent="FollowCamera"]
 current = true
 fov = 100.0
 near = 0.1
 far = 500.0
 
-[node name="RayCastGroup" type="Node3D" parent="SubViewport/FollowCamera"]
+[node name="RayCastGroup" type="Node3D" parent="FollowCamera"]
 
-[node name="RayCast3D" type="RayCast3D" parent="SubViewport/FollowCamera/RayCastGroup"]
+[node name="RayCast3D" type="RayCast3D" parent="FollowCamera/RayCastGroup"]

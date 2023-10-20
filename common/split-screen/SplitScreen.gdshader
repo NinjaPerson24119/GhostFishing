@@ -1,8 +1,6 @@
 shader_type canvas_item;
 
-uniform vec3 background_color : source_color;
-uniform vec3 divider_size : source_color;
-uniform vec3 divider_color : source_color;
+uniform float divider_size;
 uniform sampler2D player_one_texture;
 uniform sampler2D player_two_texture;
 
@@ -15,6 +13,6 @@ void fragment() {
     }
     // border at split
     if (UV.X > 0.5 - divider_size.x && UV.X < 0.5 + divider_size.x) {
-        COLOR = divider_color;
+        COLOR = vec4(0.0, 0.0, 0.0, 1.0);
     }
 }

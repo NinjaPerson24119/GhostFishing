@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3 uid="uid://eg8wyurlt2wq"]
+[gd_scene load_steps=20 format=3 uid="uid://eg8wyurlt2wq"]
 
 [ext_resource type="Script" path="res://main/Main.cs" id="1_ihgdy"]
 [ext_resource type="Script" path="res://common/time/GameClock.cs" id="2_cg76b"]
@@ -13,6 +13,7 @@
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="12_adbi1"]
 [ext_resource type="Script" path="res://common/interactive-object/interactive-objects/InventoryInteractiveObject.cs" id="12_iy7x1"]
 [ext_resource type="PackedScene" uid="uid://cwd4mbur2hb6p" path="res://common/player/PlayerContext.tscn" id="13_myeu0"]
+[ext_resource type="Script" path="res://common/split-screen/SplitScreenSprite.cs" id="15_u6tl1"]
 [ext_resource type="PackedScene" uid="uid://d3od5e8fu5ime" path="res://common/ui/common-hud/CommonHUD.tscn" id="18_0gdu0"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_qugdi"]
@@ -124,3 +125,6 @@ PlayerID = 2
 process_mode = 3
 visible = false
 z_as_relative = false
+
+[node name="SplitScreenRenderer" type="Sprite2D" parent="."]
+script = ExtResource("15_u6tl1")

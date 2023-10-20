@@ -1,13 +1,25 @@
 using Godot;
-using System.Collections.Generic;
 
 public partial class SplitScreenSprite : Sprite2D {
-    bool _active = false;
-    Texture2D? _playerOneTexture = null;
-    Texture2D? _playerTwoTexture = null;
-    Vector2 _screenSize = Vector2I.Zero;
+    [Export]
+    public float DividerSize {
+        get {
+            return _dividerSize;
+        }
+        set {
+            _dividerSize = value;
+            ReconfigureShader();
+        }
+    }
+    private float _dividerSize = 0.01f;
 
-    string _shaderPath = "res://common/split-screen/SplitScreenShader.shader";
+    private bool _ready = false;
+
+    private bool _active = false;
+    private ViewportTexture? _playerOneTexture = null;
+    private ViewportTexture? _playerTwoTexture = null;
+
+    private string _shaderPath = "res://common/split-screen/SplitScreenShader.shader";
     private ShaderMaterial _material = new ShaderMaterial();
 
     public override void _Ready() {
@@ -15,36 +27,45 @@ public partial class SplitScreenSprite : Sprite2D {
         Material = _material;
 
         PlayerManager.Ref().CoopChanged += OnCoopChanged;
+        _ready = true;
 
         Reconfigure(PlayerManager.Ref().CoopActive);
     }
 
     public void Reconfigure(bool coopActive) {
-        _screenSize = GetViewportRect().Size;
+        if (_ready) {
+            return;
+        }
 
-        // nodes will have moved, so we need to setup again
         _playerOneTexture = null;
         _playerTwoTexture = null;
         if (coopActive) {
+            // nodes will have moved, so we need to setup again
+            // be sure to get fresh references to players and textures
             var players = PlayerInjector.Ref().GetPlayers();
             if (players.ContainsKey(PlayerID.One)) {
-                _playerOneTexture = players[PlayerID.One].GetViewport().GetTexture();
+                string subviewportPath = PlayerInjector.Ref().SubViewportPath(PlayerID.One);
+                _playerOneTexture = GetNode<SubViewport>(subviewportPath).GetTexture();
             }
             if (players.ContainsKey(PlayerID.Two)) {
-                _playerTwoTexture = players[PlayerID.Two].GetViewport().GetTexture();
+                string subviewportPath = PlayerInjector.Ref().SubViewportPath(PlayerID.Two);
+                _playerTwoTexture = GetNode<SubViewport>(subviewportPath).GetTexture();
             }
         }
         Visible = coopActive;
-        _active = coopActive;
 
         ReconfigureShader();
     }
 
     private void ReconfigureShader() {
-        if (_active && _playerOneTexture != null && _playerTwoTexture != null) {
+        if (_ready) {
+            return;
+        }
+
+        if (_playerOneTexture != null && _playerTwoTexture != null) {
+            _material.SetShaderParameter("divider_size", _dividerSize);
             _material.SetShaderParameter("player_one_texture", _playerOneTexture);
             _material.SetShaderParameter("player_two_texture", _playerTwoTexture);
-            _material.SetShaderParameter("screen_size", _screenSize);
         }
     }
 
