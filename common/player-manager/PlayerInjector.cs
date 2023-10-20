@@ -23,6 +23,10 @@ public partial class PlayerInjector : Node {
     [Signal]
     public delegate void SplitScreenChangedEventHandler(bool splitScreenActive);
 
+    public bool SplitScreenActive {
+        get => _usingSubviewports;
+    }
+
     public override void _Ready() {
         _singletonTracker.Ready(this);
         _playersWorkingParent = GetNode("/root/Main/Pausable");

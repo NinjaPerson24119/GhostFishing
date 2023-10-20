@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://cwd4mbur2hb6p"]
+[gd_scene load_steps=8 format=3 uid="uid://cwd4mbur2hb6p"]
 
 [ext_resource type="Script" path="res://common/player/PlayerContext.cs" id="1_i8wqn"]
 [ext_resource type="Script" path="res://common/controllers/PlayerController.cs" id="2_81fe8"]
@@ -6,6 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://capn7flj3nsyn" path="res://common/ui/player-hud/PlayerHud.tscn" id="3_feyoh"]
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="4_3lpcq"]
 [ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="6_ub55a"]
+[ext_resource type="Script" path="res://common/camera/Camera.cs" id="7_76ayd"]
 
 [node name="PlayerContext" type="Node"]
 script = ExtResource("1_i8wqn")
@@ -29,6 +30,7 @@ current = true
 fov = 100.0
 near = 0.2
 far = 500.0
+script = ExtResource("7_76ayd")
 
 [node name="RayCastGroup" type="Node3D" parent="FollowCamera"]
 
