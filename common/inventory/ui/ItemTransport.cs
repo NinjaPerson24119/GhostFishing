@@ -202,10 +202,9 @@ internal partial class InventoryItemTransport : Node2D {
         }
 
         // bounds need to be set for each frame to avoid edge conditions when transporting items between inventories
-        InventoryItemDefinition itemDef = AssetManager.Ref().GetInventoryItemDefinition(_item.ItemDefinitionID);
-        TilePosition = _currentInventory.Frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_currentInventory.Inventory.Width - itemDef.Space.Width, _currentInventory.Inventory.Height - itemDef.Space.Height));
+        TilePosition = _currentInventory.Frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(_currentInventory.Inventory.Width - _item.Width, _currentInventory.Inventory.Height - _item.Height));
         foreach (OpenedInventory openedInventory in _openedInventories.Values) {
-            _ = openedInventory.Frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(openedInventory.Inventory.Width - itemDef.Space.Width, openedInventory.Inventory.Height - itemDef.Space.Height));
+            _ = openedInventory.Frame.SetSelectionBound(new Vector2I(0, 0), new Vector2I(openedInventory.Inventory.Width - _item.Width, openedInventory.Inventory.Height - _item.Height));
         }
 
         _selector.AssignItem(_item);
@@ -268,13 +267,14 @@ internal partial class InventoryItemTransport : Node2D {
         }
     }
 
-    public void OnSelectedPositionChanged(Vector2I tilePosition) {
+    public void OnSelectedPositionChanged(string inventoryInstanceID, Vector2I tilePosition) {
         if (_currentInventory == null) {
             throw new Exception("Cannot change selected position because current inventory is null.");
         }
-
+        if (_currentInventory.Inventory.InventoryInstanceID != inventoryInstanceID) {
+            return;
+        }
         TilePosition = tilePosition;
-
         _selector.GlobalPosition = _currentInventory.Frame.GetSelectorGlobalPosition();
         SetItemTileAppearance();
     }
@@ -290,7 +290,6 @@ internal partial class InventoryItemTransport : Node2D {
     }
 
     public void OnInventoryFocused(string inventoryInstanceID) {
-        GD.Print($"Focused: {inventoryInstanceID}");
         if (_currentInventory != null) {
             _currentInventory.Frame.ClearItemTilesAppearance();
         }
@@ -319,7 +318,6 @@ internal partial class InventoryItemTransport : Node2D {
         if (_currentInventory == null) {
             return;
         }
-        GD.Print($"Unfocused: {inventoryInstanceID}");
         if (inventoryInstanceID == _currentInventory.Inventory.InventoryInstanceID) {
             _selector.SetHoveringInventory(false);
             _currentInventory.Frame.ClearItemTilesAppearance();

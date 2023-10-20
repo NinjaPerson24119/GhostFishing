@@ -24,32 +24,32 @@ internal partial class InventoryFrame : PseudoFocusControl {
                 return;
             }
             _selectedPosition = clampedPosition;
-            EmitSignal(SignalName.SelectedPositionChanged, _selectedPosition);
+            EmitSignal(SignalName.SelectedPositionChanged, _inventory.InventoryInstanceID, _selectedPosition);
         }
     }
     private Vector2I _selectedPosition = Vector2I.Zero;
-    public Vector2I selectionBoundTopLeft {
+    private Vector2I _selectionBoundTopLeft {
         get {
-            return _selectionBoundTopLeft;
+            return _selectionBoundTopLeftInnerProp;
         }
         set {
-            _selectionBoundTopLeft = value;
+            _selectionBoundTopLeftInnerProp = value;
             // reassign selected position to clamp it
             SelectedPosition = SelectedPosition;
         }
     }
-    private Vector2I _selectionBoundTopLeft = new Vector2I(0, 0);
-    public Vector2I selectionBoundBottomRight {
+    private Vector2I _selectionBoundTopLeftInnerProp = new Vector2I(0, 0);
+    private Vector2I _selectionBoundBottomRight {
         get {
-            return _selectionBoundBottomRight;
+            return _selectionBoundBottomRightInnerProp;
         }
         set {
-            _selectionBoundBottomRight = value;
+            _selectionBoundBottomRightInnerProp = value;
             // reassign selected position to clamp it
             SelectedPosition = SelectedPosition;
         }
     }
-    private Vector2I _selectionBoundBottomRight = new Vector2I(0, 0);
+    private Vector2I _selectionBoundBottomRightInnerProp = new Vector2I(0, 0);
 
     private InventoryInstance _inventory;
     private InventoryGrid? _inventoryGrid;
@@ -68,7 +68,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
     private string _containerFrameImagePath = "res://artwork/generated/ui/InventoryFrame.png";
 
     [Signal]
-    public delegate void SelectedPositionChangedEventHandler(Vector2I position);
+    public delegate void SelectedPositionChangedEventHandler(string inventoryInstanceID, Vector2I position);
     [Signal]
     public delegate void InventoryFocusedEventHandler(string inventoryInstanceID);
     [Signal]
@@ -371,8 +371,8 @@ internal partial class InventoryFrame : PseudoFocusControl {
         if (topLeft.X < 0 || topLeft.Y < 0 || bottomRight.X >= _inventory.Width || bottomRight.Y >= _inventory.Height) {
             throw new Exception("Cannot set selections bound beyond inventory bounds.");
         }
-        selectionBoundTopLeft = topLeft;
-        selectionBoundBottomRight = bottomRight;
+        _selectionBoundTopLeft = topLeft;
+        _selectionBoundBottomRight = bottomRight;
         return SelectedPosition;
     }
 
