@@ -176,7 +176,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
         ColorRect containerBackgroundColor = new ColorRect() {
             Name = "ContainerBackgroundColor",
             Color = BackgroundColor,
-            Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+            CustomMinimumSize = CustomMinimumSize,
         };
         CallDeferred("add_child", containerBackgroundColor);
 
@@ -184,7 +184,7 @@ internal partial class InventoryFrame : PseudoFocusControl {
             TextureRect backgroundImage = new TextureRect() {
                 Name = "BackgroundImage",
                 Texture = GD.Load<Texture2D>(_inventory.BackgroundImagePath),
-                Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+                CustomMinimumSize = CustomMinimumSize,
             };
             CallDeferred("add_child", backgroundImage);
         }
@@ -193,7 +193,8 @@ internal partial class InventoryFrame : PseudoFocusControl {
         TextureRect containerFrameImage = new TextureRect() {
             Name = "ContainerFrameImage",
             Texture = GD.Load<Texture2D>(_containerFrameImagePath),
-            Size = new Vector2(ContainerWidthPx, ContainerHeightPx),
+            CustomMinimumSize = CustomMinimumSize,
+            ExpandMode = TextureRect.ExpandModeEnum.IgnoreSize
         };
         CallDeferred("add_child", containerFrameImage);
 

@@ -13,7 +13,7 @@ public partial class PlayerMenu : Menu {
     private bool _initialized = false;
     private SaveStateManager.Lock? _saveStateLock;
     private PlayerContext? _playerContext;
-    private BoxContainer? _framesContainer;
+    private HBoxContainer? _framesContainer;
 
     public PlayerMenu() {
         Visible = false;
@@ -30,7 +30,7 @@ public partial class PlayerMenu : Menu {
         _closeActions.Add(_playerContext.ActionOpenInventory);
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
 
-        _framesContainer = GetNode<BoxContainer>("InventoryFramesContainer");
+        _framesContainer = GetNode<HBoxContainer>("BoxContainer/HBoxContainer");
 
         Initialize();
     }
@@ -53,8 +53,6 @@ public partial class PlayerMenu : Menu {
         PlayerStateView playerView = AssetManager.Ref().GetPlayerView(_playerContext.PlayerID);
         _boatInventory = playerView.BoatInventory;
         _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx);
-        _boatInventoryFrame.SetAnchorsPreset(LayoutPreset.TopRight);
-        _boatInventoryFrame.Resized += OnInventoryFrameResized;
         _framesContainer.AddChild(_boatInventoryFrame);
 
         _itemTransport = new InventoryItemTransport(TileSizePx);
@@ -154,13 +152,6 @@ public partial class PlayerMenu : Menu {
             GD.Print("Closed inventories.");
         }
         base.Close();
-    }
-
-    private void OnInventoryFrameResized() {
-        if (_boatInventoryFrame == null) {
-            return;
-        }
-        _boatInventoryFrame.OffsetLeft = -_boatInventoryFrame.Size.X;
     }
 
     public void OnLoadedSaveState() {

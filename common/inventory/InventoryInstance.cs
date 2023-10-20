@@ -94,7 +94,10 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
             _ignoreTouches = true;
             foreach (InventoryItemInstanceDTO item in dto.Items) {
                 InventoryItemInstance itemInstance = new InventoryItemInstance(item);
-                PlaceItem(itemInstance);
+                bool success = PlaceItem(itemInstance);
+                if (!success) {
+                    GD.PrintErr($"Constructor: Failed to place item into inventory (InventoryInstanceID: {InventoryInstanceID}, ItemInstanceID: {itemInstance.ItemInstanceID})");
+                }
             }
             _ignoreTouches = false;
         }
