@@ -33,5 +33,3 @@ far = 500.0
 [node name="RayCastGroup" type="Node3D" parent="FollowCamera"]
 
 [node name="RayCast3D" type="RayCast3D" parent="FollowCamera/RayCastGroup"]
-
-[node name="SubViewport" type="SubViewport" parent="."]
