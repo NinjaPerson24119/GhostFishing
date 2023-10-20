@@ -95,7 +95,7 @@ public partial class PlayerInjector : Node {
         return GetPlayerOneContext().Player;
     }
 
-    private Player GetPlayerTwo() {
+    public Player GetPlayerTwo() {
         if (_usingSubviewports) {
             GD.Print($"(player injector) GetPlayerTwo (using subviewports): {CoopPlayerContextPath(PlayerID.Two)}");
             PlayerContext playerContext = GetNode<PlayerContext>(CoopPlayerContextPath(PlayerID.Two));
