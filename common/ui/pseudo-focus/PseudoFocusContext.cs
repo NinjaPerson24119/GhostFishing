@@ -25,6 +25,6 @@ public partial class PseudoFocusContext : Node {
     }
 
     public bool MouseAllowed() {
-        return InputModeController.Ref().InputType == InputType.KeyboardMouse;
+        return InputTypeController.Ref().InputType == InputType.KeyboardMouse;
     }
 }

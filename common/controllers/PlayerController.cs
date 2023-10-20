@@ -33,7 +33,7 @@ public partial class PlayerController : Node {
         _playerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
         EmitSignal(SignalName.PlayerControlsContextChanged, (int)_controlsContext);
 
-        InputModeController.Ref().InputTypeChanged += OnInputTypeChanged;
+        InputTypeController.Ref().InputTypeChanged += OnInputTypeChanged;
         if (_playerContext == null) {
             throw new Exception("PlayerContext null");
         }
@@ -41,7 +41,7 @@ public partial class PlayerController : Node {
     }
 
     public override void _ExitTree() {
-        InputModeController.Ref().InputTypeChanged -= OnInputTypeChanged;
+        InputTypeController.Ref().InputTypeChanged -= OnInputTypeChanged;
     }
 
     public override void _Process(double delta) {
@@ -73,12 +73,12 @@ public partial class PlayerController : Node {
 
     public bool MouseAllowed() {
         // for now, the input mode is independent of the player
-        return InputModeController.Ref().MouseAllowed();
+        return InputTypeController.Ref().MouseAllowed();
     }
 
     public InputType InputType {
         // for now, the input mode is independent of the player
-        get => InputModeController.Ref().InputType;
+        get => InputTypeController.Ref().InputType;
     }
 
     public void OnInputTypeChanged(InputType inputType) {

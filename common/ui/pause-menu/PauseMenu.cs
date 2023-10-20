@@ -26,6 +26,8 @@ internal partial class PauseMenu : Menu {
         PlayerManager.Ref().CoopChanged += OnCoopChanged;
         PlayerManager.Ref().PlayerControllerActiveChanged += OnPlayerControllerActiveChanged;
         PlayerManager.Ref().PlayerActiveChanged += OnPlayerActiveChanged;
+
+        InputTypeController.Ref().InputTypeChanged += OnInputTypeChanged;
     }
 
     public override void Open() {
@@ -36,7 +38,8 @@ internal partial class PauseMenu : Menu {
         if (_resume == null) {
             throw new System.Exception("Resume button null");
         }
-        _resume.GrabFocus();
+
+        SetDefaultFocus(InputTypeController.Ref().InputType);
     }
 
     public void OnResume() {
@@ -120,5 +123,22 @@ internal partial class PauseMenu : Menu {
 
     public void OnPlayerActiveChanged(PlayerID playerID, bool active) {
         SetCloseActions();
+    }
+
+    public void SetDefaultFocus(InputType inputType) {
+        if (inputType == InputType.Joypad) {
+            if (_resume != null) {
+                _resume.GrabFocus();
+            }
+        }
+        else {
+            // bit of a hack, but removes focus from whoever had it before
+            GrabFocus();
+            ReleaseFocus();
+        }
+    }
+
+    public void OnInputTypeChanged(InputType inputType) {
+        SetDefaultFocus(inputType);
     }
 }

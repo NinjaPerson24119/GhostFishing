@@ -24,7 +24,7 @@ PlayerInjector="*res://common/player-manager/PlayerInjector.cs"
 AssetManager="*res://common/asset-manager/AssetManager.cs"
 DebugMode="*res://common/debugging/DebugMode.tscn"
 SaveStateManager="*res://common/save-state/SaveStateManager.cs"
-InputModeController="*res://common/controllers/InputModeController.cs"
+InputTypeController="*res://common/controllers/InputTypeController.cs"
 CommonController="*res://common/controllers/CommonController.cs"
 
 [display]

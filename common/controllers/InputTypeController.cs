@@ -5,10 +5,10 @@ public enum InputType {
     Joypad = 1,
 }
 
-public partial class InputModeController : Node {
-    static SingletonTracker<InputModeController> _singletonTracker = new SingletonTracker<InputModeController>();
-    private static InputModeController _singleton { get => _singletonTracker.Ref(); }
-    public static InputModeController Ref() {
+public partial class InputTypeController : Node {
+    static SingletonTracker<InputTypeController> _singletonTracker = new SingletonTracker<InputTypeController>();
+    private static InputTypeController _singleton { get => _singletonTracker.Ref(); }
+    public static InputTypeController Ref() {
         return _singleton;
     }
 
@@ -41,7 +41,7 @@ public partial class InputModeController : Node {
     [Signal]
     public delegate void InputTypeChangedEventHandler(InputType inputType);
 
-    public InputModeController() {
+    public InputTypeController() {
         ProcessMode = ProcessModeEnum.Always;
     }
 
@@ -77,7 +77,7 @@ public partial class InputModeController : Node {
                 Input.MouseMode = SinglePlayerMouseModeMenu;
             }
             else {
-                GD.PrintErr($"Unknown input type {inputType}. ControlsContextType was probably updated without adjusting InputModeController");
+                GD.PrintErr($"Unknown input type {inputType}. ControlsContextType was probably updated without adjusting InputTypeController");
             }
         }
         else {
