@@ -24,7 +24,7 @@ public partial class PlayerContext : Node {
             }
         }
     }
-    private bool _usingSubviewport = false;
+    private bool _usingSubviewport = true;
 
     public PlayerMenu PlayerMenu {
         get => GetNode<PlayerMenu>("PseudoFocusContext/PlayerHUD/PlayerMenu");
@@ -42,6 +42,7 @@ public partial class PlayerContext : Node {
     }
 
     public Vector2 MovementControlVector() {
+        SubViewport.GetTexture
         int device = PlayerID.PlayerControlMappingNumber();
         return Input.GetVector(
             $"turn_left_{device}",
