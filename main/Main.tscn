@@ -38,6 +38,11 @@ points = PackedVector3Array(-0.5, -0.25, -0.35, -0.5, -0.25, 0.349932, -0.5, 0.2
 process_mode = 3
 script = ExtResource("1_ihgdy")
 
+[node name="SplitScreen" type="ColorRect" parent="."]
+visible = false
+color = Color(1, 1, 0.231373, 1)
+script = ExtResource("15_0e3de")
+
 [node name="Pausable" type="Node" parent="."]
 process_mode = 1
 
@@ -121,11 +126,6 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 20, 0, -20)
 PlayerID = 2
 
 [node name="CommonHUD" parent="Pausable" instance=ExtResource("18_0gdu0")]
-
-[node name="SplitScreen" type="ColorRect" parent="."]
-visible = false
-color = Color(1, 1, 0.231373, 1)
-script = ExtResource("15_0e3de")
 
 [node name="PauseMenu" parent="." instance=ExtResource("10_sg4eq")]
 process_mode = 3
