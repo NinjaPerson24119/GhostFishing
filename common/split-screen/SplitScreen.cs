@@ -73,6 +73,7 @@ public partial class SplitScreen : ColorRect {
     }
 
     public void OnCoopChanged(bool coopActive) {
+        GD.Print($"Split-screen coop changed, {coopActive}");
         Reconfigure(coopActive);
     }
 }

@@ -20,6 +20,8 @@ public partial class PlayerInjector : Node {
     public override void _Ready() {
         _singletonTracker.Ready(this);
         _playersWorkingParent = GetNode("/root/Main/Pausable");
+        PlayerManager.Ref().CoopChanged += OnCoopChanged;
+
         RebuildPlayers();
     }
 
@@ -83,6 +85,7 @@ public partial class PlayerInjector : Node {
     }
 
     public void OnCoopChanged(bool coopActive) {
+        GD.Print($"(player injector) Split-screen coop changed, {coopActive}");
         if (_players == null) {
             throw new System.Exception("PlayerInjector not ready");
         }
