@@ -69,7 +69,7 @@ public partial class Player : BuoyantBody, ITrackableObject {
 
     public override void _Ready() {
         PlayerContext = DependencyInjector.Ref().GetLocalPlayerContext(GetPath());
-        if (PlayerContext != null) {
+        if (PlayerContext != null && PlayerContext.InitialGlobalPosition != Vector3.Zero) {
             GlobalPosition = PlayerContext.InitialGlobalPosition;
         }
 

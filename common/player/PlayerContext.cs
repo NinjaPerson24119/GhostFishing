@@ -2,9 +2,9 @@ using Godot;
 
 public partial class PlayerContext : Node {
     [Export]
-    public PlayerID PlayerID { get; private set; } = PlayerID.Invalid;
+    public PlayerID PlayerID { get; set; } = PlayerID.Invalid;
     [Export]
-    public Vector3 InitialGlobalPosition { get; private set; } = Vector3.Zero;
+    public Vector3 InitialGlobalPosition { get; set; } = Vector3.Zero;
 
     public PlayerStateView PlayerStateView {
         get => AssetManager.Ref().GetPlayerView(PlayerID);

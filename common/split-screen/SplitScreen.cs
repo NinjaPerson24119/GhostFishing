@@ -28,20 +28,20 @@ public partial class SplitScreen : ColorRect {
         _material.Shader = GD.Load<Shader>(_shaderPath);
         Material = _material;
 
-        PlayerManager.Ref().CoopChanged += OnCoopChanged;
+        PlayerInjector.Ref().SplitScreenChanged += OnSplitScreenChanged;
         _ready = true;
 
         Reconfigure(PlayerManager.Ref().CoopActive);
     }
 
-    public void Reconfigure(bool coopActive) {
+    public void Reconfigure(bool splitScreenActive) {
         if (_ready) {
             return;
         }
 
         _playerOneTexture = null;
         _playerTwoTexture = null;
-        if (coopActive) {
+        if (splitScreenActive) {
             // nodes will have moved, so we need to setup again
             // be sure to get fresh references to players and textures
             var players = PlayerInjector.Ref().GetPlayers();
@@ -55,8 +55,9 @@ public partial class SplitScreen : ColorRect {
             }
         }
         Size = DisplayServer.WindowGetSize();
-        Visible = coopActive;
+        Visible = splitScreenActive;
 
+        GD.Print($"(split-screen) Reconfigured, {splitScreenActive}");
         ReconfigureShader();
     }
 
@@ -70,10 +71,11 @@ public partial class SplitScreen : ColorRect {
             _material.SetShaderParameter("player_one_texture", _playerOneTexture);
             _material.SetShaderParameter("player_two_texture", _playerTwoTexture);
         }
+        GD.Print("(split-screen) Reconfigured shader");
     }
 
-    public void OnCoopChanged(bool coopActive) {
-        GD.Print($"Split-screen coop changed, {coopActive}");
-        Reconfigure(coopActive);
+    public void OnSplitScreenChanged(bool splitScreenActive) {
+        GD.Print($"(split-screen) Split-screen coop changed, {splitScreenActive}");
+        Reconfigure(splitScreenActive);
     }
 }
