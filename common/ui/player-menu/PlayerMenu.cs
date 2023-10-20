@@ -13,7 +13,7 @@ public partial class PlayerMenu : Menu {
     private bool _initialized = false;
     private SaveStateManager.Lock? _saveStateLock;
     private PlayerContext? _playerContext;
-    private HBoxContainer? _framesContainer;
+    private Container? _framesContainer;
 
     public PlayerMenu() {
         Visible = false;
@@ -30,7 +30,7 @@ public partial class PlayerMenu : Menu {
         _closeActions.Add(_playerContext.ActionOpenInventory);
         SaveStateManager.Ref().LoadedSaveState += OnLoadedSaveState;
 
-        _framesContainer = GetNode<HBoxContainer>("BoxContainer/HBoxContainer");
+        _framesContainer = GetNode<VBoxContainer>("VBoxContainer");
 
         Initialize();
     }
@@ -52,7 +52,7 @@ public partial class PlayerMenu : Menu {
         }
         PlayerStateView playerView = AssetManager.Ref().GetPlayerView(_playerContext.PlayerID);
         _boatInventory = playerView.BoatInventory;
-        _boatInventoryFrame = new InventoryFrame(_boatInventory, TileSizePx);
+        _boatInventoryFrame = StyledInventoryFrame(new InventoryFrame(_boatInventory, TileSizePx));
         _framesContainer.AddChild(_boatInventoryFrame);
 
         _itemTransport = new InventoryItemTransport(TileSizePx);
@@ -135,7 +135,7 @@ public partial class PlayerMenu : Menu {
         }
         if (additionalInventories != null) {
             foreach (InventoryInstance inventory in additionalInventories) {
-                InventoryFrame frame = new InventoryFrame(inventory, TileSizePx);
+                InventoryFrame frame = StyledInventoryFrame(new InventoryFrame(inventory, TileSizePx));
                 _framesContainer.AddChild(frame);
                 _additionalInventoryFrames.Add(frame);
 
@@ -193,5 +193,10 @@ public partial class PlayerMenu : Menu {
             frame.QueueFree();
         }
         _additionalInventoryFrames.Clear();
+    }
+
+    private static InventoryFrame StyledInventoryFrame(InventoryFrame frame) {
+        frame.SizeFlagsHorizontal = SizeFlags.ShrinkCenter;
+        return frame;
     }
 }
