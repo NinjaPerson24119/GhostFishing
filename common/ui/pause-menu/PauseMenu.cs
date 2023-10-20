@@ -34,12 +34,6 @@ internal partial class PauseMenu : Menu {
         UpdateCoopPrompt();
         UpdateControllerPrompt();
         base.Open();
-
-        if (_resume == null) {
-            throw new System.Exception("Resume button null");
-        }
-
-        SetDefaultFocus(InputTypeController.Ref().InputType);
     }
 
     public void OnResume() {
@@ -125,20 +119,7 @@ internal partial class PauseMenu : Menu {
         SetCloseActions();
     }
 
-    public void SetDefaultFocus(InputType inputType) {
-        if (inputType == InputType.Joypad) {
-            if (_resume != null) {
-                _resume.GrabFocus();
-            }
-        }
-        else {
-            // bit of a hack, but removes focus from whoever had it before
-            GrabFocus();
-            ReleaseFocus();
-        }
-    }
-
-    public void OnInputTypeChanged(InputType inputType) {
-        SetDefaultFocus(inputType);
+    public override Control? DefaultFocusElement() {
+        return _resume;
     }
 }

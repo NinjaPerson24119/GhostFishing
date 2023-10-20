@@ -1,8 +1,12 @@
 using Godot;
 using System.Collections.Generic;
 
-// TODO: this is incompatible with pseudo-focus
 public partial class Menu : Control {
+    // Set this to true if the Menu shouldn't mutate focus
+    // This makes it compatible with PseudoFocusControl
+    [Export]
+    bool PseudoFocusCompatibility = false;
+
     protected List<string> _closeActions = new List<string>();
 
     public bool IsOpen {
@@ -42,6 +46,7 @@ public partial class Menu : Control {
             return;
         }
         Visible = true;
+        SetDefaultFocus(InputTypeController.Ref().InputType);
         EmitSignal(SignalName.Opened);
     }
 
@@ -52,5 +57,33 @@ public partial class Menu : Control {
 
     public void RequestClose() {
         RequestedClose = true;
+    }
+
+    public virtual Control? DefaultFocusElement() {
+        return null;
+    }
+
+    public void SetDefaultFocus(InputType inputType) {
+        if (PseudoFocusCompatibility) {
+            return;
+        }
+        if (inputType == InputType.Joypad) {
+            Control? defaultFocusElement = DefaultFocusElement();
+            if (defaultFocusElement != null) {
+                defaultFocusElement.GrabFocus();
+            }
+        }
+        else {
+            // bit of a hack, but removes focus from whoever had it before
+            GrabFocus();
+            ReleaseFocus();
+        }
+    }
+
+    public void OnInputTypeChanged(InputType inputType) {
+        if (PseudoFocusCompatibility) {
+            return;
+        }
+        SetDefaultFocus(inputType);
     }
 }
