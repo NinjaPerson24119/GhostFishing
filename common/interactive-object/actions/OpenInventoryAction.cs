@@ -6,6 +6,13 @@ internal class OpenInventoryAction : InteractiveObjectAction {
     public OpenInventoryAction(string inventoryInstanceID, float maxDistance = 6f) {
         _inventoryInstanceID = inventoryInstanceID;
         _preconditions.Add(new DistancePrecondition(maxDistance));
+        _preconditions.Add(new LambdaPrecondition((InteractiveObject interactiveObject, Player player) => {
+            InventoryInstance? inventoryInstance = AssetManager.Ref().GetInventoryInstance(_inventoryInstanceID);
+            if (inventoryInstance == null) {
+                return false;
+            }
+            return !inventoryInstance.Locked;
+        }));
     }
 
     public override bool Activate(InteractiveObject interactiveObject, Player player) {
