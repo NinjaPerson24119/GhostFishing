@@ -1,3 +1,4 @@
 [gd_scene format=3 uid="uid://cgxiwcmj0mlvb"]
 
 [node name="SplitScreenSubViewport" type="SubViewport"]
+msaa_3d = 3

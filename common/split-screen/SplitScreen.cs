@@ -15,9 +15,10 @@ public partial class SplitScreen : ColorRect {
 
     private bool _ready = false;
 
-    private bool _active = false;
     private ViewportTexture? _playerOneTexture = null;
     private ViewportTexture? _playerTwoTexture = null;
+    private SubViewport? _subviewportOne = null;
+    private SubViewport? _subviewportTwo = null;
 
     private string _shaderPath = "res://common/split-screen/SplitScreen.gdshader";
     private ShaderMaterial _material = new ShaderMaterial();
@@ -42,6 +43,14 @@ public partial class SplitScreen : ColorRect {
         Reconfigure(PlayerManager.Ref().CoopActive);
     }
 
+    public override void _Input(InputEvent inputEvent) {
+        if (!Visible || !_ready || _subviewportOne == null || _subviewportTwo == null) {
+            return;
+        }
+        _subviewportOne.PushInput(inputEvent);
+        _subviewportTwo.PushInput(inputEvent);
+    }
+
     public void Reconfigure(bool splitScreenActive) {
         if (!_ready) {
             return;
@@ -55,11 +64,13 @@ public partial class SplitScreen : ColorRect {
             var players = PlayerInjector.Ref().GetPlayers();
             if (players.ContainsKey(PlayerID.One)) {
                 string subviewportPath = PlayerInjector.Ref().SubViewportPath(PlayerID.One);
-                _playerOneTexture = GetNode<SubViewport>(subviewportPath).GetTexture();
+                _subviewportOne = GetNode<SubViewport>(subviewportPath);
+                _playerOneTexture = _subviewportOne.GetTexture();
             }
             if (players.ContainsKey(PlayerID.Two)) {
                 string subviewportPath = PlayerInjector.Ref().SubViewportPath(PlayerID.Two);
-                _playerTwoTexture = GetNode<SubViewport>(subviewportPath).GetTexture();
+                _subviewportTwo = GetNode<SubViewport>(subviewportPath);
+                _playerTwoTexture = _subviewportTwo.GetTexture();
             }
         }
         Size = DisplayServer.WindowGetSize();
