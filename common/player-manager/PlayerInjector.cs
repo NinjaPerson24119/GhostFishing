@@ -100,7 +100,7 @@ public partial class PlayerInjector : Node {
         }
     }
 
-    public async void OnCoopChanged(bool coopActive) {
+    public void OnCoopChanged(bool coopActive) {
         GD.Print($"(player injector) Split-screen coop changed, {coopActive}");
         if (_players == null) {
             throw new System.Exception("PlayerInjector not ready");
@@ -128,13 +128,13 @@ public partial class PlayerInjector : Node {
                 GD.Print($"(player injector) Activating player {playerID}");
                 if (player.PlayerContext == null) {
                     GD.Print($"(player injector) Player {playerID} is inactive, replacing with active player");
-                    await ReplaceInactivePlayerWithSubViewportAndPlayerContext(playerID);
+                    ReplaceInactivePlayerWithSubViewportAndPlayerContext(playerID);
                     continue;
                 }
                 if (playerID == PlayerID.One) {
                     GD.Print($"(player injector) Moving Player One to subviewport");
                     SubViewport subViewport = CreateSubViewport(playerID);
-                    await MoveNode(SinglePlayerContextPath(playerID), subViewport);
+                    MoveNode(SinglePlayerContextPath(playerID), subViewport);
                     _playersWorkingParent.AddChild(subViewport);
                     continue;
                 }
@@ -145,13 +145,13 @@ public partial class PlayerInjector : Node {
                 GD.Print($"(player injector) Deactivating player {playerID}");
                 if (player.PlayerContext != null) {
                     GD.Print($"(player injector) Player {playerID} is active, replacing with inactive player");
-                    await ReplaceSubViewportAndPlayerContextWithInactivePlayer(playerID);
+                    ReplaceSubViewportAndPlayerContextWithInactivePlayer(playerID);
                     continue;
                 }
                 if (playerID == PlayerID.One) {
                     GD.Print($"(player injector) Moving Player One to root");
                     SubViewport subViewport = GetNode<SubViewport>(SubViewportPath(playerID));
-                    await MoveNode(CoopPlayerContextPath(playerID), subViewport.GetParent());
+                    MoveNode(CoopPlayerContextPath(playerID), subViewport.GetParent());
                     subViewport.QueueFree();
                     continue;
                 }
@@ -177,12 +177,12 @@ public partial class PlayerInjector : Node {
         return subViewport;
     }
 
-    private async Task ReplaceInactivePlayerWithSubViewportAndPlayerContext(PlayerID playerID) {
+    private void ReplaceInactivePlayerWithSubViewportAndPlayerContext(PlayerID playerID) {
         if (_players == null) {
             throw new System.Exception("PlayerInjector not ready");
         }
         Transform3D transform3D = _players[playerID].GlobalTransform;
-        await RemoveNode(InactivePlayerPath(playerID));
+        RemoveNode(InactivePlayerPath(playerID));
         PackedScene playerCtxScene = ResourceLoader.Load<PackedScene>("res://common/player/PlayerContext.tscn");
         PlayerContext? playerCtx = playerCtxScene.Instantiate() as PlayerContext;
         if (playerCtx == null) {
@@ -201,7 +201,7 @@ public partial class PlayerInjector : Node {
         _playersWorkingParent.AddChild(subViewport);
     }
 
-    private async Task ReplaceSubViewportAndPlayerContextWithInactivePlayer(PlayerID playerID) {
+    private void ReplaceSubViewportAndPlayerContextWithInactivePlayer(PlayerID playerID) {
         if (_players == null) {
             throw new System.Exception("PlayerInjector not ready");
         }
@@ -210,7 +210,7 @@ public partial class PlayerInjector : Node {
         }
 
         Transform3D globalTransform = _players[playerID].GlobalTransform;
-        await RemoveNode(CoopPlayerContextPath(playerID));
+        RemoveNode(CoopPlayerContextPath(playerID));
         PackedScene playerScene = ResourceLoader.Load<PackedScene>("res://common/player/Player.tscn");
         Player? player = playerScene.Instantiate() as Player;
         if (player == null) {
@@ -226,17 +226,15 @@ public partial class PlayerInjector : Node {
         _playersWorkingParent.AddChild(player);
     }
 
-    private async Task RemoveNode(string nodePath) {
+    private void RemoveNode(string nodePath) {
         var node = GetNode(nodePath);
         node.GetParent().RemoveChild(node);
-        await ToSignal(node, "tree_exited");
         node.QueueFree();
     }
 
-    private async Task MoveNode(string nodePath, Node newParent) {
+    private void MoveNode(string nodePath, Node newParent) {
         var node = GetNode(nodePath);
         node.GetParent().RemoveChild(node);
-        await ToSignal(node, "tree_exited");
         newParent.AddChild(node);
         GD.Print($"Added {nodePath} to {newParent.GetPath()}");
     }
