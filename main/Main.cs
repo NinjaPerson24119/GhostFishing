@@ -2,6 +2,9 @@ using Godot;
 
 internal partial class Main : Node {
     public override void _Ready() {
+        // TODO: set this for export
+        //DisplayServer.WindowSetMode(DisplayServer.WindowMode.Fullscreen);
+
         Ocean ocean = DependencyInjector.Ref().GetOcean();
         TimeDisplay timeDisplay = DependencyInjector.Ref().GetTimeDisplay();
         PauseMenu pauseMenu = DependencyInjector.Ref().GetPauseMenu();
