@@ -51,7 +51,7 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
 
     // TODO: Complete() and add masks for specific categories and item UUIDs
     // _locked is used to prevent creating multiple mutators at once
-    private bool _locked;
+    public bool Locked { get; private set; }
     private bool _printLogs = true;
 
     private const int UNUSED_SPACE_PLACEHOLDER = -1;
@@ -234,10 +234,10 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
     }
 
     public Mutator? GetMutator() {
-        if (Disabled || _locked) {
+        if (Disabled || Locked) {
             return null;
         }
-        _locked = true;
+        Locked = true;
         return new Mutator(this);
     }
 
@@ -259,7 +259,7 @@ public partial class InventoryInstance : Node, IGameAssetWritable<InventoryInsta
             // should be idempotent
             if (!_released) {
                 _released = true;
-                _inventory._locked = false;
+                _inventory.Locked = false;
             }
         }
 

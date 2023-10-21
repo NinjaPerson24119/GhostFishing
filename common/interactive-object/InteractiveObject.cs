@@ -38,6 +38,14 @@ public partial class InteractiveObject : Node3D, ITrackableObject {
         _tracker = new Tracker(this, trackingServer);
     }
 
+    public override void _ExitTree() {
+        try {
+            TrackingServer trackingServer = DependencyInjector.Ref().GetTrackingServer();
+            trackingServer.Remove(this);
+        }
+        catch { }
+    }
+
     public override void _PhysicsProcess(double delta) {
         if (_tracker == null) {
             throw new System.Exception("_tracker must be set before PhysicsProcess");

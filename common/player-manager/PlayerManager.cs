@@ -80,8 +80,16 @@ public partial class PlayerManager : Node {
         }
     }
 
+    public bool CanUpdateCoop() {
+        // defer to SaveStateManager since if we can't save, we definitely don't want to respawn the players
+        if (SaveStateManager.Ref().Locked) {
+            return false;
+        }
+        return true;
+    }
+
     public bool CanEnableCoop() {
-        if (CoopActive) {
+        if (CoopActive || !CanUpdateCoop()) {
             return false;
         }
         foreach (var id in PlayerIDs) {
@@ -101,21 +109,21 @@ public partial class PlayerManager : Node {
 
         Input.MouseMode = Input.MouseModeEnum.Hidden;
 
-        EmitSignal(SignalName.CoopChanged, CoopActive);
         EmitSignal(SignalName.PlayerActiveChanged, (int)PlayerID.Two, true);
+        EmitSignal(SignalName.CoopChanged, CoopActive);
         GD.Print($"Co-op enabled.");
     }
 
     public void DisableCoop() {
-        if (!CoopActive) {
+        if (!CoopActive || !CanUpdateCoop()) {
             return;
         }
         CoopActive = false;
 
         Input.MouseMode = Input.MouseModeEnum.Visible;
 
-        EmitSignal(SignalName.CoopChanged, CoopActive);
         EmitSignal(SignalName.PlayerActiveChanged, (int)PlayerID.Two, false);
+        EmitSignal(SignalName.CoopChanged, CoopActive);
         GD.Print($"Co-op disabled.");
     }
 }

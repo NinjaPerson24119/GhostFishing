@@ -18,6 +18,7 @@ internal partial class TrackingServer : Node {
     }
     private float _tileSize = -1;
 
+    // careful, this may hold stale references if objects are removed from the scene, but not from the server
     private Dictionary<Vector2I, List<ITrackableObject>> _tileToObjects = new Dictionary<Vector2I, List<ITrackableObject>>();
     private Dictionary<string, Vector2I> _objectToTile = new Dictionary<string, Vector2I>();
 
@@ -42,6 +43,20 @@ internal partial class TrackingServer : Node {
             _tileToObjects[tileIndices] = new List<ITrackableObject>();
         }
         _tileToObjects[tileIndices].Add(obj);
+    }
+
+    public void Remove(ITrackableObject obj) {
+        if (obj == null) {
+            throw new System.ArgumentNullException("obj cannot be null");
+        }
+        string ID = obj.TrackingID;
+        if (!_objectToTile.ContainsKey(ID)) {
+            return;
+        }
+        Vector2I tileIndices = _objectToTile[ID];
+        _tileToObjects[tileIndices].RemoveAll((ITrackableObject obj) => obj.TrackingID == ID);
+        _objectToTile.Remove(ID);
+        GD.Print($"(tracking server) Removed {obj.TrackingID}");
     }
 
     public Vector2I GetTile(Vector3 position) {

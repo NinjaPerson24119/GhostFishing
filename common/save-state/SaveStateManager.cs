@@ -27,6 +27,9 @@ internal partial class SaveStateManager : Node {
             }
         }
     }
+    public bool Locked {
+        get => _locks > 0;
+    }
 
     static SingletonTracker<SaveStateManager> _singletonTracker = new SingletonTracker<SaveStateManager>();
     public static SaveStateManager Ref() {

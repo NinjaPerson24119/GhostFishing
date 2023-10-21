@@ -48,12 +48,17 @@ public partial class PseudoFocusControl : Control {
     }
 
     public override void _ExitTree() {
-        if (HasPseudoFocus()) {
-            ReleasePseudoFocus();
-            if (_debugLogs) {
-                GD.Print("Released pseudo focus on exit");
+        try {
+            // guard against condition where entire context and subtree is exiting
+            _pseudoFocusContext = DependencyInjector.Ref().GetLocalPseudoFocusContext(GetPath());
+            if (HasPseudoFocus()) {
+                ReleasePseudoFocus();
+                if (_debugLogs) {
+                    GD.Print("Released pseudo focus on exit");
+                }
             }
         }
+        catch { }
     }
 
     public new void GrabFocus() {

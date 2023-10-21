@@ -42,7 +42,17 @@ internal partial class PauseMenu : Menu {
     }
 
     public void OnCoopPrompt() {
-        PlayerManager.Ref().EnableCoop();
+        if (_coopPrompt == null) {
+            throw new System.Exception("CoopPrompt null");
+        }
+        if (PlayerManager.Ref().CoopActive) {
+            PlayerManager.Ref().DisableCoop();
+        }
+        else {
+            PlayerManager.Ref().EnableCoop();
+        }
+        // disable button until the co-op system finished and issues a signal
+        _coopPrompt.Disabled = true;
     }
 
     public void OnExitToOS() {
@@ -55,16 +65,23 @@ internal partial class PauseMenu : Menu {
         }
 
         bool disabled = false;
-        if (PlayerManager.Ref().CoopActive) {
-            _coopPrompt.Text = "Disable Co-op";
+        if (!PlayerManager.Ref().CanUpdateCoop()) {
+            _coopPrompt.Text = "Can't change Co-op right now.";
+            disabled = true;
         }
         else {
-            if (PlayerManager.Ref().CanEnableCoop()) {
-                _coopPrompt.Text = "Enable Co-op";
+            if (PlayerManager.Ref().CoopActive) {
+                _coopPrompt.Text = "Disable Co-op";
             }
             else {
-                _coopPrompt.Text = "Co-op\nConnect a controller for each player";
-                disabled = true;
+                if (PlayerManager.Ref().CanEnableCoop()) {
+                    _coopPrompt.Text = "Enable Co-op";
+                }
+                else {
+                    _coopPrompt.Text = "Co-op\nConnect a controller for each player";
+                    disabled = true;
+                    GD.Print("Disabled button");
+                }
             }
         }
         _coopPrompt.Disabled = disabled;
@@ -106,6 +123,7 @@ internal partial class PauseMenu : Menu {
     }
 
     public void OnCoopChanged(bool coopActive) {
+        GD.Print($"(PauseMenu): OnCoopChanged {coopActive}");
         UpdateControllerPrompt();
         UpdateCoopPrompt();
     }

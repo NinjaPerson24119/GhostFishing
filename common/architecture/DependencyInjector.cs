@@ -32,6 +32,10 @@ internal partial class DependencyInjector : Node {
         return GetNode<TrackingServer>("/root/Main/Pausable/TrackingServer");
     }
 
+    public SplashScreen GetSplashScreen() {
+        return GetNode<SplashScreen>("/root/Main/SplashScreen");
+    }
+
     // do not provide other singletons. they provide themselves.
 
     // resources local to each player

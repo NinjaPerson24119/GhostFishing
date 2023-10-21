@@ -92,6 +92,10 @@ internal partial class WaterTile : MeshInstance3D {
 
     private RealClock _realClock = null!;
 
+    public WaterTile() {
+        CastShadow = ShadowCastingSetting.Off;
+    }
+
     public override void _Ready() {
         _realClock = RealClock.Ref();
 
