@@ -2,3 +2,4 @@
 
 [node name="SplitScreenSubViewport" type="SubViewport"]
 msaa_3d = 3
+render_target_update_mode = 3
