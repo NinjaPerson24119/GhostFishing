@@ -106,7 +106,7 @@ void fragment() {
 	ALBEDO = clamp(surface_color + depth_color_adj, vec3(0.0), vec3(1.0));
 	METALLIC = metallic;
 	ROUGHNESS = roughness;
-	NORMAL_MAP = normal_blend;
+	//NORMAL_MAP = normal_blend;
 
 	// set alpha so Godot knows to render the water as transparent
 	ALPHA = 0.9;

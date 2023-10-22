@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cwd4mbur2hb6p"]
+[gd_scene load_steps=9 format=3 uid="uid://cwd4mbur2hb6p"]
 
 [ext_resource type="Script" path="res://common/player/PlayerContext.cs" id="1_i8wqn"]
 [ext_resource type="Script" path="res://common/controllers/PlayerController.cs" id="2_81fe8"]
@@ -7,6 +7,11 @@
 [ext_resource type="PackedScene" uid="uid://dpabijl3uxatr" path="res://common/player/Player.tscn" id="4_3lpcq"]
 [ext_resource type="Script" path="res://common/camera/FollowCamera.cs" id="6_ub55a"]
 [ext_resource type="Script" path="res://common/camera/Camera.cs" id="7_76ayd"]
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_xpvfy"]
+dof_blur_far_enabled = true
+dof_blur_far_distance = 350.0
+dof_blur_far_transition = -1.0
 
 [node name="PlayerContext" type="Node"]
 script = ExtResource("1_i8wqn")
@@ -26,10 +31,10 @@ script = ExtResource("2_81fe8")
 script = ExtResource("6_ub55a")
 
 [node name="Camera3D" type="Camera3D" parent="FollowCamera"]
+attributes = SubResource("CameraAttributesPractical_xpvfy")
 current = true
 fov = 100.0
-near = 0.2
-far = 500.0
+far = 400.0
 script = ExtResource("7_76ayd")
 
 [node name="RayCastGroup" type="Node3D" parent="FollowCamera"]

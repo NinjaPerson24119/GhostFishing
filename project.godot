@@ -37,6 +37,44 @@ window/vsync/vsync_mode=0
 
 project/assembly_name="Ghost Fishing"
 
+[importer_defaults]
+
+scene={
+"_subresources": {},
+"animation/fps": 30,
+"animation/import": true,
+"animation/remove_immutable_tracks": true,
+"animation/trimming": false,
+"blender/animation/always_sample": true,
+"blender/animation/group_tracks": true,
+"blender/animation/limit_playback": true,
+"blender/materials/export_materials": 1,
+"blender/materials/unpack_enabled": true,
+"blender/meshes/colors": false,
+"blender/meshes/export_bones_deforming_mesh_only": false,
+"blender/meshes/normals": true,
+"blender/meshes/skins": 2,
+"blender/meshes/tangents": true,
+"blender/meshes/uvs": true,
+"blender/nodes/cameras": false,
+"blender/nodes/custom_properties": true,
+"blender/nodes/modifiers": 1,
+"blender/nodes/punctual_lights": false,
+"blender/nodes/visible": 0,
+"gltf/embedded_image_handling": 1,
+"import_script/path": "",
+"meshes/create_shadow_meshes": true,
+"meshes/ensure_tangents": true,
+"meshes/generate_lods": true,
+"meshes/light_baking": 1,
+"meshes/lightmap_texel_size": 0.2,
+"nodes/apply_root_scale": true,
+"nodes/root_name": "Scene Root",
+"nodes/root_scale": 1.0,
+"nodes/root_type": "Node3D",
+"skins/use_named_skins": true
+}
+
 [input]
 
 ui_accept={
@@ -638,4 +676,9 @@ navigate_right_2={
 
 [rendering]
 
-anti_aliasing/quality/msaa_3d=3
+lights_and_shadows/directional_shadow/size=8192
+lights_and_shadows/directional_shadow/soft_shadow_filter_quality=3
+lights_and_shadows/directional_shadow/16_bits=false
+lights_and_shadows/positional_shadow/soft_shadow_filter_quality=3
+anti_aliasing/screen_space_roughness_limiter/enabled=false
+anti_aliasing/quality/screen_space_aa=1
