@@ -36,17 +36,9 @@ environment = SubResource("Environment_b4yav")
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 light_color = Color(1, 1, 0.933333, 1)
 light_angular_distance = 0.5
+light_bake_mode = 0
 shadow_enabled = true
-directional_shadow_max_distance = 1000.0
-sky_mode = 1
+shadow_bias = 0.3
+shadow_blur = 0.5
 script = ExtResource("2_y7bsm")
 LightEnergyAtSolarNoon = 0.7
-
-[node name="MoonLight" type="DirectionalLight3D" parent="."]
-light_color = Color(0.764706, 1, 1, 1)
-light_angular_distance = 0.5
-shadow_enabled = true
-directional_shadow_max_distance = 1000.0
-sky_mode = 1
-script = ExtResource("2_y7bsm")
-LightEnergyAtSolarNoon = 0.05
