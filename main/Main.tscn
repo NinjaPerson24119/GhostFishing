@@ -104,7 +104,7 @@ shape = SubResource("ConcavePolygonShape3D_ouryt")
 [node name="SpotLight3D" type="SpotLight3D" parent="Pausable/Level"]
 transform = Transform3D(-0.919451, 0.38168, 0.0944987, 1.11759e-08, -0.24033, 0.970691, 0.393204, 0.892503, 0.220972, -15.6434, 17.0687, 18.6465)
 visible = false
-light_energy = 35.0
+light_energy = 100.0
 shadow_enabled = true
 shadow_bias = 2.0
 shadow_blur = 2.0
@@ -113,7 +113,7 @@ spot_range = 100.0
 [node name="SpotLight3D2" type="SpotLight3D" parent="Pausable/Level"]
 transform = Transform3D(-0.919451, 0.351809, 0.175612, 7.45058e-09, -0.446619, 0.894724, 0.393204, 0.822655, 0.410645, -25.4186, 23.2238, -4.21151)
 visible = false
-light_energy = 25.0
+light_energy = 100.0
 shadow_enabled = true
 shadow_bias = 0.5
 shadow_blur = 2.0

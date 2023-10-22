@@ -13,7 +13,6 @@
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.503813, -2.1844)
 
 [node name="SpotLight3D2" type="SpotLight3D" parent="SpotlightMesh"]
-transform = Transform3D(1, -1.28388e-14, -1.98537e-13, 0, 0.997916, -0.0645323, 1.98952e-13, 0.0645323, 0.997916, 0, 0, -0.0988569)
 light_energy = 8.0
 light_volumetric_fog_energy = 0.012
 light_bake_mode = 0
