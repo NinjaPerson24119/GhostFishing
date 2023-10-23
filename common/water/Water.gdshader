@@ -14,7 +14,7 @@ uniform float wave_time = 0;
 uniform vec3 albedo : source_color;
 uniform vec3 albedo2 : source_color;
 uniform float metallic : hint_range(0.0, 1.0) = 0;
-uniform float roughness : hint_range(0.0, 1.0) = 0.2;
+uniform float roughness : hint_range(0.0, 1.0) = 0.01;
 uniform sampler2D texture_normal;
 uniform sampler2D texture_normal2;
 uniform sampler2D wave;
@@ -101,7 +101,12 @@ void fragment() {
 	float fresnel = fresnel(5.0, NORMAL, VIEW);
 	vec3 surface_color = mix(albedo, albedo2, fresnel);
 
-	vec3 depth_color_adj = mix(edge_color, color, step(edge_scale, depth_difference));
+	float s = step(edge_scale, depth_difference);
+	// don't render edge if fragment is near far 
+	if (texture(DEPTH_TEXTURE, SCREEN_UV).x == 1.0) {
+		s = 1.0;
+	}
+	vec3 depth_color_adj = mix(edge_color, color, s);
 
 	ALBEDO = clamp(surface_color + depth_color_adj, vec3(0.0), vec3(1.0));
 	METALLIC = metallic;
