@@ -1,0 +1,3 @@
+[submodule "external/AllSkyFree_Godot"]
+	path = external/AllSkyFree_Godot
+	url = https://github.com/rpgwhitelock/AllSkyFree_Godot.git

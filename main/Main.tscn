@@ -5,7 +5,7 @@
 [ext_resource type="PackedScene" uid="uid://cuwd36j8kfuje" path="res://levels/playground/ground.blend" id="4_e77m6"]
 [ext_resource type="Script" path="res://common/interactive-object/TrackingServer.cs" id="5_hh4xg"]
 [ext_resource type="Script" path="res://common/water/Ocean.cs" id="5_mnq5h"]
-[ext_resource type="PackedScene" uid="uid://brrd5dfqqljyv" path="res://common/sky/Sky.tscn" id="7_5ixg0"]
+[ext_resource type="PackedScene" uid="uid://cxfmmet2087bj" path="res://addons/AllSkyFree/AllSkyFree_ColdNight.tscn" id="5_whftr"]
 [ext_resource type="PackedScene" uid="uid://cuxkb32iujs8d" path="res://assets/Chest.blend" id="8_4fp4j"]
 [ext_resource type="Script" path="res://common/water/WaterTileCPU.cs" id="9_sht6q"]
 [ext_resource type="PackedScene" uid="uid://btubjkxhs3o87" path="res://common/ui/pause-menu/PauseMenu.tscn" id="10_sg4eq"]
@@ -63,8 +63,7 @@ script = ExtResource("2_cg76b")
 script = ExtResource("5_hh4xg")
 TileSize = 100.0
 
-[node name="Sky" parent="Pausable" instance=ExtResource("7_5ixg0")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.3415, 17.4548, 0)
+[node name="AllSkyFree_ColdNight" parent="Pausable" instance=ExtResource("5_whftr")]
 
 [node name="Ocean" type="Node3D" parent="Pausable"]
 script = ExtResource("5_mnq5h")
@@ -95,7 +94,6 @@ mesh = SubResource("PlaneMesh_xtx7o")
 
 [node name="RubberDuck" parent="Pausable/Level" instance=ExtResource("12_5k23m")]
 transform = Transform3D(0.650774, 0, -0.759271, 0, 1, 0, 0.759271, 0, 0.650774, -8, 0, -6)
-mass = 10.0
 Size = Vector3(0.4, 0.4, 0.4)
 
 [node name="Terrain" type="StaticBody3D" parent="Pausable/Level"]
