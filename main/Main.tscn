@@ -68,9 +68,15 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 16.3415, 17.4548, 0)
 
 [node name="Ocean" type="Node3D" parent="Pausable"]
 script = ExtResource("5_mnq5h")
+ViewDistance = 400.0
+LODDistance = 350.0
+MinSubdivisions = 25
+LODLevels = 8
+Subdivisions = 300
+TileSize = 50
 TileOverlap = 0.0
-NoWaves = 6
-Intensity = 0.7
+NoWaves = 12
+Intensity = 0.2
 Damping = 0.7
 SurfaceHeightScale = 0.0
 
@@ -89,6 +95,8 @@ mesh = SubResource("PlaneMesh_xtx7o")
 
 [node name="RubberDuck" parent="Pausable/Level" instance=ExtResource("12_5k23m")]
 transform = Transform3D(0.650774, 0, -0.759271, 0, 1, 0, 0.759271, 0, 0.650774, -8, 0, -6)
+mass = 10.0
+Size = Vector3(0.4, 0.4, 0.4)
 
 [node name="Terrain" type="StaticBody3D" parent="Pausable/Level"]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -6.871, 0)
