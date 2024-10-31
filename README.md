@@ -1,7 +1,6 @@
 # Ghost Fishing
 
-Angry Octopus Technologies Inc. presents Ghost Fishing, a game about fishing for fish and not for trash.
-Vacuums are included, but you'll need your own batteries.
+Game similar to Dredge, written in Godot + C#. Mostly a wave simulator / boating simulation at this time.
 
 ## Controls
 
