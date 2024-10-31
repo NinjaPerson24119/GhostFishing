@@ -2,6 +2,8 @@
 
 Game similar to Dredge, written in Godot + C#. Mostly a wave simulator / boating simulation at this time.
 
+Visuals: https://nicholaswengel.com/blog/fishing_game
+
 ## Controls
 
 `esc` to quit
