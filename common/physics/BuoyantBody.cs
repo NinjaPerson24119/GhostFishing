@@ -56,6 +56,7 @@ public partial class BuoyantBody : RigidBody3D {
     public float WaterDragCoefficient = 0.3f;
     [Export(PropertyHint.Range, "0,1")]
     public float WaterMomentCoefficient = 0.08f;
+    // Only applies to drag
     [Export(PropertyHint.Range, "0,0.99")]
     public float SubmergedProportionOffset = 0.5f;
 

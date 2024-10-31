@@ -2,7 +2,7 @@ using Godot;
 
 internal partial class Sky : Node3D {
 	private const string _sunPathLight = "SunLight";
-	private const string _moonPathLight = "MoonLight";
+	//private const string _moonPathLight = "MoonLight";
 	private const string _worldEnvironmentPath = "WorldEnvironment";
 
 	private Environment _environment = null!;
@@ -36,7 +36,7 @@ internal partial class Sky : Node3D {
 		}
 		set {
 			_moonLightColor = value;
-			GetNode<PlanetaryLight>(_moonPathLight).LightColor = value;
+			//GetNode<PlanetaryLight>(_moonPathLight).LightColor = value;
 		}
 	}
 	private Color _moonLightColor = Color.FromString("#c3ffff", Colors.White);
@@ -46,9 +46,9 @@ internal partial class Sky : Node3D {
 
 		SetLightCycles();
 		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_sunPathLight).Update);
-		GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_moonPathLight).Update);
+		//GameClock.ConnectGameSecondsChanged(GetNode<PlanetaryLight>(_moonPathLight).Update);
 		GetNode<PlanetaryLight>(_sunPathLight).PlanetaryLightChanged += OnSunChanged;
-		GetNode<PlanetaryLight>(_moonPathLight).PlanetaryLightChanged += OnMoonChanged;
+		//GetNode<PlanetaryLight>(_moonPathLight).PlanetaryLightChanged += OnMoonChanged;
 	}
 
 	private void SetLightCycles() {
@@ -57,10 +57,10 @@ internal partial class Sky : Node3D {
 		sun.DurationSeconds = GameClock.SecondsPerDay / 2f;
 		sun.Start();
 
-		PlanetaryLight moon = GetNode<PlanetaryLight>(_moonPathLight);
-		moon.StartSecondsModuloTime = sun.StartSecondsModuloTime + sun.DurationSeconds;
-		moon.DurationSeconds = GameClock.SecondsPerDay / 2f;
-		moon.Start();
+		//PlanetaryLight moon = GetNode<PlanetaryLight>(_moonPathLight);
+		//moon.StartSecondsModuloTime = sun.StartSecondsModuloTime + sun.DurationSeconds;
+		//moon.DurationSeconds = GameClock.SecondsPerDay / 2f;
+		//moon.Start();
 	}
 
 	// Set sky as constant multiple of sun/moon energy so it doesn't appear disproportionately bright/dark

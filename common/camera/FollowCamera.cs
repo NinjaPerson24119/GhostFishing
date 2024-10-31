@@ -265,6 +265,10 @@ public partial class FollowCamera : Node3D {
             }
         }
 
+        if (!Constants.CameraReset) {
+            _cameraResetTimer.Start();
+        }
+
         if (!DisableControls) {
             Vector2 controlDirection = _playerContext.CameraControlVector();
             bool updated = controlDirection != Vector2.Zero;

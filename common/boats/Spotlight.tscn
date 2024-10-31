@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3 uid="uid://dlb6hv1mb3l"]
+
+[ext_resource type="PackedScene" uid="uid://s7i1n5ympgo7" path="res://common/boats/Spotlight.blend" id="1_l82io"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_naje7"]
+emission_enabled = true
+emission = Color(0.966667, 1, 0, 1)
+emission_energy_multiplier = 5.0
+
+[node name="Spotlight" instance=ExtResource("1_l82io")]
+
+[node name="Spotlight" parent="." index="0"]
+surface_material_override/1 = SubResource("StandardMaterial3D_naje7")

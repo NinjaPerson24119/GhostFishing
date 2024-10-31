@@ -3,6 +3,11 @@
 
 *.blend
 *.blend1
+*.fbx
+*.obj
+
 *.png
+*.jpeg
+*.jpg
 
 *.material

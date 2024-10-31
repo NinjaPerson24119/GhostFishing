@@ -1,25 +1,25 @@
 [gd_scene load_steps=3 format=3 uid="uid://byfuil0lya5ei"]
 
+[ext_resource type="PackedScene" uid="uid://dlb6hv1mb3l" path="res://common/boats/Spotlight.tscn" id="1_cn7qn"]
 [ext_resource type="PackedScene" uid="uid://bhqlgmv88s8nu" path="res://common/boats/SimpleBoat.blend" id="1_y05rb"]
-[ext_resource type="PackedScene" uid="uid://s7i1n5ympgo7" path="res://common/boats/Spotlight.blend" id="2_un3uk"]
 
 [node name="Boat" type="Node3D"]
 
-[node name="Model" parent="." instance=ExtResource("1_y05rb")]
+[node name="Spotlight" parent="." instance=ExtResource("1_cn7qn")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.504, -2.184)
 
-[node name="BottomMarker" type="Marker3D" parent="Model"]
-
-[node name="SpotlightMesh" parent="." instance=ExtResource("2_un3uk")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.503813, -2.1844)
-
-[node name="SpotLight3D2" type="SpotLight3D" parent="SpotlightMesh"]
-transform = Transform3D(1, -1.28388e-14, -1.98537e-13, 0, 0.997916, -0.0645323, 1.98952e-13, 0.0645323, 0.997916, 0, 0, -0.0988569)
+[node name="SpotLight3D2" type="SpotLight3D" parent="Spotlight"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -0.00018698, -0.0541382)
 light_energy = 8.0
 light_volumetric_fog_energy = 0.012
 light_bake_mode = 0
 shadow_enabled = true
 spot_range = 25.0
 spot_angle_attenuation = 0.3
+
+[node name="Model" parent="." instance=ExtResource("1_y05rb")]
+
+[node name="BottomMarker" type="Marker3D" parent="Model"]
 
 [node name="WaterContactPoints" type="Node3D" parent="."]
 transform = Transform3D(0.5, 0, 0, 0, 1, 0, 0, 0, 0.5, 0, 0.0673565, 0)

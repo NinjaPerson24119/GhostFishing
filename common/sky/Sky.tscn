@@ -1,15 +1,12 @@
-[gd_scene load_steps=7 format=3 uid="uid://brrd5dfqqljyv"]
+[gd_scene load_steps=6 format=3 uid="uid://brrd5dfqqljyv"]
 
 [ext_resource type="Script" path="res://common/sky/Sky.cs" id="1_gvmb6"]
-[ext_resource type="Shader" path="res://common/sky/Sky.gdshader" id="1_p4nk1"]
 [ext_resource type="Script" path="res://common/sky/PlanetaryLight.cs" id="2_y7bsm"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_mkdp7"]
-shader = ExtResource("1_p4nk1")
-shader_parameter/skyColor = Color(0.537255, 0.890196, 0.933333, 1)
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_gxxsb"]
 
 [sub_resource type="Sky" id="Sky_blepi"]
-sky_material = SubResource("ShaderMaterial_mkdp7")
+sky_material = SubResource("PanoramaSkyMaterial_gxxsb")
 
 [sub_resource type="Environment" id="Environment_b4yav"]
 background_mode = 2
@@ -23,7 +20,6 @@ tonemap_mode = 3
 sdfgi_enabled = true
 fog_light_energy = 0.9
 fog_sun_scatter = 0.25
-fog_aerial_perspective = 0.5
 fog_height = 1.0
 volumetric_fog_sky_affect = 0.3
 
@@ -36,17 +32,9 @@ environment = SubResource("Environment_b4yav")
 [node name="SunLight" type="DirectionalLight3D" parent="."]
 light_color = Color(1, 1, 0.933333, 1)
 light_angular_distance = 0.5
+light_bake_mode = 0
 shadow_enabled = true
-directional_shadow_max_distance = 1000.0
-sky_mode = 1
+shadow_bias = 1.0
+shadow_blur = 0.5
 script = ExtResource("2_y7bsm")
 LightEnergyAtSolarNoon = 0.7
-
-[node name="MoonLight" type="DirectionalLight3D" parent="."]
-light_color = Color(0.764706, 1, 1, 1)
-light_angular_distance = 0.5
-shadow_enabled = true
-directional_shadow_max_distance = 1000.0
-sky_mode = 1
-script = ExtResource("2_y7bsm")
-LightEnergyAtSolarNoon = 0.05

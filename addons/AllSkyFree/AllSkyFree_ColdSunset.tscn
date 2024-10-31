@@ -1,0 +1,32 @@
+[gd_scene load_steps=5 format=3 uid="uid://bmw8vky6dwj7c"]
+
+[ext_resource type="Texture2D" uid="uid://b3nwtu0mih6pv" path="res://addons/AllSkyFree/Skyboxes/AllSkyFree_Sky_ColdSunset_Equirect.png" id="1"]
+
+[sub_resource type="PanoramaSkyMaterial" id="PanoramaSkyMaterial_une4g"]
+panorama = ExtResource("1")
+
+[sub_resource type="Sky" id="1"]
+sky_material = SubResource("PanoramaSkyMaterial_une4g")
+
+[sub_resource type="Environment" id="2"]
+background_mode = 2
+sky = SubResource("1")
+ambient_light_energy = 0.37
+ssao_radius = 8.1
+ssao_intensity = 4.3
+glow_enabled = true
+glow_intensity = 1.86
+glow_strength = 0.87
+glow_bloom = 0.02
+glow_hdr_threshold = 0.44
+
+[node name="AllSkyFree_ColdSunset" type="Node3D"]
+
+[node name="WorldEnvironment_ColdSunset" type="WorldEnvironment" parent="."]
+environment = SubResource("2")
+
+[node name="DirectionalLight_ColdSunset" type="DirectionalLight3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 0.849579, 0.527461, 0, -0.527461, 0.849579, 0, 26.5368, 0)
+light_color = Color(0.96875, 0.9232, 0.8321, 1)
+light_energy = 1.18
+shadow_enabled = true
